@@ -69,7 +69,7 @@ function paint(r){const c=calc(data[r.dataset.i]);r.dataset.st=c.st;
 
 function build(){
   $('#rows').innerHTML=ITEMS.map((it,i)=>'<div class="grid row" data-i="'+it[2]+'"><span class="n">'+(i+1)+'</span><span class="nm" id="item-'+it[2]+'">'+esc(it[0])+'</span><span class="u">'+esc(it[1])+'</span>'+
-  ['a','s'].map(k=>'<label class="field" data-k="'+k+'"><span>'+(k==='a'?'Actual':'System')+'</span><input class="q" data-k="'+k+'" inputmode="decimal" enterkeyhint="next" aria-describedby="numberHelp" aria-label="'+(k==='a'?'Actual':'System')+' — '+esc(it[0])+'"></label>').join('')+
+  ['a','s'].map(k=>'<label class="field" data-k="'+k+'"><span>'+(k==='a'?'Actual':'System')+'</span><input class="q" data-k="'+k+'" inputmode="decimal" enterkeyhint="next" aria-label="'+(k==='a'?'Actual':'System')+' — '+esc(it[0])+'"></label>').join('')+
   '<span class="df"></span><label class="field" data-k="r"><span>Remarks</span><input data-k="r" enterkeyhint="next" aria-label="Remarks — '+esc(it[0])+'"></label><span class="st"></span></div>').join('')}
 
 function show(){
