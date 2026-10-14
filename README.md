@@ -49,3 +49,17 @@ The approved CGV StockTake design uses the original CGV vector mark from [Knowle
 While the app is open, it checks for a new version every minute and when you return to the tab or reconnect. Once the new app shell is downloaded, a **New version available** banner offers **Refresh** or **Later**. It never automatically refreshes an editing tab. Refresh retries pending saves and is blocked if any entries remain unsaved. Updating in another tab prompts this tab rather than reloading it. Dismissing a version hides that prompt for the current page session.
 
 Existing installations need one normal page refresh to load this notification feature. Future deployments are then detected automatically. Offline users receive the prompt after reconnecting and downloading the update.
+
+## Counter / Verifier cloud setup
+
+This release adds a role-selection welcome screen, a streamlined Counter entry view and the existing Verifier dashboard. **Cloud synchronization requires your own Supabase project**; it will not work until configured.
+
+1. Create a Supabase project and run `supabase/schema.sql` in the SQL editor.
+2. In Supabase Authentication, create each staff member as an email/password user. Copy their Auth user UUID.
+3. In SQL editor assign each user a role: `insert into public.profiles(id,role) values ('USER_UUID','counter');` (or `'verifier'`). Never expose an administrative service-role key.
+4. In Supabase Project Settings, obtain the project URL and **publishable/anon** key. Put them in `cloud-config.js`. These are public browser credentials; Row Level Security and role-checked RPCs enforce access.
+5. Redeploy GitHub Pages and sign in. Counters save physical counts immediately to Supabase. Verifiers open a cloud snapshot in the original dashboard and use **Upload dashboard changes** to save system quantities and remarks. Use **Reload cloud** to see new Counter counts.
+
+Important: Verifier uploads intentionally cannot change Counter actual quantities. Shared data requires network access; offline edits are not automatically queued. The original dashboard still uses local storage as a working view. Avoid simultaneous Verifier editing and reload before editing if another person has changed the date. There is currently no audit log or conflict resolution. This is an initial cloud integration, not a complete production inventory control system.
+
+The public GitHub Pages source includes `cloud-config.js`; only put the public publishable/anon key in it. Never commit a service-role secret or staff passwords.
