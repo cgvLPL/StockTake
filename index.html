@@ -55,6 +55,35 @@
     <div class="card stat variance"><div>Do not match <i data-ic="alert"></i></div><b id="sB">0</b><small id="sBs"></small></div>
     <div class="card stat"><div>Not counted <i data-ic="dash"></i></div><b id="sN">0</b><small id="sNs"></small></div>
   </section>
+  <section class="report-panel" id="reportPanel" aria-labelledby="reportTitle">
+    <div class="report-panel-heading">
+      <div>
+        <span class="report-eyebrow">EXPORT &amp; ARCHIVE</span>
+        <h3 id="reportTitle">Download stocktake report</h3>
+        <p>Export saved records from Google Sheets, including daily summaries and item details.</p>
+      </div>
+      <span class="report-icon" aria-hidden="true">↓</span>
+    </div>
+    <div class="report-panel-controls">
+      <div class="report-period-field">
+        <span class="report-label">Report period</span>
+        <div class="report-period-choices" role="group" aria-label="Report period">
+          <button type="button" class="report-period is-selected" data-report-period="daily" aria-pressed="true">Daily</button>
+          <button type="button" class="report-period" data-report-period="weekly" aria-pressed="false">Weekly</button>
+          <button type="button" class="report-period" data-report-period="monthly" aria-pressed="false">Monthly</button>
+        </div>
+      </div>
+      <div class="report-date-field">
+        <label class="report-label" for="reportDate">Select date</label>
+        <input type="date" id="reportDate" required>
+      </div>
+      <button type="button" id="downloadStockReport" class="report-download">
+        <span aria-hidden="true">↓</span> Download CSV
+      </button>
+    </div>
+    <p id="reportPeriodHint" class="report-hint">Exports one day of item-level records.</p>
+    <p id="reportDownloadStatus" class="report-status" role="status" aria-live="polite"></p>
+  </section>
   <section class="card mc" id="monthCard">
     <details class="month-disclosure" id="monthDisclosure">
       <summary class="month-summary">
@@ -86,6 +115,7 @@
 <link rel="stylesheet" href="./roles.css">
 <script src="./cloud-config.js" defer></script>
 <script src="./app.js" defer></script>
+<script src="./reports.js" defer></script>
 <script src="./cloud.js?v=login-cleanup-20261014" defer></script>
 <script src="./updates.js" defer></script>
 </body>
