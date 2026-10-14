@@ -40,7 +40,7 @@ function rebuildDay_(date){
   s.getRange(4,4,values.length,2).setBackground('#dceeff');s.getRange(4,7,values.length,1).setBackground('#dceeff');
  }
  s.setFrozenRows(3);s.setColumnWidth(1,55);s.setColumnWidth(2,420);s.setColumnWidth(3,70);s.setColumnWidths(4,5,120);
- s.getRange(3,1,Math.max(2,items.length+1),8).createFilter();
+ if(s.getFilter())s.getFilter().remove();s.getRange(3,1,Math.max(2,items.length+1),8).createFilter();
 }
 function summary_(){
  const ss=sheet_().getParent();let s=ss.getSheetByName('Summary');if(!s)s=ss.insertSheet('Summary',0);
