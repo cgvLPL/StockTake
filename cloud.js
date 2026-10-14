@@ -35,7 +35,7 @@ function login(){
 function welcome(){
  document.querySelector('.frame').hidden=true;
  const r=state.role;
- shell('<h2>Welcome to StockTake</h2><p>Choose your workspace. Your account is authorized as <strong>'+esc(r)+'</strong>.</p><div class="role-choices">'+button('enterCounter','Counter · Enter physical quantities')+button('enterVerifier','Verifier · Open dashboard')+'</div>'+button('roleLogout','Sign out'));
+ shell('<div class="workspace-intro"><span class="workspace-eyebrow">SELECT WORKSPACE</span><h2>Choose your workspace</h2><p>Signed in as <strong>'+esc(state.user)+'</strong> <span class="workspace-access">'+esc(r)+'</span></p></div><div class="role-choices workspace-choices"><button type="button" id="enterCounter" class="role-button workspace-choice"><span class="workspace-choice-icon" aria-hidden="true">01</span><span class="workspace-choice-copy"><strong>Counter</strong><small>Enter physical stock quantities</small></span><span class="workspace-choice-arrow" aria-hidden="true">↗</span></button><button type="button" id="enterVerifier" class="role-button workspace-choice"><span class="workspace-choice-icon" aria-hidden="true">02</span><span class="workspace-choice-copy"><strong>Verifier</strong><small>Review counts and manage stock</small></span><span class="workspace-choice-arrow" aria-hidden="true">↗</span></button></div><div class="workspace-footer"><span>CGV · STOCKTAKE</span>'+button('roleLogout','Sign out')+'</div>');
  root.querySelector('#enterCounter').disabled=r!=='counter';root.querySelector('#enterVerifier').disabled=r!=='verifier';
  root.querySelector('#enterCounter').onclick=()=>counter();
  root.querySelector('#enterVerifier').onclick=()=>verifier();
