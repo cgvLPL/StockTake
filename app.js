@@ -81,7 +81,7 @@ function show(){
   $('#dnum').textContent=pad(d.getDate());
   document.querySelectorAll('#rows .row').forEach(r=>{const v=data[r.dataset.i]||{};
     r.querySelectorAll('input').forEach(inp=>inp.value=v[inp.dataset.k]||'');paint(r)});
-  stats();filt();month();storageStatus();
+  stats();sortRows();filt();month();storageStatus();
 }
 function stats(){let c=0,m=0,b=0;document.querySelectorAll('#rows .row').forEach(r=>{const s=r.dataset.st;if(s){c++;s==='MATCH'?m++:b++}});
   const n=ITEMS.length,p=(x,t)=>t?Math.round(x/t*100)+'% of counted':'none counted yet';
@@ -103,13 +103,49 @@ function month(){const [y,m]=date.split('-').map(Number);const n=new Date(y,m,0)
 function disarm(){armedDate=null;clearTimeout(clearTimer);$('#clear').classList.remove('arm')}
 function go(k){disarm();date=k;show()}
 function shift(n){const d=new Date(date+'T00:00:00');d.setDate(d.getDate()+n);go(iso(d))}
+let sortKey='no',sortDescending=false;
+function sortValue(row,key){
+ const item=ITEMS.find(it=>it[2]===row.dataset.i);
+ const record=data[row.dataset.i]||{};
+ if(key==='no')return ITEMS.indexOf(item);
+ if(key==='name')return item?.[0]||'';
+ if(key==='uom')return item?.[1]||'';
+ if(key==='actual'||key==='system')return num(record[key==='actual'?'a':'s']);
+ if(key==='difference')return calc(record).diff;
+ if(key==='remarks')return record.r||'';
+ if(key==='status')return row.dataset.st||'';
+ return '';
+}
+function sortRows(){
+ const host=$('#rows');if(!host)return;
+ const rows=[...host.querySelectorAll('.row')];
+ const collator=new Intl.Collator(undefined,{numeric:true,sensitivity:'base'});
+ rows.sort((a,b)=>{
+   const av=sortValue(a,sortKey),bv=sortValue(b,sortKey);
+   const missingA=av===null||av===undefined||av==='';
+   const missingB=bv===null||bv===undefined||bv==='';
+   if(missingA!==missingB)return missingA?1:-1;
+   let cmp=0;
+   if(typeof av==='number'&&typeof bv==='number')cmp=av-bv;
+   else cmp=collator.compare(String(av??''),String(bv??''));
+   return (sortDescending?-cmp:cmp)||ITEMS.findIndex(it=>it[2]===a.dataset.i)-ITEMS.findIndex(it=>it[2]===b.dataset.i);
+ });
+ rows.forEach(row=>host.appendChild(row));
+ const select=$('#itemSort');if(select)select.value=sortKey;
+ const dir=$('#sortDirection');if(dir)dir.textContent=sortDescending?'↓ Descending':'↑ Ascending';
+ document.querySelectorAll('.sort-head').forEach(b=>{const active=b.dataset.sort===sortKey;b.setAttribute('aria-pressed',String(active));b.querySelector('.sort-glyph').textContent=active?(sortDescending?'↓':'↑'):'↕'});
+}
+function setSort(key){if(sortKey===key)sortDescending=!sortDescending;else{sortKey=key;sortDescending=false}sortRows()}
+document.querySelectorAll('.sort-head').forEach(b=>b.addEventListener('click',()=>setSort(b.dataset.sort)));
+$('#itemSort').addEventListener('change',e=>{sortKey=e.target.value;sortDescending=false;sortRows()});
+$('#sortDirection').addEventListener('click',()=>{sortDescending=!sortDescending;sortRows()});
 function setFilter(f){filter=f;document.querySelectorAll('.f').forEach(x=>(x.classList.toggle('on',x.dataset.f===f),x.setAttribute('aria-pressed',String(x.dataset.f===f))));filt()}
 
 $('#rows').addEventListener('input',e=>{const inp=e.target,r=inp.closest('.row');if(!r)return;
   const i=r.dataset.i;data[i]=data[i]||{};data[i][inp.dataset.k]=inp.value;
   if(!data[i].a&&!data[i].s&&!data[i].r)delete data[i];
   save();paint(r);stats();month();filt(true)});
-$('#rows').addEventListener('focusout',()=>setTimeout(()=>filt(),0));
+$('#rows').addEventListener('focusout',()=>setTimeout(()=>{sortRows();filt()},0));
 $('#rows').addEventListener('keydown',e=>{const t=e.target;if(e.key!=='Enter'||t.tagName!=='INPUT')return;e.preventDefault();
   let nx;
   if(t.dataset.k==='a')nx=t.closest('.row').querySelector('input[data-k="s"]');
