@@ -114,7 +114,8 @@ function doPost(e){
  let out;try{out={ok:true,data:process_(e.parameter||{})}}catch(err){out={ok:false,error:String(err.message)}}
  // Parent verifies event.origin against script.google.com / googleusercontent.com.
  const json=JSON.stringify(out).replace(/</g,'\\u003c');
- return HtmlService.createHtmlOutput('<script>parent.postMessage({stocktake:true,result:'+json+'},"*")</script>');
+ const requestId=JSON.stringify(String((e.parameter||{}).requestId||''));
+ return HtmlService.createHtmlOutput('<script>window.top.postMessage({stocktake:true,requestId:'+requestId+',result:'+json+'},"*")</script>');
 }
 
 /** One-time initialization: creates the Inventory sheet with the original 103 items. */
