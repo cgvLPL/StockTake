@@ -261,17 +261,83 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
 }
 
 
-/* Sortable Verifier stock table */
-.table-sortbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:8px 10px 14px}
-.table-sortbar label{font-size:12px;font-weight:650;color:#72777c}
-.table-sortbar select,.table-sortbar button{border:1px solid #d9dcdf;border-radius:999px;background:#fff;color:#1c1d1f;min-height:38px;padding:8px 12px;font-size:12px;font-weight:600}
-.table-sortbar select{min-width:138px}
-.table-sortbar button{cursor:pointer}
-.sortable-head .sort-head{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;padding:4px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;white-space:nowrap}
-.sortable-head .sort-head:nth-child(6){justify-content:flex-end}
-.sortable-head .sort-head[aria-pressed=true]{color:#ec672e}
-.sortable-head .sort-head:focus-visible{outline:2px solid #ec672e;outline-offset:3px;border-radius:4px}
-.sort-glyph{font-size:13px;opacity:.65}
-@media(min-width:1200px){.table-sortbar{padding-right:18px}}
-@media(max-width:1199px){.table-sortbar{justify-content:flex-start;flex-wrap:wrap;padding:0 2px 14px}}
-@media(max-width:500px){.table-sortbar{gap:7px}.table-sortbar select{flex:1;min-width:0}.table-sortbar button{white-space:nowrap}}
+/* Verifier item sorting: editorial table headings on desktop, one compact mobile toolbar. */
+.table-sortbar{
+  display:flex;align-items:center;flex-wrap:wrap;gap:10px;
+  padding:12px 14px;margin:0 0 10px;
+  background:#eef0f2;border:1px solid #e0e3e7;border-radius:14px;
+}
+.table-sortbar label{
+  flex:none;color:#727984;font-size:11px;font-weight:750;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.table-sortbar select,.table-sortbar button{
+  box-sizing:border-box;min-height:42px;
+  border:1px solid #d6dbe1;border-radius:11px;
+  background:#fff;color:#1d2229;padding:10px 14px;
+  font:650 13px/1.2 "Instrument Sans",Arial,sans-serif;
+  box-shadow:0 1px 2px rgba(16,24,40,.04);
+}
+.table-sortbar select{min-width:168px;max-width:100%;cursor:pointer;}
+.table-sortbar button{cursor:pointer;white-space:nowrap;}
+.table-sortbar select:focus-visible,.table-sortbar button:focus-visible{
+  outline:2px solid #ff681f;outline-offset:2px;
+}
+.table-sortbar button:hover{border-color:#aeb4bd;background:#f8f9fa}
+
+/* Reset native button chrome so column headings read as a single table header,
+   not eight separate grey pills. */
+.wrap .grid.hd.sortable-head{
+  background:#eceff1;border:1px solid #e1e4e8;
+  border-radius:13px;margin-bottom:8px;
+  color:#68707a;align-items:center;
+}
+.wrap .sortable-head .sort-head{
+  -webkit-appearance:none;appearance:none;
+  display:flex;flex-direction:row;align-items:center;
+  justify-content:flex-start;gap:5px;
+  width:100%;min-width:0;min-height:30px;
+  margin:0;padding:5px 0;box-sizing:border-box;
+  border:0!important;border-radius:0!important;
+  background:transparent!important;background-image:none!important;
+  box-shadow:none!important;
+  color:#666e78;
+  font:700 12px/1.25 "Instrument Sans",Arial,sans-serif;
+  text-align:left;text-transform:none;
+  white-space:nowrap;cursor:pointer;
+}
+.wrap .sortable-head .sort-head:hover{
+  color:#15191e;
+}
+.wrap .sortable-head .sort-head[aria-pressed="true"]{
+  color:#ea621e;
+}
+.wrap .sortable-head .sort-head:focus-visible{
+  outline:2px solid #ff681f;outline-offset:3px;border-radius:3px!important;
+}
+.wrap .sortable-head .sort-head:nth-child(6){justify-content:flex-end}
+.wrap .sortable-head .sort-glyph{
+  flex:none;display:inline-block;opacity:0;
+  font-size:12px;font-weight:750;line-height:1;
+}
+.wrap .sortable-head .sort-head:hover .sort-glyph,
+.wrap .sortable-head .sort-head:focus-visible .sort-glyph,
+.wrap .sortable-head .sort-head[aria-pressed="true"] .sort-glyph{opacity:1}
+.wrap .sortable-head .sort-head[data-sort="no"] .sort-glyph,
+.wrap .sortable-head .sort-head[data-sort="uom"] .sort-glyph{display:none}
+
+@media(min-width:1200px){
+  /* The column headings are the sort controls on desktop. */
+  .table-sortbar{display:none}
+}
+@media(max-width:1199px){
+  /* On tablet/phone the table becomes cards: use one sort toolbar. */
+  .table-sortbar{justify-content:flex-start;margin-bottom:10px;padding:10px 12px}
+  .wrap .grid.hd.sortable-head{display:none}
+}
+@media(max-width:520px){
+  .table-sortbar{gap:8px;padding:10px}
+  .table-sortbar label{width:100%}
+  .table-sortbar select{flex:1;min-width:0}
+  .table-sortbar button{padding:10px 12px;font-size:12px}
+}
