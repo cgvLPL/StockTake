@@ -65,6 +65,18 @@ This version uses **Google Sheets** as the shared stock database, with **Google 
 
 **Synchronization:** Counter changes save to the shared Sheet after each field change. Verifiers load a snapshot of that data and explicitly upload their system quantities and remarks. Refresh cloud data to see another user's edits. Automatic live updates and conflict resolution are not included. The Verifier dashboard continues to use a local working copy.
 
+## Daily, weekly, and monthly report downloads
+
+Verifier users can open **Download stocktake report** on the dashboard, select **Daily**, **Weekly**, or **Monthly**, pick a reference date, and choose **Download CSV**.
+
+- **Daily** exports the selected day, including all current inventory items and their Actual, System, Difference, Remarks and Status fields, even if no count has been entered.
+- **Weekly** covers Monday through Sunday containing the selected date. **Monthly** covers the entire selected calendar month. Both include daily summaries for every date, and item details for dates that have saved records.
+- The Excel-compatible UTF-8 CSV includes a daily summary (counted, verified, matched, differences, pending and not counted) followed by an item-level detail section. Zero values and decimal quantities are preserved. Exported notes and item names are sanitized to reduce spreadsheet-formula injection risks.
+- Reports are read from the **Google Sheets Counts tab**, not from the current device's local storage. Only **Verifier** accounts are authorized to request reports. The exports do not modify inventory or stock counts.
+- If an item recorded historically is no longer part of the active Inventory list, its item ID appears under an 'Archived item' label.
+
+**One-time Apps Script update required:** copy the latest `google-apps-script/Code.gs` into the associated Google Apps Script project, then select **Deploy → Manage deployments → Edit → New version → Deploy**. The GitHub Pages update alone does not enable the new authenticated `report` backend action. Keep the existing deployment URL and Script Properties unchanged.
+
 ## Editable Inventory and Excel-style daily reports
 
 After setting `SHEET_ID`, run `seedInventory()` **once** in the Apps Script editor. It creates the `Inventory` tab and imports the original 103 catalog items. Do not run it on a populated Inventory tab.
@@ -87,6 +99,6 @@ A four-digit PIN (including 0000) is weak and not recommended for an internet-ex
 
 ## Verifier staff account management
 
-After deploying the latest Apps Script version, sign in as a Verifier and use **Staff accounts** on the welcome screen. Verifiers can create additional Counter and Verifier users. Usernames must be unique, and new passwords must be at least eight characters. Counter users cannot call the create-user backend operation. The `Users` sheet stores SHA-256 password hashes. The initial admin/stars accounts still require running `setupStaffAccounts()` in the Apps Script editor; GitHub deployment cannot modify Apps Script project properties or spreadsheet data automatically.
+After deploying the latest Apps Script version, sign in as a Verifier and expand **Staff management** on the Verifier dashboard. Verifiers can create additional Counter and Verifier users. Usernames must be unique, and new passwords must be at least eight characters. Counter users cannot call the create-user backend operation. The `Users` sheet stores SHA-256 password hashes. The initial admin/stars accounts still require running `setupStaffAccounts()` in the Apps Script editor; GitHub deployment cannot modify Apps Script project properties or spreadsheet data automatically.
 
 Security: this starter authentication has no brute-force rate limiting, salts, or account recovery. Do not use weak 4-digit PINs on an internet-accessible app in production.
