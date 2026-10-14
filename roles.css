@@ -156,3 +156,21 @@ html:has(#roleLogin){background:#252b37}
 
 /* Keep automatic Verifier cloud synchronization accessible but visually hidden. */
 .role-sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+
+/* Center role-selection island and eliminate the iOS Safari bottom seam. */
+html:has(#enterVerifier),html:has(#enterCounter){min-height:100%;background:#242a35}
+body:has(#enterVerifier),body:has(#enterCounter){margin:0;min-height:100dvh;background:#242a35!important;overflow-x:hidden}
+body:has(#enterVerifier) #roleApp,body:has(#enterCounter) #roleApp{min-height:100dvh}
+body:has(#enterVerifier) .role-shell,body:has(#enterCounter) .role-shell{
+ box-sizing:border-box;display:flex;align-items:center;justify-content:center;
+ width:100%;min-height:100svh;min-height:100dvh;
+ padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));
+ background:radial-gradient(ellipse at 80% 12%,#65717a 0%,transparent 52%),linear-gradient(155deg,#1b202b 0%,#626e72 70%,#9a9689 100%);
+ background-attachment:scroll;
+}
+body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizing:border-box;width:min(100%,600px);margin:auto}
+@media(max-width:560px){
+ body:has(#enterVerifier) .role-shell,body:has(#enterCounter) .role-shell{align-items:center;padding:16px}
+ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{margin:auto}
+}
