@@ -61,6 +61,48 @@ function setupInventory(){
 function sheet_(){const id=PropertiesService.getScriptProperties().getProperty('SHEET_ID')||'1otK327n3_dVEB5iHFyi6PNdJ0t9BHmfycuo0sICYf-A';const ss=SpreadsheetApp.openById(id);let s=ss.getSheetByName(TAB);if(!s){s=ss.insertSheet(TAB);s.appendRow(['Date','Item ID','Actual','System','Remarks','Updated At','Updated By']);}return s;}
 function digest_(s){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s).map(x=>('0'+(x&255).toString(16)).slice(-2)).join('');}
 function user_(name,pin){const s=SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SHEET_ID')||'1otK327n3_dVEB5iHFyi6PNdJ0t9BHmfycuo0sICYf-A').getSheetByName('Users');if(!s)throw Error('Create Users sheet');const rows=s.getDataRange().getDisplayValues();const row=rows.slice(1).find(r=>r[0]===name&&r[1]===digest_(pin));if(!row||!['counter','verifier'].includes(row[2]))throw Error('Invalid credentials');return {name,role:row[2]};}
+function validReportDate_(value){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;
+ const parts=value.split('-').map(Number);
+ const time=Date.UTC(parts[0],parts[1]-1,parts[2]);
+ return Number.isFinite(time)&&new Date(time).toISOString().slice(0,10)===value;
+}
+function reportQuantity_(raw,display){
+ if(raw===''||raw===null||raw===undefined)return null;
+ if(typeof raw==='number')return Number.isFinite(raw)?raw:null;
+ const text=String(display).trim();
+ if(!text)return null;
+ const normalized=/^\d{1,3}(?:\.\d{3})+,\d{1,4}$/.test(text)?
+    text.replace(/\./g,'').replace(',','.'):text.replace(',','.');
+ const value=Number(normalized);
+ return Number.isFinite(value)?value:null;
+}
+function reportData_(start,end){
+ if(!validReportDate_(start)||!validReportDate_(end))throw Error('Choose valid report dates');
+ const days=(Date.parse(end+'T00:00:00Z')-Date.parse(start+'T00:00:00Z'))/86400000;
+ if(!Number.isInteger(days)||days<0||days>30)throw Error('Report range must be 1–31 days');
+ const sh=sheet_(),range=sh.getDataRange();
+ const display=range.getDisplayValues(),values=range.getValues();
+ const records=[];
+ for(let i=1;i<display.length;i++){
+   const shown=display[i];
+   if(shown[0]<start||shown[0]>end||!shown[1])continue;
+   const raw=values[i];
+   records.push({
+     date:shown[0],
+     item_id:String(shown[1]),
+     actual:reportQuantity_(raw[2],shown[2]),
+     system:reportQuantity_(raw[3],shown[3]),
+     remarks:String(shown[4]||'')
+   });
+ }
+ return {
+   start:start,end:end,
+   items:catalog_().map(it=>({id:it.id,name:it.name,uom:it.uom})),
+   rows:records
+ };
+}
+
 function process_(p){
  const u=user_(String(p.username||''),String(p.pin||'')),action=String(p.action||'login');
  if(action==='login')return {role:u.role};
@@ -84,6 +126,10 @@ function process_(p){
   }finally{lock.releaseLock();}
  }
 
+ if(action==='report'){
+  if(u.role!=='verifier')throw Error('Verifier access required');
+  return reportData_(String(p.startDate||''),String(p.endDate||''));
+ }
  if(action==='load'){
   const s=sheet_();
   const date=String(p.date||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('Invalid date');
