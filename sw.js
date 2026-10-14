@@ -1,5 +1,5 @@
 const CACHE = 'stocktake-app-v4';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './updates.js', './manifest.webmanifest', './icon.svg', './brand/cgv-stocktake.svg', './brand/favicon.svg', './brand/app-icon-192.png', './brand/app-icon-512.png', './brand/app-icon-maskable-512.png', './brand/apple-touch-icon.png'];
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './cloud.js', './cloud-config.js', './roles.css', './updates.js', './manifest.webmanifest', './icon.svg', './brand/cgv-stocktake.svg', './brand/favicon.svg', './brand/app-icon-192.png', './brand/app-icon-512.png', './brand/app-icon-maskable-512.png', './brand/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
 });
