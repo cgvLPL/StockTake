@@ -39,10 +39,13 @@ function welcome(){
  root.querySelector('#enterCounter').disabled=r!=='counter';root.querySelector('#enterVerifier').disabled=r!=='verifier';
  root.querySelector('#enterCounter').onclick=()=>counter();
  root.querySelector('#enterVerifier').onclick=()=>verifier();
- if(r==='verifier'){
+
+ root.querySelector('#roleLogout').onclick=logout;
+}
+function mountStaffAccounts(){
   const area=document.createElement('section');area.className='role-admin';
   area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>New password<input name="password" type="password" required minlength="8" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
-  root.querySelector('.role-card').appendChild(area);
+  document.querySelector('#verifierStaffPanel').appendChild(area);
   area.querySelector('form').onsubmit=async e=>{
    e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),result=area.querySelector('#staffResult');
    button.disabled=true;result.textContent='Creating account…';
@@ -52,8 +55,6 @@ function welcome(){
   };
  }
 
- root.querySelector('#roleLogout').onclick=logout;
-}
 function logout(){state.token=null;state.user=null;state.role=null;login()}
 async function load(){const result=await api('load',{date:state.date});const rows=result.rows;state.records=Object.fromEntries(rows.map(r=>[r.item_id,r]));state.catalog=(result.items||[]).map(it=>[it.name,it.uom,it.id]);return rows}
 const catalog=()=>state.catalog||[];
@@ -84,6 +85,7 @@ async function verifier(){
   root.innerHTML='<span id="roleMessage" class="role-sync-state role-sr-only" role="status" aria-live="polite"></span>';
   if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());
   if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
+  mountStaffAccounts();
   /* Verifier loads cloud data automatically; no manual refresh or transition toolbar. */
  }catch(err){message('Unable to load verifier: '+err.message)}
 }
