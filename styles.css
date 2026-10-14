@@ -218,3 +218,44 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
 .month-legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;margin-top:14px;font-size:11px;color:#aeb0b2}
 @media(max-width:700px){.month-summary{padding:16px;min-height:88px}.month-summary-text strong{font-size:21px}#monthCard #mn{font-size:12px}.month-toggle-label{display:none}.month-content{padding:13px 12px}#monthCard .chips{gap:5px}#monthCard .d{border-radius:9px;font-size:12px}.month-legend{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.month-chevron{transition:none}}
+
+
+/* Verifier item table: legible desktop columns and properly labelled mobile cards. */
+#listHead{min-width:0}
+#listHead p{max-width:78ch;line-height:1.5}
+.wrap{max-width:100%;min-width:0;box-sizing:border-box}
+#rows{min-width:0}
+@media(min-width:1200px){
+ .wrap{overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+ .wrap>.grid.hd,.wrap>#rows{min-width:1090px}
+ .wrap .grid{grid-template-columns:38px minmax(185px,1.6fr) 50px minmax(94px,1fr) minmax(94px,1fr) minmax(100px,.9fr) minmax(130px,1.1fr) 104px;gap:9px}
+ .wrap .row{padding:10px 14px;border-radius:15px}
+ .wrap .hd{padding:12px 14px}
+ .wrap .row .nm{overflow-wrap:anywhere;line-height:1.35}
+ .wrap .row input{min-width:0;box-sizing:border-box}
+ .wrap .pill{min-width:0;width:100%;box-sizing:border-box}
+}
+@media(max-width:1199px){
+ .wrap{padding:10px;background:#f3f4f5;overflow:visible}
+ #rows{gap:10px}
+ #rows .row{min-width:0;box-sizing:border-box;border-radius:16px;padding:14px;gap:10px;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-areas:"n u u st st st" "nm nm nm nm nm nm" "a a a s s s" "d d r r r r"}
+ #rows .row .nm{min-width:0;overflow-wrap:anywhere;font-size:14px;line-height:1.4}
+ #rows .row .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+ #rows .row .field>span{display:block;font-size:11px;font-weight:650;color:#687078}
+ #rows .row input{box-sizing:border-box;width:100%;min-width:0;height:43px;min-height:43px;padding:9px 10px;border:1px solid #e1e4e8;border-radius:10px;background:#f7f8f9;font-size:16px}
+ #rows .row input.q{text-align:right;font-variant-numeric:tabular-nums}
+ #rows .row .df{align-self:end;min-width:0;overflow-wrap:anywhere;font-size:13px;padding-bottom:6px}
+ #rows .row .df:before{margin-bottom:5px}
+ #rows .row .st{max-width:100%}
+ #rows .row .pill{display:inline-block;max-width:100%;min-width:0;box-sizing:border-box;font-size:10px;padding:6px 10px}
+}
+@media(max-width:700px){
+ #rows{display:grid;grid-template-columns:minmax(0,1fr)}
+ .wrap{padding:8px}
+ #rows .row{padding:13px 12px;gap:10px}
+ #rows .row .n{font-size:12px}
+ #rows .row .u{font-size:12px}
+ #rows .row .nm{font-size:14px}
+ #rows .row .field[data-k=r] input{font-size:14px}
+ #numberHelp{font-size:12px;line-height:1.5}
+}
