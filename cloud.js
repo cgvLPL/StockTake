@@ -81,15 +81,14 @@ async function verifier(){
   for(const [id,r] of Object.entries(state.records))local.records[id]={a:r.actual==null?'':String(r.actual),s:r.system==null?'':String(r.system),r:r.remarks||''};
   localStorage.setItem('stocktake:'+state.date,JSON.stringify(local));
   document.querySelector('.frame').hidden=false;
-  root.innerHTML='<div class="role-topbar"><div class="role-topbar-title"><strong>Verifier dashboard</strong><small>StockTake · '+esc(state.date)+'</small></div><span class="role-sync-state" id="roleMessage" role="status">Cloud data loaded · Changes save automatically</span><div class="role-topbar-actions">'+button('roleReload','Refresh data')+button('roleBack','Back to roles')+'</div></div>';
+  root.innerHTML='<span id="roleMessage" class="role-sync-state role-sr-only" role="status" aria-live="polite"></span>';
   if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());
   if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
-  root.querySelector('#roleBack').onclick=welcome;
-  root.querySelector('#roleReload').onclick=()=>verifier();
+  /* Verifier loads cloud data automatically; no manual refresh or transition toolbar. */
  }catch(err){message('Unable to load verifier: '+err.message)}
 }
 function queueVerifierSave(){
- if(state.role!=='verifier'||!root.querySelector('#roleReload'))return;
+ if(state.role!=='verifier'||!document.querySelector('.frame')||document.querySelector('.frame').hidden)return;
  clearTimeout(verifierSaveTimer);
  message('Saving changes…');
  verifierSaveTimer=setTimeout(()=>{
