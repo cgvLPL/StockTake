@@ -65,6 +65,25 @@ function process_(p){
  const u=user_(String(p.username||''),String(p.pin||'')),action=String(p.action||'login');
  if(action==='login')return {role:u.role};
  if(action==='catalog')return {items:catalog_()};
+ if(action==='listUsers'){
+  if(u.role!=='verifier')throw Error('Verifier access required');
+  const sh=sheet_().getParent().getSheetByName('Users');
+  return {users:sh?sh.getDataRange().getDisplayValues().slice(1).filter(r=>r[0]).map(r=>({username:r[0],role:r[2]})):[]};
+ }
+ if(action==='createUser'){
+  if(u.role!=='verifier')throw Error('Verifier access required');
+  const username=String(p.newUsername||'').trim().toLowerCase(),pin=String(p.newPin||''),role=String(p.newRole||'');
+  if(!/^[a-z][a-z0-9_.-]{2,31}$/.test(username))throw Error('Username must be 3-32 letters, numbers, dots, dashes or underscores');
+  if(!['counter','verifier'].includes(role))throw Error('Invalid role');
+  if(pin.length<8||pin.length>128)throw Error('Password must be at least 8 characters');
+  const lock=LockService.getScriptLock();lock.waitLock(20000);
+  try{
+   const sh=sheet_().getParent().getSheetByName('Users');if(!sh)throw Error('Run setupStaffAccounts first');
+   if(sh.getDataRange().getDisplayValues().slice(1).some(r=>String(r[0]).toLowerCase()===username))throw Error('Username already exists');
+   sh.appendRow([username,digest_(pin),role]);return {created:true,username,role};
+  }finally{lock.releaseLock();}
+ }
+
  const s=sheet_();
  if(action==='load'){
   const date=String(p.date||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('Invalid date');
