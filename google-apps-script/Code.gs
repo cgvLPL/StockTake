@@ -111,11 +111,12 @@ function process_(p){
  throw Error('Unknown action');
 }
 function doPost(e){
- let out;try{out={ok:true,data:process_(e.parameter||{})}}catch(err){out={ok:false,error:String(err.message)}}
- // Parent verifies event.origin against script.google.com / googleusercontent.com.
- const json=JSON.stringify(out).replace(/</g,'\\u003c');
- const requestId=JSON.stringify(String((e.parameter||{}).requestId||''));
- return HtmlService.createHtmlOutput('<script>window.top.postMessage({stocktake:true,requestId:'+requestId+',result:'+json+'},"*")</script>');
+ const p=e&&e.parameter||{};
+ let out;
+ try{out={ok:true,data:process_(p)}}catch(err){out={ok:false,error:String(err.message)}}
+ const payload=JSON.stringify({stocktake:true,requestId:String(p.requestId||''),result:out}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+ const html='<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><script>try{window.top.postMessage('+payload+',"https://cgvlpl.github.io")}catch(e){}<\\/script></body></html>';
+ return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 /** One-time initialization: creates the Inventory sheet with the original 103 items. */
