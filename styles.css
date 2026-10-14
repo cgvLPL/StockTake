@@ -172,3 +172,22 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
 .wrap{border-radius:18px;overflow:hidden}
 .lh h3{font-size:22px;letter-spacing:-.03em}
 @media(max-width:700px){.stats{gap:8px}.stat{padding:13px;min-height:100px;border-radius:14px}.stat b{font-size:35px}.stat div{font-size:11px}.stat small{font-size:10px}.mc{border-radius:15px}}
+
+
+/* Verifier-only account administration, tucked into dashboard. */
+.staff-panel{border:1px solid #dfe2e5;background:#fff;border-radius:18px;padding:0 18px}
+.staff-panel summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px;font-weight:700;color:#16181b}
+.staff-panel summary::-webkit-details-marker{display:none}
+.staff-panel summary:after{content:'+';font-size:25px;font-weight:400;color:#747a80}
+.staff-panel[open] summary:after{content:'−'}
+.staff-panel summary span{font-size:12px;font-weight:400;color:#747a80;margin-left:auto}
+.staff-panel .role-admin{padding:4px 0 22px;border-top:1px solid #e6e8eb}
+.staff-panel .role-admin h3{font-size:17px;margin:14px 0 6px}
+.staff-panel .role-admin p{font-size:13px;color:#687078}
+.staff-panel #newStaffForm{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end}
+.staff-panel #newStaffForm label{display:grid;gap:7px;font-size:12px;font-weight:650;color:#363b42}
+.staff-panel #newStaffForm input,.staff-panel #newStaffForm select{width:100%;min-width:0;min-height:45px;border:1px solid #dfe2e5;background:#f6f7f8;color:#17191b;border-radius:11px;padding:10px 12px}
+.staff-panel #newStaffForm button{grid-column:1/-1;justify-self:start;min-height:43px;border:0;border-radius:999px;padding:10px 24px;background:#ff681f;color:#fff;font-weight:700}
+.staff-panel #newStaffForm button:disabled{opacity:.5}
+.staff-panel #staffResult{min-height:18px}
+@media(max-width:700px){.staff-panel{padding:0 14px}.staff-panel summary{flex-wrap:wrap;padding:12px 0}.staff-panel summary span{order:3;width:100%;margin:0}.staff-panel #newStaffForm{grid-template-columns:1fr}.staff-panel #newStaffForm button{width:100%}}
