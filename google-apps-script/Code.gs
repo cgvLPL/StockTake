@@ -60,7 +60,7 @@ function setupInventory(){
 
 function sheet_(){const id=PropertiesService.getScriptProperties().getProperty('SHEET_ID')||'1otK327n3_dVEB5iHFyi6PNdJ0t9BHmfycuo0sICYf-A';const ss=SpreadsheetApp.openById(id);let s=ss.getSheetByName(TAB);if(!s){s=ss.insertSheet(TAB);s.appendRow(['Date','Item ID','Actual','System','Remarks','Updated At','Updated By']);}return s;}
 function digest_(s){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s).map(x=>('0'+(x&255).toString(16)).slice(-2)).join('');}
-function user_(name,pin){const s=sheet_().getParent().getSheetByName('Users');if(!s)throw Error('Create Users sheet');const rows=s.getDataRange().getDisplayValues();const row=rows.slice(1).find(r=>r[0]===name&&r[1]===digest_(pin));if(!row||!['counter','verifier'].includes(row[2]))throw Error('Invalid credentials');return {name,role:row[2]};}
+function user_(name,pin){const s=SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SHEET_ID')||'1otK327n3_dVEB5iHFyi6PNdJ0t9BHmfycuo0sICYf-A').getSheetByName('Users');if(!s)throw Error('Create Users sheet');const rows=s.getDataRange().getDisplayValues();const row=rows.slice(1).find(r=>r[0]===name&&r[1]===digest_(pin));if(!row||!['counter','verifier'].includes(row[2]))throw Error('Invalid credentials');return {name,role:row[2]};}
 function process_(p){
  const u=user_(String(p.username||''),String(p.pin||'')),action=String(p.action||'login');
  if(action==='login')return {role:u.role};
@@ -84,13 +84,14 @@ function process_(p){
   }finally{lock.releaseLock();}
  }
 
- const s=sheet_();
  if(action==='load'){
+  const s=sheet_();
   const date=String(p.date||'');if(!/^\d{4}-\d{2}-\d{2}$/.test(date))throw Error('Invalid date');
   const all=s.getDataRange().getDisplayValues().slice(1).filter(r=>r[0]===date);
   return {role:u.role,items:catalog_(),rows:all.map(r=>({item_id:r[1],actual:r[2]===''?null:Number(r[2]),system:r[3]===''?null:Number(r[3]),remarks:r[4]}))};
  }
  if(action==='save'){
+  const s=sheet_();
   const date=String(p.date||''),id=String(p.item_id||'');
   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!/^stock-\d{3}$/.test(id)||Number(id.slice(6))>103)throw Error('Invalid record');
   const field=u.role==='counter'?'actual':'system',v=String(p.value??'');
