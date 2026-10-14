@@ -90,3 +90,12 @@
 #roleItems{border-radius:18px;background:#fff}
 .role-item input{background:#f6f7f8}
 @media(max-width:560px){.role-shell{padding:16px}.role-card{border-radius:22px}.role-choices .role-button{min-height:64px}.role-topbar{margin:8px 8px 0;border-radius:14px;padding:12px}.role-topbar-actions .role-button{padding:9px 12px}}
+
+
+/* Login viewport alignment: center the island in the visible Safari viewport. */
+body:has(#roleLogin){background:#252b37!important}
+body:has(#roleLogin) .role-shell{min-height:100svh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(18px + env(safe-area-inset-top,0px)) 18px calc(18px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 80% 12%,#65717a 0%,transparent 52%),linear-gradient(155deg,#1b202b 0%,#626e72 70%,#9a9689 100%);background-attachment:fixed}
+body:has(#roleLogin) .role-card{margin:auto;width:min(100%,600px)}
+body:has(#roleLogin) #roleApp{min-height:100svh;min-height:100dvh}
+html:has(#roleLogin){background:#252b37}
+@media(max-width:560px){body:has(#roleLogin) .role-shell{align-items:center;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}}
