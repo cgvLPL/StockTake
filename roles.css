@@ -138,3 +138,17 @@ html:has(#roleLogin){background:#252b37}
  body:has(#roleItems) #roleDate::-webkit-datetime-edit{padding:0;line-height:24px}
  body:has(#roleItems) #roleDate::-webkit-calendar-picker-indicator{margin:0 0 0 auto;opacity:.65}
 }
+
+
+/* Data-first progress component inspired by the reference cards. */
+.count-progress{margin:16px 0 18px;padding:20px;border-radius:19px;background:#101112;color:#f9f9f9;border:1px solid #2a2b2d}
+.count-progress-top,.count-progress-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#a8a8a8;font-size:10px;letter-spacing:.09em;font-weight:650}
+.count-progress-top span:last-child{letter-spacing:0;font-weight:500}
+.count-progress-metric{display:flex;align-items:baseline;gap:16px;margin:12px 0 17px;flex-wrap:wrap}
+.count-progress-metric strong{font-size:clamp(42px,9vw,64px);line-height:1;letter-spacing:-.065em;font-weight:500;font-variant-numeric:tabular-nums}
+.count-progress-metric span{color:#c0c0c0;font-size:13px}
+.count-segments{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));gap:3px;height:44px;margin-bottom:12px}
+.count-segments i{display:block;min-width:0;border-radius:2px;background:#454648}
+.count-segments i.filled{background:#f5f5f5}
+.count-progress-bottom{font-size:9px}
+@media(max-width:560px){.count-progress{padding:16px;margin:15px 0}.count-segments{height:34px;gap:2px}.count-progress-metric{gap:12px;margin:12px 0 15px}.count-progress-metric span{font-size:12px}}
