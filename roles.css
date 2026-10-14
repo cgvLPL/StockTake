@@ -7,3 +7,5 @@
 .role-card form input:focus-visible{outline:3px solid #ed6c45;outline-offset:2px;border-color:#ed6c45}
 .role-button:focus-visible{outline:3px solid #ed6c45;outline-offset:2px}
 @media(max-width:480px){.role-shell{padding:16px}.role-card{padding:26px 22px}.role-logo{margin-bottom:16px}}
+
+.role-admin{margin-top:22px;padding-top:18px;border-top:1px solid #dfe4e9}.role-admin form{display:grid;gap:12px}.role-admin select{width:100%;padding:12px;border:1px solid #b9c0c8;border-radius:10px;background:#fff;color:#111}.role-admin h3{margin:0 0 6px}.role-admin #staffResult{font-size:13px}
