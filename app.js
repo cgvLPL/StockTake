@@ -122,7 +122,7 @@ document.querySelectorAll('.f').forEach(b=>b.onclick=()=>setFilter(b.dataset.f))
 document.querySelectorAll('.r[data-go]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.r[data-go]').forEach(x=>x.classList.toggle('on',x===b));
   const g=b.dataset.go;if(g==='bad'){setFilter('bad');$('#listHead').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
-  else{if(g==='listHead')setFilter('all');$('#'+g).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}});
+  else{if(g==='listHead')setFilter('all');if(g==='monthCard')$('#monthDisclosure').open=true;$('#'+g).scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}});
 $('#q').oninput=e=>{query=e.target.value.trim().toLowerCase();filt()};
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#q').focus()}});
 $('#copy').onclick=()=>{
