@@ -70,7 +70,12 @@
   <p class="tag">Entries stay on this device. Copy for Excel to keep a backup. On iPhone, use Share → Add to Home Screen.</p>
 </div>
 </div>
+<aside id="updateBanner" class="update-banner" role="status" aria-live="polite" hidden>
+  <div><strong>New version available</strong><p id="updateMessage">Refresh to get the latest StockTake improvements.</p></div>
+  <div class="update-actions"><button id="refreshApp" type="button">Refresh</button><button id="dismissUpdate" type="button">Later</button></div>
+</aside>
 <div id="toast" role="status"></div>
 <script src="./app.js" defer></script>
+<script src="./updates.js" defer></script>
 </body>
 </html>

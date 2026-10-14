@@ -38,8 +38,14 @@ Serve this directory with any static HTTP server, for example `python3 -m http.s
 - `tests/`: numeric, storage, migration, filtering and clear-day regression tests
 - `.github/workflows/pages.yml`: tests and GitHub Pages deployment
 
-Keep catalog IDs permanent. Do not renumber IDs when sorting or inserting items. Increment the service-worker cache version when updating the app shell.
+Keep catalog IDs permanent. Do not renumber IDs when sorting or inserting items. GitHub Actions stamps the service-worker cache with the commit SHA on every deployment, so every release is detectable.
 
 ## Branding
 
 The approved CGV StockTake design uses the original CGV vector mark from [KnowledgeAcademy](https://github.com/cgvLPL/KnowledgeAcademy/blob/main/public/brand/cgv-knowledge-academy.svg), a warm gradient divider, and a light/bold StockTake wordmark. Lettering is outlined for consistent rendering. `brand/` includes the header logo, favicon, PNG app icons, and iPhone home-screen icon. The Actions workflow deploys these assets and the offline cache includes them.
+
+## Update notifications
+
+While the app is open, it checks for a new version every minute and when you return to the tab or reconnect. Once the new app shell is downloaded, a **New version available** banner offers **Refresh** or **Later**. It never automatically refreshes an editing tab. Refresh retries pending saves and is blocked if any entries remain unsaved. Updating in another tab prompts this tab rather than reloading it. Dismissing a version hides that prompt for the current page session.
+
+Existing installations need one normal page refresh to load this notification feature. Future deployments are then detected automatically. Offline users receive the prompt after reconnecting and downloading the update.

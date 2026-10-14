@@ -1,5 +1,5 @@
-const CACHE = 'stocktake-app-v3';
-const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg', './brand/cgv-stocktake.svg', './brand/favicon.svg', './brand/app-icon-192.png', './brand/app-icon-512.png', './brand/app-icon-maskable-512.png', './brand/apple-touch-icon.png'];
+const CACHE = 'stocktake-app-v4';
+const ASSETS = ['./', './index.html', './styles.css', './app.js', './updates.js', './manifest.webmanifest', './icon.svg', './brand/cgv-stocktake.svg', './brand/favicon.svg', './brand/app-icon-192.png', './brand/app-icon-512.png', './brand/app-icon-maskable-512.png', './brand/apple-touch-icon.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
 });
@@ -13,4 +13,9 @@ self.addEventListener('fetch', event => {
     const cache = await caches.open(CACHE);
     return await cache.match(event.request) || (event.request.mode === 'navigate' ? await cache.match('./index.html') : Response.error());
   }));
+});
+
+// Activation requires an explicit Refresh click in the app.
+self.addEventListener('message',event=>{
+  if(event.data?.type==='SKIP_WAITING')event.waitUntil(self.skipWaiting());
 });

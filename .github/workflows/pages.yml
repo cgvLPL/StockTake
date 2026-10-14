@@ -21,8 +21,9 @@ jobs:
       - name: Stage app files
         run: |
           mkdir _site
-          cp index.html styles.css app.js sw.js manifest.webmanifest icon.svg _site/
+          cp index.html styles.css app.js updates.js sw.js manifest.webmanifest icon.svg _site/
           cp -R brand _site/
+          node scripts/stamp-version.cjs _site/sw.js
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

@@ -145,6 +145,8 @@ $('#retrySave').onclick=()=>{for(const d of [...dirty])save(d);storageStatus()};
 window.addEventListener('beforeunload',e=>{if(dirty.size){e.preventDefault();e.returnValue=''}});
 build();show();setFilter(filter);
 
-if('serviceWorker' in navigator && location.protocol!=='file:'){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
+// Refresh only after every pending edit has been persisted.
+window.stockTakeCanRefresh=()=>{
+  for(const d of [...dirty])save(d);
+  return dirty.size===0;
+};
