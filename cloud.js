@@ -42,8 +42,8 @@ function welcome(){
  root.querySelector('#roleLogout').onclick=logout;
 }
 function logout(){state.token=null;state.user=null;state.role=null;login()}
-async function load(){const result=await api('load',{date:state.date});const rows=result.rows;state.records=Object.fromEntries(rows.map(r=>[r.item_id,r]));return rows}
-const catalog=()=>window.STOCKTAKE_ITEMS||[];
+async function load(){const result=await api('load',{date:state.date});const rows=result.rows;state.records=Object.fromEntries(rows.map(r=>[r.item_id,r]));state.catalog=(result.items||[]).map(it=>[it.name,it.uom,it.id]);return rows}
+const catalog=()=>state.catalog||[];
 function counterView(){
  const items=catalog(),done=items.filter(i=>state.records[i[2]]?.actual!==null&&state.records[i[2]]?.actual!==undefined).length;
  shell('<div class="role-toolbar">'+button('roleBack','← Roles')+'<strong>Counter</strong>'+button('roleOut','Sign out')+'</div><h2>Physical stock count</h2><label>Count date <input id="roleDate" type="date" value="'+state.date+'"></label><p id="roleProgress">'+done+' / '+items.length+' items counted</p><input id="roleSearch" type="search" placeholder="Search stock items" aria-label="Search stock items"><div id="roleItems">'+items.map((it,i)=>'<label class="role-item" data-name="'+esc(it[0].toLowerCase())+'"><span><b>'+(i+1)+'. '+esc(it[0])+'</b><small>'+esc(it[1])+'</small></span><input inputmode="decimal" data-id="'+it[2]+'" aria-label="Quantity for '+esc(it[0])+'" placeholder="Quantity" value="'+esc(state.records[it[2]]?.actual??'')+'"></label>').join('')+'</div>');
@@ -62,7 +62,7 @@ async function verifier(){
  // Cloud data is copied to the existing dashboard's local view. Editing remains local until explicitly synced.
  localStorage.setItem(k,JSON.stringify(local));
  document.querySelector('.frame').hidden=false;root.innerHTML='<div class="role-topbar"><strong>Verifier · Cloud snapshot '+esc(state.date)+'</strong>'+button('roleSync','Upload dashboard changes')+button('roleReload','Reload cloud')+button('roleBack','Switch role')+'<span id="roleMessage" role="status"></span></div>';
- if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
+ if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
  root.querySelector('#roleBack').onclick=welcome;
  root.querySelector('#roleReload').onclick=()=>verifier();
  root.querySelector('#roleSync').onclick=async()=>{
