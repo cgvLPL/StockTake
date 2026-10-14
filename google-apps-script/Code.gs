@@ -58,7 +58,7 @@ function setupInventory(){
  const s=inventory_();return {sheet:s.getName(),items:catalog_().length};
 }
 
-function sheet_(){const id=PropertiesService.getScriptProperties().getProperty('SHEET_ID');if(!id)throw Error('Set SHEET_ID script property');const ss=SpreadsheetApp.openById(id);let s=ss.getSheetByName(TAB);if(!s){s=ss.insertSheet(TAB);s.appendRow(['Date','Item ID','Actual','System','Remarks','Updated At','Updated By']);}return s;}
+function sheet_(){const id=PropertiesService.getScriptProperties().getProperty('SHEET_ID')||'1otK327n3_dVEB5iHFyi6PNdJ0t9BHmfycuo0sICYf-A';const ss=SpreadsheetApp.openById(id);let s=ss.getSheetByName(TAB);if(!s){s=ss.insertSheet(TAB);s.appendRow(['Date','Item ID','Actual','System','Remarks','Updated At','Updated By']);}return s;}
 function digest_(s){return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,s).map(x=>('0'+(x&255).toString(16)).slice(-2)).join('');}
 function user_(name,pin){const s=sheet_().getParent().getSheetByName('Users');if(!s)throw Error('Create Users sheet');const rows=s.getDataRange().getDisplayValues();const row=rows.slice(1).find(r=>r[0]===name&&r[1]===digest_(pin));if(!row||!['counter','verifier'].includes(row[2]))throw Error('Invalid credentials');return {name,role:row[2]};}
 function process_(p){
