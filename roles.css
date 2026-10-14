@@ -99,3 +99,32 @@ body:has(#roleLogin) .role-card{margin:auto;width:min(100%,600px)}
 body:has(#roleLogin) #roleApp{min-height:100svh;min-height:100dvh}
 html:has(#roleLogin){background:#252b37}
 @media(max-width:560px){body:has(#roleLogin) .role-shell{align-items:center;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}}
+
+
+/* Counter: compact, safe-area-aware mobile counting workspace. */
+@media(max-width:700px){
+ body:has(#roleItems) .role-shell{display:block;min-height:100dvh;padding:calc(12px + env(safe-area-inset-top,0px)) 10px calc(96px + env(safe-area-inset-bottom,0px));background:#edf0f2}
+ body:has(#roleItems) .role-card{width:100%;max-width:none;margin:0;padding:18px 14px 24px;border-radius:20px;box-shadow:0 8px 30px #10182012}
+ body:has(#roleItems) .role-logo{width:min(210px,75%);max-height:62px;margin:0 auto 16px}
+ body:has(#roleItems) .role-toolbar{display:grid;grid-template-columns:1fr auto;gap:8px;margin:0 0 14px;align-items:center}
+ body:has(#roleItems) .role-toolbar strong{grid-column:1/-1;grid-row:1;font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:#727982;margin:0}
+ body:has(#roleItems) .role-toolbar #roleBack{grid-column:1;grid-row:2;justify-self:start}
+ body:has(#roleItems) .role-toolbar #roleOut{grid-column:2;grid-row:2;justify-self:end}
+ body:has(#roleItems) .role-toolbar .role-button{min-height:40px;padding:9px 15px;font-size:12px}
+ body:has(#roleItems) .role-card h2{font-size:22px;margin:12px 0 16px}
+ body:has(#roleItems) .role-card>label{display:grid;gap:7px;font-size:12px;color:#6c747d}
+ body:has(#roleItems) #roleDate{display:block;width:100%;min-width:0;max-width:100%;height:46px;min-height:46px;font-size:15px;padding:8px 12px;text-align:left;box-sizing:border-box}
+ body:has(#roleItems) #roleProgress{margin:14px 0 10px;font-size:12px;font-weight:650;color:#64707b}
+ body:has(#roleItems) #roleSearch{height:46px;min-height:46px;margin:0;font-size:14px}
+ body:has(#roleItems) #roleItems{max-height:none;overflow:visible;margin-top:12px;padding:0 12px;border-radius:15px}
+ body:has(#roleItems) .role-item{display:grid!important;grid-template-columns:minmax(0,1fr) 100px;gap:10px;align-items:center;padding:13px 0;min-height:76px}
+ body:has(#roleItems) .role-item[hidden]{display:none!important}
+ body:has(#roleItems) .role-item span{min-width:0;overflow-wrap:anywhere}
+ body:has(#roleItems) .role-item b{font-size:12px;line-height:1.35;display:block}
+ body:has(#roleItems) .role-item small{font-size:11px;margin-top:4px}
+ body:has(#roleItems) .role-item input{width:100%;min-width:0;max-width:none;height:44px;min-height:44px;padding:8px 9px;border-radius:12px;text-align:right;font-size:15px}
+ body:has(#roleItems) .role-item input::placeholder{font-size:12px;color:#9da3ac}
+ body:has(#roleItems) #roleMessage{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:#fff;border-radius:12px;z-index:3}
+ body:has(#roleItems) #roleMessage:empty{display:none}
+}
+@media(max-width:360px){body:has(#roleItems) .role-item{grid-template-columns:minmax(0,1fr) 88px}}
