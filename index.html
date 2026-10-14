@@ -3,18 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Daily stock take</title>
+<title>CGV StockTake</title>
 
 <link rel="stylesheet" href="./styles.css">
 <meta name="theme-color" content="#17181a">
 <meta name="description" content="Daily stock counts, variance tracking, and Excel export.">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./brand/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./brand/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="StockTake">
 </head>
 <body>
 <div class="frame">
 <nav class="rail" aria-label="Sections">
-  <div class="mark" data-ic="box"></div>
+  <div class="mark"><img src="./brand/favicon.svg" width="44" height="44" alt="CGV"></div>
   <button class="r on" data-go="top" data-ic="grid" title="Overview" aria-label="Overview"></button>
   <button class="r" data-go="listHead" data-ic="list" title="Item count" aria-label="Item count"></button>
   <button class="r" data-go="bad" data-ic="alert" title="Variances" aria-label="Variances"></button>
@@ -23,6 +25,10 @@
   <button class="r" id="clear" data-ic="trash" title="Clear day" aria-label="Clear day"></button>
 </nav>
 <div class="panel" id="top">
+  <div class="brand-header">
+    <img class="brand-logo" src="./brand/cgv-stocktake.svg" width="1172" height="320" alt="CGV StockTake">
+    <h1>Daily stock take</h1>
+  </div>
   <header class="top">
     <div class="barpill">
       <span class="sq" data-ic="box"></span>

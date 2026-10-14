@@ -1,4 +1,4 @@
-# StockTake
+# CGV StockTake
 
 A mobile-friendly daily stock-counting app with 103 inventory items, actual/system comparisons, daily history, month summaries, search, and Excel export. No server or runtime dependencies are needed.
 
@@ -39,3 +39,7 @@ Serve this directory with any static HTTP server, for example `python3 -m http.s
 - `.github/workflows/pages.yml`: tests and GitHub Pages deployment
 
 Keep catalog IDs permanent. Do not renumber IDs when sorting or inserting items. Increment the service-worker cache version when updating the app shell.
+
+## Branding
+
+The approved CGV StockTake design uses the original CGV vector mark from [KnowledgeAcademy](https://github.com/cgvLPL/KnowledgeAcademy/blob/main/public/brand/cgv-knowledge-academy.svg), a warm gradient divider, and a light/bold StockTake wordmark. Lettering is outlined for consistent rendering. `brand/` includes the header logo, favicon, PNG app icons, and iPhone home-screen icon. The Actions workflow deploys these assets and the offline cache includes them.
