@@ -70,20 +70,45 @@ function counterView(){
  });
 }
 async function counter(){try{await load();counterView()}catch(err){message('Unable to load counts: '+err.message)}}
+let verifierSaveTimer=null;
+let verifierSaveQueue=Promise.resolve();
 async function verifier(){
- try{await load();const saved=state.records;const k='stocktake:'+state.date;const local={version:2,records:{}};for(const [id,r] of Object.entries(saved))local.records[id]={a:r.actual==null?'':String(r.actual),s:r.system==null?'':String(r.system),r:r.remarks||''};
- // Cloud data is copied to the existing dashboard's local view. Editing remains local until explicitly synced.
- localStorage.setItem(k,JSON.stringify(local));
- document.querySelector('.frame').hidden=false;root.innerHTML='<div class="role-topbar"><strong>Verifier · Cloud snapshot '+esc(state.date)+'</strong>'+button('roleSync','Upload dashboard changes')+button('roleReload','Reload cloud')+button('roleBack','Switch role')+'<span id="roleMessage" role="status"></span></div>';
- if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
- root.querySelector('#roleBack').onclick=welcome;
- root.querySelector('#roleReload').onclick=()=>verifier();
- root.querySelector('#roleSync').onclick=async()=>{
-  const b=root.querySelector('#roleSync');b.disabled=true;
-  try{const current=JSON.parse(localStorage.getItem('stocktake:'+state.date)||'{}').records||{};const payload=catalog().filter(it=>current[it[2]]).map(it=>({count_date:state.date,item_id:it[2],actual:current[it[2]].a===''?null:Number(String(current[it[2]].a).replace(',','.')),system:current[it[2]].s===''?null:Number(String(current[it[2]].s).replace(',','.')),remarks:current[it[2]].r||''}));if(payload.some(x=>[x.actual,x.system].some(v=>v!==null&&!Number.isFinite(v))))throw Error('Invalid number in dashboard.');for(const row of payload)await api('save',{date:row.count_date,item_id:row.item_id,value:row.system===null?'':String(row.system),remarks:row.remarks});message('Dashboard changes uploaded.')}catch(err){message('Upload failed: '+err.message)}finally{b.disabled=false}
- };
+ try{
+  await load();
+  const local={version:2,records:{}};
+  for(const [id,r] of Object.entries(state.records))local.records[id]={a:r.actual==null?'':String(r.actual),s:r.system==null?'':String(r.system),r:r.remarks||''};
+  localStorage.setItem('stocktake:'+state.date,JSON.stringify(local));
+  document.querySelector('.frame').hidden=false;
+  root.innerHTML='<div class="role-topbar"><div class="role-topbar-title"><strong>Verifier dashboard</strong><small>StockTake · '+esc(state.date)+'</small></div><span class="role-sync-state" id="roleMessage" role="status">Cloud data loaded · Changes save automatically</span><div class="role-topbar-actions">'+button('roleReload','Refresh data')+button('roleBack','Back to roles')+'</div></div>';
+  if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());
+  if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
+  root.querySelector('#roleBack').onclick=welcome;
+  root.querySelector('#roleReload').onclick=()=>verifier();
  }catch(err){message('Unable to load verifier: '+err.message)}
 }
+function queueVerifierSave(){
+ if(state.role!=='verifier'||!root.querySelector('#roleReload'))return;
+ clearTimeout(verifierSaveTimer);
+ message('Saving changes…');
+ verifierSaveTimer=setTimeout(()=>{
+  const date=state.date,items=catalog();
+  let records={};
+  try{records=JSON.parse(localStorage.getItem('stocktake:'+date)||'{}').records||{}}catch(err){message('Local save unavailable');return}
+  const changes=items.filter(it=>records[it[2]]&&String(records[it[2]].s??'')!==String(state.records[it[2]]?.system??'')||records[it[2]]&&String(records[it[2]].r??'')!==String(state.records[it[2]]?.remarks??''));
+  for(const it of changes){
+   const r=records[it[2]],raw=String(r.s??'').trim().replace(',','.'),value=raw===''?'':Number(raw);
+   if(raw!==''&&(!Number.isFinite(value)||value<0)){message('Invalid system quantity; not saved to cloud');continue}
+   const remarks=String(r.r||'');
+   verifierSaveQueue=verifierSaveQueue.then(()=>api('save',{date,item_id:it[2],value:value===''?'':String(value),remarks}).then(()=>{
+    state.records[it[2]]={...state.records[it[2]],system:value===''?null:value,remarks};
+    message('All changes saved to cloud');
+   })).catch(err=>{message('Cloud save failed: '+err.message)});
+  }
+  if(!changes.length)message('All changes saved');
+ },650);
+}
+document.querySelector('#rows')?.addEventListener('change',queueVerifierSave);
+
 window.STOCKTAKE_CLOUD_ACTIVE=true;
 login();
 })();
