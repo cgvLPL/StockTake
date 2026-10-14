@@ -20,3 +20,48 @@
 .role-topbar-actions .role-button{border-radius:999px;padding:10px 14px;background:#f0f3f7;color:#202936;white-space:nowrap}
 .role-topbar-actions .role-button:last-child{background:#202936;color:#fff}
 @media(max-width:640px){.role-topbar{padding:10px 14px}.role-sync-state{order:3;width:100%;margin:0}.role-topbar-actions{margin-left:auto}.role-topbar-actions .role-button{font-size:11px;padding:9px 11px}}
+
+
+/* Unified StockTake interface: shared palette, spacing, surfaces and controls. */
+:root{--st-navy:#17263d;--st-ink:#202936;--st-accent:#ed6c45;--st-muted:#687588;--st-border:#dfe5ed;--st-surface:#fff;--st-soft:#f5f7fa}
+.role-shell{min-height:100dvh;padding:clamp(16px,4vw,48px);background:radial-gradient(ellipse at 85% 0%,#e8e1d7 0%,transparent 45%),linear-gradient(150deg,#e9edf2,#d5dde6);color:var(--st-ink)}
+.role-card{width:min(100%,600px);max-width:600px;padding:clamp(24px,4vw,42px);border:1px solid #ffffffa8;border-radius:22px;box-shadow:0 20px 65px #17263d1c;background:var(--st-surface)}
+.role-logo{margin:0 auto 20px;max-height:96px;width:min(290px,100%);filter:none}
+.role-card h2{font-size:clamp(23px,3vw,29px);line-height:1.2;letter-spacing:-.035em;color:var(--st-navy);margin:0 0 10px}
+.role-card h2+p{color:var(--st-muted);margin:0 0 24px;line-height:1.6}
+.role-card label{color:var(--st-ink);font-size:13px;letter-spacing:.01em}
+.role-card input,.role-card select{min-height:46px;width:100%;padding:11px 13px;border:1px solid #cbd3de;border-radius:11px;background:#fff;color:var(--st-ink);transition:border-color .15s,box-shadow .15s}
+.role-card input:focus,.role-card select:focus{border-color:var(--st-accent);box-shadow:0 0 0 3px #ed6c4524;outline:none}
+.role-card form,.role-choices{gap:15px}
+.role-button{min-height:44px;padding:11px 17px;border-radius:11px;background:var(--st-navy);color:#fff;font-size:13px;font-weight:700;letter-spacing:.005em;transition:background .15s,transform .15s}
+.role-button:hover:not(:disabled){background:#294464}
+.role-button:active:not(:disabled){transform:translateY(1px)}
+.role-button:disabled{opacity:.42}
+#roleLogin>.role-button,#newStaffForm>.role-button{margin-top:5px;width:100%}
+.role-choices{grid-template-columns:1fr 1fr}
+.role-choices .role-button{min-height:76px;text-align:left;line-height:1.4;padding:16px}
+#roleLogout{margin-top:16px;background:var(--st-soft);color:var(--st-navy);border:1px solid var(--st-border)}
+.role-admin{margin-top:25px;padding-top:24px;border-top:1px solid var(--st-border)}
+.role-admin h3{color:var(--st-navy);font-size:17px;margin:0 0 6px}
+.role-admin>p{color:var(--st-muted);margin:0 0 18px}
+.role-admin form{gap:13px}
+.role-error{color:#b42318}
+#roleMessage{min-height:1em;font-size:12px;line-height:1.5;color:var(--st-muted)}
+.role-card #roleMessage:not(:empty){margin-top:12px}
+.role-toolbar{gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.role-toolbar strong{font-size:17px;color:var(--st-navy);margin-right:auto}
+.role-toolbar .role-button{background:var(--st-soft);border:1px solid var(--st-border);color:var(--st-navy)}
+#roleItems{max-height:min(65dvh,760px);overflow:auto;border:1px solid var(--st-border);border-radius:14px;margin-top:15px;padding:0 14px}
+.role-item{padding:13px 2px;gap:14px}
+.role-item:last-child{border-bottom:0}
+.role-item b{font-size:13px;line-height:1.4}
+.role-item small{font-size:11px;margin-top:4px;color:var(--st-muted)}
+.role-item input{max-width:110px;text-align:right;font-variant-numeric:tabular-nums}
+.role-topbar{background:#fff;box-shadow:0 2px 12px #17263d0d;border-bottom:1px solid var(--st-border);padding:12px clamp(14px,3vw,30px)}
+.role-topbar-title strong{color:var(--st-navy);font-size:16px}
+.role-topbar-title small{color:var(--st-muted)}
+.role-sync-state{color:#3b8064}
+.role-topbar-actions .role-button{background:var(--st-soft);color:var(--st-navy);border:1px solid var(--st-border)}
+.role-topbar-actions .role-button:last-child{background:var(--st-navy);color:#fff}
+@media(max-width:560px){.role-shell{padding:14px;align-items:start}.role-card{padding:24px 20px;border-radius:18px}.role-choices{grid-template-columns:1fr}.role-choices .role-button{min-height:56px}.role-toolbar{gap:8px}.role-toolbar strong{order:-1;width:100%}.role-topbar{gap:8px}.role-topbar-title{min-width:0}.role-topbar-actions{margin-left:auto}.role-sync-state{order:3;width:100%;margin:0}.role-item input{max-width:95px}}
+@media(prefers-reduced-motion:reduce){.role-button,.role-card input,.role-card select{transition:none}}
