@@ -36,12 +36,6 @@ function process_(p){
  }
  throw Error('Unknown action');
 }
-function doGet(e){
- const p=e.parameter||{},callback=String(p.callback||'');
- if(!/^stocktakeCallback[0-9]+$/.test(callback))return ContentService.createTextOutput('Invalid callback');
- let out;try{out={ok:true,data:process_(p)}}catch(err){out={ok:false,error:String(err.message)}}
- return ContentService.createTextOutput(callback+'('+JSON.stringify(out).replace(/</g,'\\u003c')+');').setMimeType(ContentService.MimeType.JAVASCRIPT);
-}
 function doPost(e){
  let out;try{out={ok:true,data:process_(e.parameter||{})}}catch(err){out={ok:false,error:String(err.message)}}
  // Parent verifies event.origin against script.google.com / googleusercontent.com.
