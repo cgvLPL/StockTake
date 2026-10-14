@@ -115,7 +115,7 @@ function doPost(e){
  let out;
  try{out={ok:true,data:process_(p)}}catch(err){out={ok:false,error:String(err.message)}}
  const payload=JSON.stringify({stocktake:true,requestId:String(p.requestId||''),result:out}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
- const html='<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><script>try{window.top.postMessage('+payload+',"https://cgvlpl.github.io")}catch(e){}<\\/script></body></html>';
+ const html='<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><script>try{window.top.postMessage('+payload+',"https://cgvlpl.github.io")}catch(e){}</script></body></html>';
  return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
