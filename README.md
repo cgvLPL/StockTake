@@ -84,3 +84,9 @@ The backend provides `setupStaffAccounts()` to create or update two accounts:
 In the Apps Script editor, open **Project Settings → Script Properties**, set `ADMIN_PIN` and `STARS_PIN` to the desired PINs, and run `setupStaffAccounts()` once. It writes SHA-256 PIN hashes to the private `Users` tab, not plaintext PINs. Then **Deploy → Manage deployments → Edit → New version → Deploy** so the web app runs the updated code.
 
 A four-digit PIN (including 0000) is weak and not recommended for an internet-exposed application. Prefer long, unique passphrases and add throttling and proper authentication before production use.
+
+## Verifier staff account management
+
+After deploying the latest Apps Script version, sign in as a Verifier and use **Staff accounts** on the welcome screen. Verifiers can create additional Counter and Verifier users. Usernames must be unique, and new passwords must be at least eight characters. Counter users cannot call the create-user backend operation. The `Users` sheet stores SHA-256 password hashes. The initial admin/stars accounts still require running `setupStaffAccounts()` in the Apps Script editor; GitHub deployment cannot modify Apps Script project properties or spreadsheet data automatically.
+
+Security: this starter authentication has no brute-force rate limiting, salts, or account recovery. Do not use weak 4-digit PINs on an internet-accessible app in production.
