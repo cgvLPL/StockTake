@@ -74,3 +74,13 @@ Inventory columns: `Item ID | Item Name | UOM | Active | Sort Order`. Edit names
 The backend also generates a formatted daily tab such as `14-Oct-2026` on each save, with the original workbook's eight columns and calculated Difference and Status. A `Summary` tab provides daily totals. `Counts` is the authoritative record store; daily tabs are **generated views** and direct edits to them will be overwritten. To change stock values, use the web app. The date tabs and summary are created for days with saved counts, rather than pre-creating every date of the month.
 
 For production, test Apps Script permissions and browser communication before rollout. Google Sheets should be shared only with trusted inventory administrators; staff use the web app rather than editing protected records.
+
+## Staff account setup
+
+The backend provides `setupStaffAccounts()` to create or update two accounts:
+- `admin` — `verifier`
+- `stars` — `counter`
+
+In the Apps Script editor, open **Project Settings → Script Properties**, set `ADMIN_PIN` and `STARS_PIN` to the desired PINs, and run `setupStaffAccounts()` once. It writes SHA-256 PIN hashes to the private `Users` tab, not plaintext PINs. Then **Deploy → Manage deployments → Edit → New version → Deploy** so the web app runs the updated code.
+
+A four-digit PIN (including 0000) is weak and not recommended for an internet-exposed application. Prefer long, unique passphrases and add throttling and proper authentication before production use.
