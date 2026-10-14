@@ -29,7 +29,7 @@ const button=(id,label)=>'<button type="button" id="'+id+'" class="role-button">
 function shell(inner){root.innerHTML='<div class="role-shell"><div class="role-card"><img src="./brand/cgv-stocktake.svg" alt="CGV StockTake" class="role-logo">'+inner+'<p id="roleMessage" role="status"></p></div></div>'}
 function login(){
  document.querySelector('.frame').hidden=true;
- shell('<h2>Shared StockTake</h2><p>Sign in with your assigned staff username and PIN.</p><form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><label>PIN<input type="password" name="pin" autocomplete="off" required></label><button class="role-button">Sign in</button></form>'+(!configured?'<p class="role-error">Google Apps Script URL is not configured. See README.</p>':''));
+ shell('<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><label>PIN<input type="password" name="pin" autocomplete="off" required></label><button class="role-button">Sign in</button></form>'+(!configured?'<p class="role-error">Google Apps Script URL is not configured. See README.</p>':''));
  root.querySelector('form').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;b.textContent='Signing in…';message('Connecting to Google Sheets…');state.user=e.target.elements.username.value.trim();state.token=e.target.elements.pin.value;try{const x=await api('login');state.role=x.role;welcome()}catch(err){message(err.message)}finally{b.disabled=false;b.textContent='Sign in'}};
 }
 function welcome(){
