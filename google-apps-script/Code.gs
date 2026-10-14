@@ -40,5 +40,5 @@ function doPost(e){
  let out;try{out={ok:true,data:process_(e.parameter||{})}}catch(err){out={ok:false,error:String(err.message)}}
  // Parent verifies event.origin against script.google.com / googleusercontent.com.
  const json=JSON.stringify(out).replace(/</g,'\\u003c');
- return HtmlService.createHtmlOutput('<script>parent.postMessage({stocktake:true,result:'+json+'},"*")<\\/script>');
+ return HtmlService.createHtmlOutput('<script>parent.postMessage({stocktake:true,result:'+json+'},"*")</script>');
 }
