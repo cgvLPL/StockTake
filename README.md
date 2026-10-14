@@ -50,16 +50,17 @@ While the app is open, it checks for a new version every minute and when you ret
 
 Existing installations need one normal page refresh to load this notification feature. Future deployments are then detected automatically. Offline users receive the prompt after reconnecting and downloading the update.
 
-## Counter / Verifier cloud setup
+## Google Apps Script + Google Sheets synchronization
 
-This release adds a role-selection welcome screen, a streamlined Counter entry view and the existing Verifier dashboard. **Cloud synchronization requires your own Supabase project**; it will not work until configured.
+This version uses **Google Sheets** as the shared stock database, with **Google Apps Script** as the backend. Supabase is not required.
 
-1. Create a Supabase project and run `supabase/schema.sql` in the SQL editor.
-2. In Supabase Authentication, create each staff member as an email/password user. Copy their Auth user UUID.
-3. In SQL editor assign each user a role: `insert into public.profiles(id,role) values ('USER_UUID','counter');` (or `'verifier'`). Never expose an administrative service-role key.
-4. In Supabase Project Settings, obtain the project URL and **publishable/anon** key. Put them in `cloud-config.js`. These are public browser credentials; Row Level Security and role-checked RPCs enforce access.
-5. Redeploy GitHub Pages and sign in. Counters save physical counts immediately to Supabase. Verifiers open a cloud snapshot in the original dashboard and use **Upload dashboard changes** to save system quantities and remarks. Use **Reload cloud** to see new Counter counts.
+1. Create a Google Sheet with a `Users` tab. Row 1: `Username | PIN_SHA256 | Role`.
+2. In Apps Script (Extensions → Apps Script), paste `google-apps-script/Code.gs` into `Code.gs`.
+3. Set a Script Property `SHEET_ID` to your Google Sheet's ID (Project Settings → Script properties).
+4. Add users to the `Users` sheet, with usernames, SHA-256 hexadecimal hashes of their PINs, and roles `counter` or `verifier`. Use long, unique random passphrases rather than short numeric PINs. Do not put plaintext credentials in the repository.
+5. Deploy → New deployment → Web app → Execute as **Me**, Who has access **Anyone**. Copy the `/exec` URL to `cloud-config.js` and commit that URL.
+6. Refresh the GitHub Pages app and sign in. Counters enter physical counts; Verifiers view shared counts and upload system quantities and remarks.
 
-Important: Verifier uploads intentionally cannot change Counter actual quantities. Shared data requires network access; offline edits are not automatically queued. The original dashboard still uses local storage as a working view. Avoid simultaneous Verifier editing and reload before editing if another person has changed the date. There is currently no audit log or conflict resolution. This is an initial cloud integration, not a complete production inventory control system.
+**Security limitations:** This basic Apps Script deployment authenticates with staff credentials managed in a Google Sheet. It does not provide Google account sign-in, rate limiting, session tokens, or an enterprise-grade audit trail. Anyone with the web app URL can attempt authentication. Use strong random passphrases, protect the Sheet, and do not use this for sensitive production inventory without stronger authentication. Google Apps Script HTML iframe POST responses may be subject to browser restrictions, so validate the integration on your devices before relying on it. Network access is required.
 
-The public GitHub Pages source includes `cloud-config.js`; only put the public publishable/anon key in it. Never commit a service-role secret or staff passwords.
+**Synchronization:** Counter changes save to the shared Sheet after each field change. Verifiers load a snapshot of that data and explicitly upload their system quantities and remarks. Refresh cloud data to see another user's edits. Automatic live updates and conflict resolution are not included. The Verifier dashboard continues to use a local working copy.
