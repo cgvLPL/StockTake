@@ -65,3 +65,28 @@
 .role-topbar-actions .role-button:last-child{background:var(--st-navy);color:#fff}
 @media(max-width:560px){.role-shell{padding:14px;align-items:start}.role-card{padding:24px 20px;border-radius:18px}.role-choices{grid-template-columns:1fr}.role-choices .role-button{min-height:56px}.role-toolbar{gap:8px}.role-toolbar strong{order:-1;width:100%}.role-topbar{gap:8px}.role-topbar-title{min-width:0}.role-topbar-actions{margin-left:auto}.role-sync-state{order:3;width:100%;margin:0}.role-item input{max-width:95px}}
 @media(prefers-reduced-motion:reduce){.role-button,.role-card input,.role-card select{transition:none}}
+
+
+/* Match the reference: graphite shell, floating white panels, pill navigation. */
+:root{--st-navy:#111214;--st-ink:#191c20;--st-accent:#ff681f;--st-muted:#737a83;--st-border:#e5e7eb;--st-surface:#fff;--st-soft:#f2f3f5}
+.role-shell{background:radial-gradient(ellipse at 80% 10%,#647079 0%,transparent 52%),linear-gradient(155deg,#1b202b 0%,#626e72 62%,#c7b69b 100%);padding:clamp(18px,4vw,52px)}
+.role-card{border:1px solid #ffffff90;border-radius:26px;box-shadow:0 30px 90px #090b1247}
+.role-logo{width:min(310px,100%)}
+.role-card h2{color:#15171b;font-weight:750}
+.role-card input,.role-card select{border-radius:14px;background:#f8f9fa;border-color:#e2e5e9}
+.role-card input:focus,.role-card select:focus{border-color:#ff681f;box-shadow:0 0 0 3px #ff681f20}
+.role-button{border-radius:999px;background:#111214;min-height:46px;padding:12px 20px}
+.role-button:hover:not(:disabled){background:#34383d}
+#roleLogin>.role-button,#newStaffForm>.role-button{background:#ff681f;color:#fff}
+#roleLogin>.role-button:hover:not(:disabled),#newStaffForm>.role-button:hover:not(:disabled){background:#e95912}
+.role-choices .role-button{border-radius:18px;background:#151719;min-height:86px}
+#roleLogout,.role-toolbar .role-button{border-radius:999px}
+.role-topbar{background:#0c0d0f;border:1px solid #292b30;border-radius:18px;margin:12px clamp(12px,2vw,24px) 0;padding:13px 18px;box-shadow:0 10px 26px #0002}
+.role-topbar-title strong{color:#fff}
+.role-topbar-title small{color:#a2a8b0}
+.role-sync-state{color:#8ad7b0}
+.role-topbar-actions .role-button{background:#27292e;color:#f8f8f8;border-color:#383b40;border-radius:999px}
+.role-topbar-actions .role-button:last-child{background:#ff681f;color:#fff;border-color:#ff681f}
+#roleItems{border-radius:18px;background:#fff}
+.role-item input{background:#f6f7f8}
+@media(max-width:560px){.role-shell{padding:16px}.role-card{border-radius:22px}.role-choices .role-button{min-height:64px}.role-topbar{margin:8px 8px 0;border-radius:14px;padding:12px}.role-topbar-actions .role-button{padding:9px 12px}}
