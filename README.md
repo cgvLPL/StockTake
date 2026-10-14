@@ -1,1 +1,41 @@
 # StockTake
+
+A mobile-friendly daily stock-counting app with 103 inventory items, actual/system comparisons, daily history, month summaries, search, and Excel export. No server or runtime dependencies are needed.
+
+## Open the app
+
+Once GitHub Pages is enabled, the app is served at **https://cgvlpl.github.io/StockTake/**.
+
+One-time setup: open **Settings → Pages → Build and deployment → Source → GitHub Actions**. Then open **Actions → Test and deploy StockTake → Run workflow**. Subsequent pushes to `main` test and deploy automatically.
+
+On iPhone, open the site in Safari and use **Share → Add to Home Screen**. The app works offline after the first successful online load and service-worker installation. Browser support for installation varies.
+
+## Counting
+
+- Choose a date, then enter Actual and System quantities. Both are required for an item to count as completed.
+- Use up to four decimal places, e.g. `1000,50` or `1000.50`. A single separator is always decimal. Indonesian grouped values such as `1.000,50` are accepted; use `1000` for one thousand without a fractional part.
+- Invalid numbers are marked in red and excluded from matches. Differences display all supported decimal places.
+- Search and filters update as entries change. Completing a row removes it from the active filter after you leave the row, so typing is not interrupted.
+- **Copy for Excel** exports all items for the selected date, including the date. Numbers use Indonesian decimal commas; paste with an Indonesian spreadsheet locale. Text that could be interpreted as a formula is escaped.
+- Tap the bin twice within three seconds to clear the selected day. Switching dates cancels the confirmation.
+
+## Data and backups
+
+Counts are saved only in this browser's local storage. They are not committed to GitHub, sent to a server, or synchronized between devices. Clearing browser data removes counts. Keep regular Excel copies; there is no spreadsheet import.
+
+If saving fails, a persistent warning appears. Unsaved edits remain available when switching dates in the same tab; use **Retry saving** or copy each affected date before closing. Corrupted stored records are preserved and not silently overwritten. Use Clear day only if you intend to discard that saved day's data.
+
+Legacy index-keyed records on the **same browser origin** migrate to fixed item IDs when next saved. Opening this hosted app does not import entries from the original HTML file or another origin; copy those entries for safekeeping first. Use one editing tab per device to avoid concurrent edits.
+
+## Development
+
+Serve this directory with any static HTTP server, for example `python3 -m http.server 8080`, then open `http://localhost:8080`. Run regression tests with `npm test` (Node 20+; no package installation needed).
+
+- `index.html`: interface
+- `styles.css`: responsive styling
+- `app.js`: catalog, calculations, persistence, filtering and export
+- `manifest.webmanifest`, `icon.svg`, `sw.js`: home-screen and offline support
+- `tests/`: numeric, storage, migration, filtering and clear-day regression tests
+- `.github/workflows/pages.yml`: tests and GitHub Pages deployment
+
+Keep catalog IDs permanent. Do not renumber IDs when sorting or inserting items. Increment the service-worker cache version when updating the app shell.

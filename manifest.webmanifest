@@ -1,0 +1,18 @@
+{
+  "name": "Daily Stock Take",
+  "short_name": "StockTake",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17181a",
+  "theme_color": "#17181a",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

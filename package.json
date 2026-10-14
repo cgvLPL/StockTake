@@ -1,0 +1,8 @@
+{
+  "name": "daily-stock-take",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile-friendly daily stock take app",
+  "scripts": { "test": "node --test tests/*.test.cjs" },
+  "engines": { "node": ">=20" }
+}

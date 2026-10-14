@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily stock take</title>
+
+<link rel="stylesheet" href="./styles.css">
+<meta name="theme-color" content="#17181a">
+<meta name="description" content="Daily stock counts, variance tracking, and Excel export.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="frame">
+<nav class="rail" aria-label="Sections">
+  <div class="mark" data-ic="box"></div>
+  <button class="r on" data-go="top" data-ic="grid" title="Overview" aria-label="Overview"></button>
+  <button class="r" data-go="listHead" data-ic="list" title="Item count" aria-label="Item count"></button>
+  <button class="r" data-go="bad" data-ic="alert" title="Variances" aria-label="Variances"></button>
+  <button class="r" data-go="monthCard" data-ic="cal" title="Month overview" aria-label="Month overview"></button>
+  <span class="sp"></span>
+  <button class="r" id="clear" data-ic="trash" title="Clear day" aria-label="Clear day"></button>
+</nav>
+<div class="panel" id="top">
+  <header class="top">
+    <div class="barpill">
+      <span class="sq" data-ic="box"></span>
+      <div class="dt"><b id="dow"></b><span id="mon"></span></div>
+      <span class="big" id="dnum"></span>
+      <i class="vr"></i>
+      <span class="chip"><i class="dot" id="dot"></i><span id="chipT"></span></span>
+    </div>
+    <div class="grp"><button id="prev" aria-label="Previous day">&lsaquo;</button><input type="date" id="date" aria-label="Stock take date"><button id="next" aria-label="Next day">&rsaquo;</button></div>
+    <div class="acts">
+      <button class="pb o" id="today">Today</button>
+      <button class="pb k" id="copy"><i data-ic="copy"></i> Copy for Excel</button>
+    </div>
+  </header>
+  <div id="storageStatus" class="storage-warning" role="alert" hidden><span id="storageMessage"></span> <button id="retrySave">Retry saving</button></div>
+  <div class="srow">
+    <label class="sc"><i data-ic="search"></i><input type="search" id="q" placeholder="Search item name" aria-label="Search item name"></label>
+    <div class="sum" id="sum"></div>
+    <div class="grp"><button class="f on" data-f="all">All items</button><button class="f" data-f="bad">Do not match</button><button class="f" data-f="none">Not counted</button></div>
+  </div>
+  <section class="stats">
+    <div class="card stat"><div>Counted <i data-ic="list"></i></div><b id="sC">0</b><small id="sCs"></small></div>
+    <div class="card stat g"><div>Match <i data-ic="check"></i></div><b id="sM">0</b><small id="sMs"></small></div>
+    <div class="card stat r"><div>Do not match <i data-ic="alert"></i></div><b id="sB">0</b><small id="sBs"></small></div>
+    <div class="card stat"><div>Not counted <i data-ic="dash"></i></div><b id="sN">0</b><small id="sNs"></small></div>
+  </section>
+  <section class="card mc" id="monthCard">
+    <h3>Month overview</h3><p id="mn"></p>
+    <div class="chips" id="days"></div>
+  </section>
+  <section>
+    <div class="lh" id="listHead"><h3>Item count</h3><p>Fill in Actual and System. Difference and Status update automatically.</p><p id="numberHelp">Use up to 4 decimal places: 1000,50 or 1000.50. A single dot or comma is a decimal separator; Indonesian grouping such as 1.000,50 is also accepted. Red fields need correction.</p></div>
+    <div class="wrap">
+      <div class="grid hd"><span>No</span><span>Item Name</span><span>UOM</span><span>Actual</span><span>System</span><span style="text-align:right">Difference</span><span>Remarks</span><span>Status</span></div>
+      <div id="rows"></div>
+      <div class="empty" id="empty" hidden>No items match this filter.</div>
+    </div>
+  </section>
+  <p class="tag">Entries stay on this device. Copy for Excel to keep a backup. On iPhone, use Share → Add to Home Screen.</p>
+</div>
+</div>
+<div id="toast" role="status"></div>
+<script src="./app.js" defer></script>
+</body>
+</html>
