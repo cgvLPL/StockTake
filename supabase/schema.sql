@@ -22,17 +22,27 @@ create policy "Read own profile" on public.profiles for select to authenticated 
 create policy "Read counts" on public.stock_counts for select to authenticated using(
  exists(select 1 from public.profiles p where p.id=auth.uid() and p.role in ('counter','verifier'))
 );
-create policy "Insert counts" on public.stock_counts for insert to authenticated with check(
- exists(select 1 from public.profiles p where p.id=auth.uid() and p.role in ('counter','verifier'))
-);
-create policy "Update counts" on public.stock_counts for update to authenticated using(
- exists(select 1 from public.profiles p where p.id=auth.uid() and p.role in ('counter','verifier'))
-) with check(
- exists(select 1 from public.profiles p where p.id=auth.uid() and p.role in ('counter','verifier'))
-);
--- IMPORTANT: Column grants limit counters to updating actual only.
-revoke update on public.stock_counts from authenticated;
-grant update(actual) on public.stock_counts to authenticated;
--- Supabase cannot apply column grants by role in this shared authenticated role.
--- For strict Counter/Verifier separation, use a security-definer RPC and revoke
--- direct writes. Do NOT deploy this starter schema as production authorization.
+-- Writes are mediated by RPCs with role checks, not direct table grants.
+revoke insert,update,delete on public.stock_counts from authenticated;
+create or replace function public.save_counter_count(p_date date,p_item text,p_actual numeric)
+returns void language plpgsql security definer set search_path = '' as $$
+begin
+ if not exists(select 1 from public.profiles where id=auth.uid() and role='counter') then raise exception 'Counter access required'; end if;
+ if p_item !~ '^stock-[0-9]{3}$' or p_actual < 0 then raise exception 'Invalid item or quantity'; end if;
+ insert into public.stock_counts(count_date,item_id,actual) values(p_date,p_item,p_actual)
+ on conflict(count_date,item_id) do update set actual=excluded.actual,updated_at=now();
+end $$;
+create or replace function public.save_verifier_count(p_date date,p_item text,p_system numeric,p_remarks text)
+returns void language plpgsql security definer set search_path = '' as $$
+begin
+ if not exists(select 1 from public.profiles where id=auth.uid() and role='verifier') then raise exception 'Verifier access required'; end if;
+ if p_item !~ '^stock-[0-9]{3}$' or p_system < 0 then raise exception 'Invalid item or quantity'; end if;
+ insert into public.stock_counts(count_date,item_id,system,remarks) values(p_date,p_item,p_system,coalesce(p_remarks,''))
+ on conflict(count_date,item_id) do update set system=excluded.system,remarks=excluded.remarks,updated_at=now();
+end $$;
+revoke all on function public.save_counter_count(date,text,numeric) from public;
+revoke all on function public.save_verifier_count(date,text,numeric,text) from public;
+grant execute on function public.save_counter_count(date,text,numeric) to authenticated;
+grant execute on function public.save_verifier_count(date,text,numeric,text) to authenticated;
+-- Assign roles using the SQL editor after creating Auth users:
+-- insert into public.profiles(id,role) values ('USER_UUID','counter');
