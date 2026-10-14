@@ -11,16 +11,16 @@ function api(action,params={}){
  return new Promise((resolve,reject)=>{
   if(!configured)return reject(Error('Configure the Google Apps Script deployment URL.'));
   const id='stocktake-post-'+(++requestNumber),frame=document.createElement('iframe');
-  frame.name=id;frame.hidden=true;document.body.appendChild(frame);
+  frame.name=id;frame.hidden=true;frame.setAttribute('aria-hidden','true');document.body.appendChild(frame);
   const form=document.createElement('form');form.method='POST';form.action=cfg.scriptUrl;form.target=id;form.hidden=true;
   const fields={action,username:state.user,pin:state.token,...params};
   Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.name=k;input.value=v??'';form.appendChild(input)});
   document.body.appendChild(form);
   let timer;
   const finish=()=>{clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove()};
-  const receive=e=>{if(e.source!==frame.contentWindow||!e.data||e.data.stocktake!==true||!(e.origin==='https://script.google.com'||e.origin.endsWith('.googleusercontent.com')))return;finish();e.data.result?.ok?resolve(e.data.result.data):reject(Error(e.data.result?.error||'Backend error'))};
+  const receive=e=>{if(e.source!==frame.contentWindow||!e.data||e.data.stocktake!==true||!(e.origin==='https://script.google.com'||e.origin.endsWith('.googleusercontent.com')||e.origin==='null'))return;finish();e.data.result?.ok?resolve(e.data.result.data):reject(Error(e.data.result?.error||'Backend error'))};
   window.addEventListener('message',receive);
-  timer=setTimeout(()=>{finish();reject(Error('Request timed out. Check deployment permissions.'))},25000);
+  timer=setTimeout(()=>{finish();reject(Error('Google Apps Script did not respond. Check that the latest Code.gs is deployed as a Web App accessible to Anyone, then try again.'))},10000);
   form.submit();
  });
 }
@@ -30,7 +30,7 @@ function shell(inner){root.innerHTML='<div class="role-shell"><div class="role-c
 function login(){
  document.querySelector('.frame').hidden=true;
  shell('<h2>Shared StockTake</h2><p>Sign in with your assigned staff username and PIN.</p><form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><label>PIN<input type="password" name="pin" autocomplete="off" required></label><button class="role-button">Sign in</button></form>'+(!configured?'<p class="role-error">Google Apps Script URL is not configured. See README.</p>':''));
- root.querySelector('form').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;state.user=e.target.elements.username.value.trim();state.token=e.target.elements.pin.value;try{const x=await api('login');state.role=x.role;welcome()}catch(err){message(err.message)}finally{b.disabled=false}};
+ root.querySelector('form').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;b.textContent='Signing in…';message('Connecting to Google Sheets…');state.user=e.target.elements.username.value.trim();state.token=e.target.elements.pin.value;try{const x=await api('login');state.role=x.role;welcome()}catch(err){message(err.message)}finally{b.disabled=false;b.textContent='Sign in'}};
 }
 function welcome(){
  document.querySelector('.frame').hidden=true;
