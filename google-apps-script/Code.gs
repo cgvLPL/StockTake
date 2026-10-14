@@ -106,3 +106,26 @@ function seedInventory(){
  s.setFrozenRows(1);
  return items.length;
 }
+
+/**
+ * Run once in the Apps Script editor to create/update the two staff accounts.
+ * Set script properties ADMIN_PIN and STARS_PIN first (user-requested: 0000).
+ * Credentials are stored only as SHA-256 hashes in the private Users sheet.
+ * A four-digit PIN is insecure for an internet-accessible app; replace promptly.
+ */
+function setupStaffAccounts(){
+ const props=PropertiesService.getScriptProperties();
+ const adminPin=props.getProperty('ADMIN_PIN'),starsPin=props.getProperty('STARS_PIN');
+ if(!adminPin||!starsPin)throw Error('Set ADMIN_PIN and STARS_PIN in Script Properties before running.');
+ const ss=sheet_().getParent();let s=ss.getSheetByName('Users');
+ if(!s){s=ss.insertSheet('Users');s.appendRow(['Username','PIN_SHA256','Role']);}
+ const entries=[['admin',digest_(adminPin),'verifier'],['stars',digest_(starsPin),'counter']];
+ const values=s.getDataRange().getDisplayValues();
+ entries.forEach(entry=>{
+  const i=values.findIndex((row,index)=>index>0&&row[0]===entry[0]);
+  if(i<0)s.appendRow(entry);else s.getRange(i+1,1,1,3).setValues([entry]);
+ });
+ s.setFrozenRows(1);s.getRange(1,1,1,3).setBackground('#17263d').setFontColor('white').setFontWeight('bold');
+ s.autoResizeColumns(1,3);
+ return 'Configured admin (verifier) and stars (counter)';
+}
