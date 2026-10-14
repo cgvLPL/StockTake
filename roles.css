@@ -9,3 +9,14 @@
 @media(max-width:480px){.role-shell{padding:16px}.role-card{padding:26px 22px}.role-logo{margin-bottom:16px}}
 
 .role-admin{margin-top:22px;padding-top:18px;border-top:1px solid #dfe4e9}.role-admin form{display:grid;gap:12px}.role-admin select{width:100%;padding:12px;border:1px solid #b9c0c8;border-radius:10px;background:#fff;color:#111}.role-admin h3{margin:0 0 6px}.role-admin #staffResult{font-size:13px}
+
+/* Refined verifier header */
+.role-topbar{position:sticky;top:0;z-index:50;min-height:70px;padding:12px clamp(14px,3vw,32px);gap:12px;border-bottom:1px solid #e6e8ed;box-shadow:0 4px 18px #17263d0b;background:#fff}
+.role-topbar-title{display:flex;flex-direction:column;gap:3px;min-width:140px}
+.role-topbar-title strong{font-size:15px;letter-spacing:-.02em;color:#17263d}
+.role-topbar-title small{font-size:11px;color:#77808e}
+.role-sync-state{margin-left:auto;font-size:12px;color:#3f7662;line-height:1.4}
+.role-topbar-actions{display:flex;gap:8px}
+.role-topbar-actions .role-button{border-radius:999px;padding:10px 14px;background:#f0f3f7;color:#202936;white-space:nowrap}
+.role-topbar-actions .role-button:last-child{background:#202936;color:#fff}
+@media(max-width:640px){.role-topbar{padding:10px 14px}.role-sync-state{order:3;width:100%;margin:0}.role-topbar-actions{margin-left:auto}.role-topbar-actions .role-button{font-size:11px;padding:9px 11px}}
