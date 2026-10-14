@@ -341,3 +341,67 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
   .table-sortbar select{flex:1;min-width:0}
   .table-sortbar button{padding:10px 12px;font-size:12px}
 }
+
+
+/* Saved-cloud report downloads: dark, compact Verifier export panel. */
+#reportPanel.report-panel{
+  box-sizing:border-box;min-width:0;padding:clamp(18px,3vw,26px);
+  border-radius:20px;background:#101112;color:#fafafa;
+  border:1px solid #2b2d30;box-shadow:0 12px 32px #0a0c1014;
+}
+.report-panel-heading{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:22px}
+.report-eyebrow{font-size:10px;letter-spacing:.16em;color:#b4b8bc;font-weight:750}
+.report-panel-heading h3{font-size:clamp(20px,2.6vw,27px);letter-spacing:-.045em;line-height:1.2;margin:7px 0}
+.report-panel-heading p{max-width:65ch;margin:0;color:#aeb2b8;font-size:12px;line-height:1.55}
+.report-icon{
+  flex:none;display:grid;place-items:center;width:42px;height:42px;
+  border-radius:50%;border:1px solid #424448;font-size:24px;
+}
+.report-panel-controls{display:grid;grid-template-columns:minmax(230px,1.5fr) minmax(150px,.85fr) auto;align-items:end;gap:14px}
+.report-period-field,.report-date-field{display:flex;flex-direction:column;gap:9px;min-width:0}
+.report-label{font-size:11px;color:#d2d3d4;font-weight:700;letter-spacing:.03em}
+.report-period-choices{display:flex;gap:5px;padding:5px;background:#242629;border:1px solid #373a3d;border-radius:13px;min-height:46px}
+.report-period{
+  flex:1;min-width:0;padding:10px 12px;border:0;border-radius:9px;
+  color:#babdc0;background:transparent;font-size:12px;font-weight:650;
+  transition:background .15s,color .15s;cursor:pointer
+}
+.report-period:hover:not(.is-selected){color:#fff;background:#35383b}
+.report-period.is-selected{background:#fff;color:#141619}
+.report-date-field input{
+  box-sizing:border-box;min-width:0;width:100%;max-width:100%;height:46px;
+  border:1px solid #44464a;border-radius:12px;
+  background:#26282b;color:#fff;
+  padding:9px 12px;font-size:15px;color-scheme:dark;line-height:24px;
+}
+.report-date-field input::-webkit-date-and-time-value{min-height:24px;text-align:left}
+.report-download{
+  min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  white-space:nowrap;padding:12px 21px;border:0;border-radius:12px;
+  background:#ff681f;color:white;font-size:13px;font-weight:750;cursor:pointer;
+  transition:background .15s,transform .15s
+}
+.report-download:hover:not(:disabled){background:#e85b17}
+.report-download:active:not(:disabled){transform:translateY(1px)}
+.report-download:disabled{opacity:.6;cursor:wait}
+.report-download>span{font-size:18px;font-weight:400}
+.report-hint{margin:14px 0 0;color:#aaafb4;font-size:11px}
+.report-status{margin:10px 0 0;color:#9ce0bb;font-size:12px;line-height:1.5}
+.report-status:empty{display:none}
+.report-status[data-error="true"]{color:#ffb8ad}
+.report-panel :is(input,button):focus-visible{outline:2px solid #ff792f;outline-offset:3px}
+@media(max-width:980px){
+ .report-panel-controls{grid-template-columns:1fr minmax(160px,.7fr)}
+ .report-download{grid-column:1/-1;justify-self:start}
+}
+@media(max-width:560px){
+ #reportPanel.report-panel{padding:17px;border-radius:17px}
+ .report-panel-heading{margin-bottom:18px}
+ .report-icon{width:36px;height:36px;font-size:20px}
+ .report-panel-controls{display:flex;flex-direction:column;align-items:stretch;gap:13px}
+ .report-period-choices{width:100%}
+ .report-download{width:100%;justify-self:auto}
+ .report-date-field input{height:46px;min-height:46px;max-height:46px}
+ .report-hint{line-height:1.5}
+}
+@media(prefers-reduced-motion:reduce){.report-period,.report-download{transition:none}}
