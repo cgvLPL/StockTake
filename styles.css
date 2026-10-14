@@ -259,3 +259,19 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
  #rows .row .field[data-k=r] input{font-size:14px}
  #numberHelp{font-size:12px;line-height:1.5}
 }
+
+
+/* Sortable Verifier stock table */
+.table-sortbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:8px 10px 14px}
+.table-sortbar label{font-size:12px;font-weight:650;color:#72777c}
+.table-sortbar select,.table-sortbar button{border:1px solid #d9dcdf;border-radius:999px;background:#fff;color:#1c1d1f;min-height:38px;padding:8px 12px;font-size:12px;font-weight:600}
+.table-sortbar select{min-width:138px}
+.table-sortbar button{cursor:pointer}
+.sortable-head .sort-head{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;padding:4px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;white-space:nowrap}
+.sortable-head .sort-head:nth-child(6){justify-content:flex-end}
+.sortable-head .sort-head[aria-pressed=true]{color:#ec672e}
+.sortable-head .sort-head:focus-visible{outline:2px solid #ec672e;outline-offset:3px;border-radius:4px}
+.sort-glyph{font-size:13px;opacity:.65}
+@media(min-width:1200px){.table-sortbar{padding-right:18px}}
+@media(max-width:1199px){.table-sortbar{justify-content:flex-start;flex-wrap:wrap;padding:0 2px 14px}}
+@media(max-width:500px){.table-sortbar{gap:7px}.table-sortbar select{flex:1;min-width:0}.table-sortbar button{white-space:nowrap}}
