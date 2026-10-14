@@ -64,3 +64,13 @@ This version uses **Google Sheets** as the shared stock database, with **Google 
 **Security limitations:** This basic Apps Script deployment authenticates with staff credentials managed in a Google Sheet. It does not provide Google account sign-in, rate limiting, session tokens, or an enterprise-grade audit trail. Anyone with the web app URL can attempt authentication. Use strong random passphrases, protect the Sheet, and do not use this for sensitive production inventory without stronger authentication. Google Apps Script HTML iframe POST responses may be subject to browser restrictions, so validate the integration on your devices before relying on it. Network access is required.
 
 **Synchronization:** Counter changes save to the shared Sheet after each field change. Verifiers load a snapshot of that data and explicitly upload their system quantities and remarks. Refresh cloud data to see another user's edits. Automatic live updates and conflict resolution are not included. The Verifier dashboard continues to use a local working copy.
+
+## Editable Inventory and Excel-style daily reports
+
+After setting `SHEET_ID`, run `seedInventory()` **once** in the Apps Script editor. It creates the `Inventory` tab and imports the original 103 catalog items. Do not run it on a populated Inventory tab.
+
+Inventory columns: `Item ID | Item Name | UOM | Active | Sort Order`. Edit names, UOM, sort order, or the Active checkbox directly in Google Sheets. To add an item, assign a **new permanent ID** such as `stock-104` and mark it active. Never reuse an existing ID, even if the item is inactive. The app reloads this list when Counter or Verifier loads a date or refreshes cloud data.
+
+The backend also generates a formatted daily tab such as `14-Oct-2026` on each save, with the original workbook's eight columns and calculated Difference and Status. A `Summary` tab provides daily totals. `Counts` is the authoritative record store; daily tabs are **generated views** and direct edits to them will be overwritten. To change stock values, use the web app. The date tabs and summary are created for days with saved counts, rather than pre-creating every date of the month.
+
+For production, test Apps Script permissions and browser communication before rollout. Google Sheets should be shared only with trusted inventory administrators; staff use the web app rather than editing protected records.
