@@ -56,8 +56,16 @@
     <div class="card stat"><div>Not counted <i data-ic="dash"></i></div><b id="sN">0</b><small id="sNs"></small></div>
   </section>
   <section class="card mc" id="monthCard">
-    <h3>Month overview</h3><p id="mn"></p>
-    <div class="chips" id="days"></div>
+    <details class="month-disclosure" id="monthDisclosure">
+      <summary class="month-summary">
+        <span class="month-summary-text"><strong>Month overview</strong><span id="mn"></span></span>
+        <span class="month-toggle" aria-hidden="true"><span class="month-toggle-label">View calendar</span><span class="month-chevron">⌄</span></span>
+      </summary>
+      <div class="month-content">
+        <div class="chips" id="days" aria-label="Select a stock count date"></div>
+        <div class="month-legend"><span>Outlined = selected day</span><span>Dashed = partly counted</span></div>
+      </div>
+    </details>
   </section>
   <section>
     <div class="lh" id="listHead"><h3>Item count</h3><p>Fill in Actual and System. Difference and Status update automatically.</p><p id="numberHelp">Use up to 4 decimal places: 1000,50 or 1000.50. A single dot or comma is a decimal separator; Indonesian grouping such as 1.000,50 is also accepted. Red fields need correction.</p></div>
