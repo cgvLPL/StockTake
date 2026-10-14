@@ -150,3 +150,4 @@ window.stockTakeCanRefresh=()=>{
   for(const d of [...dirty])save(d);
   return dirty.size===0;
 };
+\nwindow.STOCKTAKE_ITEMS=ITEMS;\nwindow.stockTakeOpenDate=go;\n
