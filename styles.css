@@ -128,3 +128,31 @@ input{font-size:16px}
 #refreshApp{background:#f13b40}#refreshApp:disabled{opacity:.6;cursor:wait}
 @media(max-width:900px){.update-banner{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}
 @media(max-width:480px){.update-banner{align-items:stretch;flex-direction:column;gap:12px}.update-actions button{flex:1}}
+
+
+/* Editorial dark chrome, soft-glass surfaces and compact pill controls. */
+:root,:root[data-theme="dark"]{--bg:linear-gradient(155deg,#252b37 0%,#59666a 52%,#b6a98f 100%);--panel:#f5f6f6;--card:#ffffff;--row:#fff;--rowsel:#f2f4f5;--ink:#191c20;--mut:#697078;--line:#e4e7e9;--bar:#fff;--chip:#f0f1f2;--inp:#f2f4f5;--blk:#08090a;--or:#ff681f;--ok:#21835d;--bad:#c03932}
+body{background:var(--bg) fixed;color:var(--ink)}
+.frame{background:#08090a;border:1px solid #24272b;border-radius:30px;box-shadow:0 28px 80px #05060850;padding:8px 8px 8px 0}
+.rail{gap:8px}
+.rail .r{border-radius:14px;color:#d1d4d8;transition:background .15s,transform .15s}
+.rail .r:hover,.rail .r.on{background:#25272b;color:#fff}
+.rail .r:active{transform:scale(.96)}
+.mark img{border-radius:13px}
+.panel{background:#f5f6f6;border:0;border-radius:23px;backdrop-filter:none;-webkit-backdrop-filter:none;gap:18px}
+.brand-header{background:#0d0e10;border:1px solid #282a2d;border-radius:20px;padding:14px 22px}
+.brand-header h1{color:#b4b8be;letter-spacing:.02em}
+.barpill,.card,.wrap{border:1px solid var(--line);box-shadow:0 4px 20px #10182008}
+.barpill{border-radius:999px;padding:8px 16px 8px 8px}
+.sq{border-radius:50%;background:#101113}
+.card{border-radius:20px}
+.pb,.f,.grp button,.chip{border-radius:999px}
+.pb.o,#today{background:#ff681f;color:#fff;border-color:#ff681f}
+input,button{transition:border-color .15s,background-color .15s,box-shadow .15s}
+input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offset:3px}
+.grid.hd{letter-spacing:.025em}
+.row:hover{background:#f0f2f3}
+.update-banner{background:#111214;border:1px solid #303238;border-radius:20px}
+#refreshApp{background:#ff681f}
+@media(max-width:700px){.frame{border-radius:19px}.panel{border-radius:15px}.brand-header{border-radius:15px;padding:12px 14px}.barpill{border-radius:19px}}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--panel:#f5f6f6;--card:#fff;--row:#fff;--rowsel:#f2f4f5;--ink:#191c20;--mut:#697078;--line:#e4e7e9;--bar:#fff;--chip:#f0f1f2;--inp:#f2f4f5;--ok:#21835d;--bad:#c03932}}
