@@ -39,6 +39,19 @@ function welcome(){
  root.querySelector('#enterCounter').disabled=r!=='counter';root.querySelector('#enterVerifier').disabled=r!=='verifier';
  root.querySelector('#enterCounter').onclick=()=>counter();
  root.querySelector('#enterVerifier').onclick=()=>verifier();
+ if(r==='verifier'){
+  const area=document.createElement('section');area.className='role-admin';
+  area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>New password<input name="password" type="password" required minlength="8" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
+  root.querySelector('.role-card').appendChild(area);
+  area.querySelector('form').onsubmit=async e=>{
+   e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),result=area.querySelector('#staffResult');
+   button.disabled=true;result.textContent='Creating account…';
+   try{const response=await api('createUser',{newUsername:form.elements.username.value,newPin:form.elements.password.value,newRole:form.elements.role.value});result.textContent='Created '+response.username+' ('+response.role+').';form.reset()}
+   catch(err){result.textContent='Account not created: '+err.message}
+   finally{button.disabled=false}
+  };
+ }
+
  root.querySelector('#roleLogout').onclick=logout;
 }
 function logout(){state.token=null;state.user=null;state.role=null;login()}
