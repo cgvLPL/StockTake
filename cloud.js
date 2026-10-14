@@ -20,7 +20,7 @@ function api(action,params={}){
   const finish=()=>{clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove()};
   const receive=e=>{if(!e.data||e.data.stocktake!==true||e.data.requestId!==id||!(e.origin==='https://script.google.com'||e.origin.endsWith('.googleusercontent.com')))return;finish();e.data.result?.ok?resolve(e.data.result.data):reject(Error(e.data.result?.error||'Backend error'))};
   window.addEventListener('message',receive);
-  timer=setTimeout(()=>{finish();reject(Error('Google Apps Script did not respond. Check that the latest Code.gs is deployed as a Web App accessible to Anyone, then try again.'))},10000);
+  timer=setTimeout(()=>{finish();reject(Error('Google Apps Script did not respond. Check that the latest Code.gs is deployed as a Web App accessible to Anyone, then try again.'))},action==='report'?45000:10000);
   form.submit();
  });
 }
@@ -73,6 +73,76 @@ function counterView(){
  });
 }
 async function counter(){try{await load();counterView()}catch(err){message('Unable to load counts: '+err.message)}}
+function setupReportDownloads(){
+ const panel=document.querySelector('#reportPanel');
+ const tools=window.StockTakeReports;
+ if(!panel||!tools||state.role!=='verifier')return;
+ const date=panel.querySelector('#reportDate');
+ const hint=panel.querySelector('#reportPeriodHint');
+ const status=panel.querySelector('#reportDownloadStatus');
+ const button=panel.querySelector('#downloadStockReport');
+ const all=panel.querySelectorAll('[data-report-period]');
+ const selectedDate=document.querySelector('#date')?.value||state.date;
+ if(/^\d{4}-\d{2}-\d{2}$/.test(selectedDate))date.value=selectedDate;
+ if(panel.dataset.reportReady==='yes')return;
+ panel.dataset.reportReady='yes';
+ let kind='daily';
+ function updateHint(){
+  try{
+   const range=tools.periodRange(kind,date.value);
+   hint.textContent=kind==='daily'
+     ?'Daily report · '+range.start
+     :kind==='weekly'
+       ?'Weekly report · '+range.start+' to '+range.end+' (Monday–Sunday)'
+       :'Monthly report · '+range.start+' to '+range.end;
+  }catch(err){hint.textContent='Select a valid date to choose the report period.'}
+ }
+ all.forEach(option=>option.addEventListener('click',()=>{
+  kind=option.dataset.reportPeriod;
+  all.forEach(el=>{
+    const active=el===option;
+    el.classList.toggle('is-selected',active);
+    el.setAttribute('aria-pressed',String(active));
+  });
+  status.textContent='';
+  delete status.dataset.error;
+  updateHint();
+ }));
+ date.addEventListener('change',()=>{
+  status.textContent='';
+  delete status.dataset.error;
+  updateHint();
+ });
+ button.addEventListener('click',async()=>{
+  let range;
+  try{range=tools.periodRange(kind,date.value)}
+  catch(err){status.dataset.error='true';status.textContent=err.message;date.focus();return}
+  button.disabled=true;
+  button.innerHTML='<span aria-hidden="true">⌛</span> Preparing…';
+  status.textContent='Loading saved stock records from Google Sheets…';
+  delete status.dataset.error;
+  try{
+   // Wait for edits which are still in the verifier's auto-save debounce/queue.
+   if(verifierSaveTimer)await new Promise(resolve=>setTimeout(resolve,750));
+   await verifierSaveQueue;
+   const payload=await api('report',{startDate:range.start,endDate:range.end});
+   const report=tools.makeReport(payload,kind,date.value);
+   tools.download(report);
+   status.textContent='Ready: '+report.filename+' · '+report.activeDays+
+     ' day(s) with saved records · '+report.variances+' variances.';
+  }catch(err){
+   status.dataset.error='true';
+   status.textContent=String(err.message||err).includes('Unknown action')
+     ?'The report service needs updating. Copy the latest GitHub Code.gs to Google Apps Script and deploy a new version.'
+     :'Could not download the report: '+String(err.message||err);
+  }finally{
+   button.disabled=false;
+   button.innerHTML='<span aria-hidden="true">↓</span> Download CSV';
+  }
+ });
+ updateHint();
+}
+
 let verifierSaveTimer=null;
 let verifierSaveQueue=Promise.resolve();
 async function verifier(){
@@ -86,6 +156,7 @@ async function verifier(){
   if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());
   if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
   mountStaffAccounts();
+  setupReportDownloads();
   /* Verifier loads cloud data automatically; no manual refresh or transition toolbar. */
  }catch(err){message('Unable to load verifier: '+err.message)}
 }
