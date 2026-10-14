@@ -150,7 +150,10 @@ window.stockTakeCanRefresh=()=>{
   for(const d of [...dirty])save(d);
   return dirty.size===0;
 };
-\nwindow.STOCKTAKE_ITEMS=ITEMS;\nwindow.stockTakeOpenDate=go;\n
+
+window.STOCKTAKE_ITEMS=ITEMS;
+window.stockTakeOpenDate=go;
+
 window.stockTakeSetCatalog=items=>{
  if(!Array.isArray(items))return;
  ITEMS=items.filter(x=>Array.isArray(x)&&x.length===3&&/^stock-[0-9]{3,}$/.test(x[2]));
