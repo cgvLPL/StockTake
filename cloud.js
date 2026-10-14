@@ -13,12 +13,12 @@ function api(action,params={}){
   const id='stocktake-post-'+(++requestNumber),frame=document.createElement('iframe');
   frame.name=id;frame.hidden=true;frame.setAttribute('aria-hidden','true');document.body.appendChild(frame);
   const form=document.createElement('form');form.method='POST';form.action=cfg.scriptUrl;form.target=id;form.hidden=true;
-  const fields={action,username:state.user,pin:state.token,...params};
+  const fields={action,requestId:id,username:state.user,pin:state.token,...params};
   Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.name=k;input.value=v??'';form.appendChild(input)});
   document.body.appendChild(form);
   let timer;
   const finish=()=>{clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove()};
-  const receive=e=>{if(e.source!==frame.contentWindow||!e.data||e.data.stocktake!==true||!(e.origin==='https://script.google.com'||e.origin.endsWith('.googleusercontent.com')||e.origin==='null'))return;finish();e.data.result?.ok?resolve(e.data.result.data):reject(Error(e.data.result?.error||'Backend error'))};
+  const receive=e=>{if(!e.data||e.data.stocktake!==true||e.data.requestId!==id||!(e.origin==='https://script.google.com'||e.origin.endsWith('.googleusercontent.com')))return;finish();e.data.result?.ok?resolve(e.data.result.data):reject(Error(e.data.result?.error||'Backend error'))};
   window.addEventListener('message',receive);
   timer=setTimeout(()=>{finish();reject(Error('Google Apps Script did not respond. Check that the latest Code.gs is deployed as a Web App accessible to Anyone, then try again.'))},10000);
   form.submit();
