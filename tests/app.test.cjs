@@ -12,7 +12,8 @@ function fixture() {
       const classes = new Set();
       elements.set(key, { hidden: false, textContent: '', innerHTML: '', value: '', dataset: {},
         classList: { add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x), toggle(x,on) { on ? classes.add(x) : classes.delete(x); } },
-        handlers: {}, addEventListener(n,f) { this.handlers[n] = f; }, setAttribute() {}, focus() {}, scrollIntoView() {} });
+        handlers: {}, addEventListener(n,f) { this.handlers[n] = f; }, setAttribute() {}, focus() {}, scrollIntoView() {},
+        querySelectorAll() { return []; }, appendChild() {} });
     }
     return elements.get(key);
   }
