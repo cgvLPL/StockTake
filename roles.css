@@ -174,3 +174,31 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
  body:has(#enterVerifier) .role-shell,body:has(#enterCounter) .role-shell{align-items:center;padding:16px}
  body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{margin:auto}
 }
+
+
+/* Workspace selector — tactile monochrome cards inspired by the reference. */
+.role-card:has(.workspace-choices){padding:clamp(22px,5vw,40px);background:#f5f5f4;color:#171819}
+.role-card:has(.workspace-choices) .role-logo{width:min(270px,75%);margin:0 auto 30px}
+.workspace-intro{margin-bottom:24px}
+.workspace-eyebrow{font-size:10px;letter-spacing:.2em;font-weight:750;color:#777d80}
+.role-card .workspace-intro h2{font-size:clamp(28px,5vw,38px);letter-spacing:-.055em;line-height:1.05;margin:12px 0 12px;color:#141517}
+.workspace-intro p{font-size:13px;color:#6d7175;line-height:1.5;margin:0}
+.workspace-intro p strong{color:#242629}
+.workspace-access{display:inline-block;padding:4px 9px;border:1px solid #d5d8da;border-radius:999px;font-size:11px;text-transform:capitalize;margin-left:5px;color:#44484b}
+.role-card .workspace-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.role-card .workspace-choice{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:24px;min-height:190px;min-width:0;padding:20px;border:1px solid #292b2d;border-radius:24px;background:#0b0c0d;color:#fff;text-align:left;overflow:hidden}
+.role-card .workspace-choice:hover:not(:disabled){background:#232526;border-color:#232526}
+.role-card .workspace-choice:active:not(:disabled){transform:scale(.985)}
+.workspace-choice-icon{display:grid;place-items:center;width:46px;height:46px;border:1px solid #5b5e60;border-radius:50%;font-size:14px;font-weight:600;letter-spacing:-.02em}
+.workspace-choice-copy{display:grid;gap:7px;max-width:100%}
+.workspace-choice-copy strong{font-size:23px;letter-spacing:-.045em;line-height:1}
+.workspace-choice-copy small{font-size:12px;font-weight:400;color:#b3b6b8;line-height:1.4}
+.workspace-choice-arrow{position:absolute;right:20px;top:24px;font-size:25px;font-weight:400}
+.role-card .workspace-choice:disabled{opacity:.45;cursor:not-allowed;background:#dddfe0;color:#4e5458;border-color:#d5d8da}
+.role-card .workspace-choice:disabled .workspace-choice-icon{border-color:#9ca1a5}
+.role-card .workspace-choice:disabled .workspace-choice-copy small{color:#62686d}
+.role-card .workspace-choice:disabled .workspace-choice-arrow{display:none}
+.workspace-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #d9dbdc}
+.workspace-footer>span{font-size:10px;letter-spacing:.16em;font-weight:700;color:#7b8084}
+.role-card .workspace-footer #roleLogout{margin:0;border:1px solid #d4d7da;border-radius:999px;min-height:38px;padding:8px 17px;background:#e9ebed;color:#1a1c1e}
+@media(max-width:480px){.role-card:has(.workspace-choices){padding:26px 20px}.role-card .workspace-choices{grid-template-columns:1fr;gap:10px}.role-card .workspace-choice{min-height:120px;padding:16px 18px;gap:12px;border-radius:20px}.workspace-choice-icon{width:36px;height:36px;font-size:11px}.workspace-choice-copy strong{font-size:21px}.workspace-choice-copy small{font-size:11px}.workspace-choice-arrow{top:16px;right:18px}.role-card:has(.workspace-choices) .role-logo{margin-bottom:22px}}
