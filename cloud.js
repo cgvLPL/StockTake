@@ -7,7 +7,7 @@ const state={token:null,user:null,role:null,date:new Date().toLocaleDateString('
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const configured=Boolean(cfg.url&&cfg.anonKey&&!cfg.url.includes('YOUR_PROJECT'));
 const api=async(path,method='GET',body,token=state.token)=>{
- const r=await fetch(cfg.url+'/rest/v1/'+path,{method,headers:{apikey:cfg.anonKey,Authorization:'Bearer '+(token||cfg.anonKey),'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body)});
+ const endpoint=path.startsWith('rpc/')?'/rest/v1/':'/rest/v1/';const r=await fetch(cfg.url+endpoint+path,{method,headers:{apikey:cfg.anonKey,Authorization:'Bearer '+(token||cfg.anonKey),'Content-Type':'application/json',Prefer:'return=representation'},body:body===undefined?undefined:JSON.stringify(body)});
  if(!r.ok)throw Error((await r.text()).slice(0,220));return r.status===204?[]:r.json();
 };
 const auth=async(email,password)=>{
@@ -43,7 +43,7 @@ function counterView(){
  root.querySelectorAll('[data-id]').forEach(inp=>inp.onchange=async()=>{
  const id=inp.dataset.id,raw=inp.value.trim(),v=raw===''?null:Number(raw.replace(',','.'));
  if(raw!==''&&(!Number.isFinite(v)||v<0||!/^\d+(?:[.,]\d{1,4})?$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimals.');return}
- inp.disabled=true;try{await api('stock_counts?on_conflict=count_date,item_id','POST',[{count_date:state.date,item_id:id,actual:v}],state.token);state.records[id]={...state.records[id],actual:v};message('Saved to cloud.');const done=catalog().filter(i=>state.records[i[2]]?.actual!=null).length;root.querySelector('#roleProgress').textContent=done+' / '+catalog().length+' items counted'}catch(err){message('Not saved: '+err.message)}finally{inp.disabled=false}
+ inp.disabled=true;try{await api('rpc/save_counter_count','POST',{p_date:state.date,p_item:id,p_actual:v});state.records[id]={...state.records[id],actual:v};message('Saved to cloud.');const done=catalog().filter(i=>state.records[i[2]]?.actual!=null).length;root.querySelector('#roleProgress').textContent=done+' / '+catalog().length+' items counted'}catch(err){message('Not saved: '+err.message)}finally{inp.disabled=false}
  });
 }
 async function counter(){try{await load();counterView()}catch(err){message('Unable to load counts: '+err.message)}}
@@ -57,7 +57,7 @@ async function verifier(){
  root.querySelector('#roleReload').onclick=()=>verifier();
  root.querySelector('#roleSync').onclick=async()=>{
   const b=root.querySelector('#roleSync');b.disabled=true;
-  try{const current=JSON.parse(localStorage.getItem('stocktake:'+state.date)||'{}').records||{};const payload=catalog().filter(it=>current[it[2]]).map(it=>({count_date:state.date,item_id:it[2],actual:current[it[2]].a===''?null:Number(String(current[it[2]].a).replace(',','.')),system:current[it[2]].s===''?null:Number(String(current[it[2]].s).replace(',','.')),remarks:current[it[2]].r||''}));if(payload.some(x=>[x.actual,x.system].some(v=>v!==null&&!Number.isFinite(v))))throw Error('Invalid number in dashboard.');if(payload.length)await api('stock_counts?on_conflict=count_date,item_id','POST',payload);message('Dashboard changes uploaded.')}catch(err){message('Upload failed: '+err.message)}finally{b.disabled=false}
+  try{const current=JSON.parse(localStorage.getItem('stocktake:'+state.date)||'{}').records||{};const payload=catalog().filter(it=>current[it[2]]).map(it=>({count_date:state.date,item_id:it[2],actual:current[it[2]].a===''?null:Number(String(current[it[2]].a).replace(',','.')),system:current[it[2]].s===''?null:Number(String(current[it[2]].s).replace(',','.')),remarks:current[it[2]].r||''}));if(payload.some(x=>[x.actual,x.system].some(v=>v!==null&&!Number.isFinite(v))))throw Error('Invalid number in dashboard.');for(const row of payload)await api('rpc/save_verifier_count','POST',{p_date:row.count_date,p_item:row.item_id,p_system:row.system,p_remarks:row.remarks});message('Dashboard changes uploaded.')}catch(err){message('Upload failed: '+err.message)}finally{b.disabled=false}
  };
  }catch(err){message('Unable to load verifier: '+err.message)}
 }
