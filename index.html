@@ -27,6 +27,7 @@
 <div class="panel" id="top">
   <div class="brand-header">
     <img class="brand-logo" src="./brand/cgv-stocktake.svg" width="1172" height="320" alt="CGV StockTake">
+    <span class="brand-workspace-label"><span class="brand-workspace-dot" aria-hidden="true"></span> VERIFIER WORKSPACE</span>
   </div>
   <header class="top">
     <div class="barpill">
@@ -49,11 +50,26 @@
     <div class="grp"><button class="f on" data-f="all">All items</button><button class="f" data-f="bad">Do not match</button><button class="f" data-f="none">Not counted</button></div>
   </div>
   <details id="verifierStaffPanel" class="staff-panel"><summary>Staff management <span>Create Counter or Verifier accounts</span></summary></details>
+  <div class="dashboard-section-label"><span>STOCK OVERVIEW</span><small>Selected count date</small></div>
   <section class="stats">
     <div class="card stat"><div>Counted <i data-ic="list"></i></div><b id="sC">0</b><small id="sCs"></small></div>
     <div class="card stat g"><div>Match <i data-ic="check"></i></div><b id="sM">0</b><small id="sMs"></small></div>
     <div class="card stat variance"><div>Do not match <i data-ic="alert"></i></div><b id="sB">0</b><small id="sBs"></small></div>
     <div class="card stat"><div>Not counted <i data-ic="dash"></i></div><b id="sN">0</b><small id="sNs"></small></div>
+  </section>
+  <section class="dashboard-progress" aria-labelledby="dashboardProgressTitle">
+    <div class="dashboard-progress-heading">
+      <div class="dashboard-progress-title">
+        <span class="dashboard-progress-eyebrow">COUNT VERIFICATION</span>
+        <h3 id="dashboardProgressTitle">Today's progress</h3>
+        <p id="verifiedFraction">0 items verified</p>
+      </div>
+      <span class="dashboard-progress-percent" id="verifiedPercent">0%</span>
+    </div>
+    <div class="dashboard-progress-track" role="progressbar" aria-label="Verified inventory items" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="dashboardProgressTrack">
+      <span id="dashboardProgressFill" class="dashboard-progress-fill" style="width:0%"></span>
+    </div>
+    <div class="dashboard-progress-legend"><span>Verified items</span><span>100% target</span></div>
   </section>
   <section class="report-panel" id="reportPanel" aria-labelledby="reportTitle">
     <div class="report-panel-heading">
@@ -113,6 +129,7 @@
 </aside>
 <div id="toast" role="status"></div>
 <link rel="stylesheet" href="./roles.css">
+<link rel="stylesheet" href="./ui-refresh.css?v=20261018">
 <script src="./cloud-config.js" defer></script>
 <script src="./app.js" defer></script>
 <script src="./reports.js" defer></script>
