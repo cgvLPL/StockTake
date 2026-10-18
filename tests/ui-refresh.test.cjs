@@ -16,8 +16,8 @@ test('Verifier dashboard has accessible progress and preserved business controls
   assert.match(html,/id="rows"/);
   assert.match(html,/data-report-period="weekly"/);
   assert.match(html,/data-report-period="monthly"/);
-  assert.match(html,/src="\.\/ui-refresh\.css/);
-  assert.match(app,/verifiedPercent.*Math\.round\(c\/n\*100\)/);
+  assert.match(html,/href="\.\/ui-refresh\.css/);
+  assert.match(app,/const verifiedPercent=n\?Math\.round\(c\/n\*100\)/);
   assert.match(app,/dashboardProgressTrack/);
 });
 
