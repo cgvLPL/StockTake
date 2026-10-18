@@ -88,7 +88,11 @@ function stats(){let c=0,m=0,b=0;document.querySelectorAll('#rows .row').forEach
   $('#sC').textContent=c;$('#sM').textContent=m;$('#sB').textContent=b;$('#sN').textContent=n-c;
   $('#sCs').textContent='of '+n+' items';$('#sMs').textContent=p(m,c);$('#sBs').textContent=p(b,c);$('#sNs').textContent=n-c?'still to count':'all counted';
   $('#chipT').textContent=c+' / '+n+' counted';$('#dot').className='dot '+(b?'bad':c?'ok':'');
-  $('#sum').innerHTML='<span><b>'+c+'</b> counted, <b>'+m+'</b> match, <b>'+b+'</b> do not match</span>'}
+  $('#sum').innerHTML='<span><b>'+c+'</b> counted, <b>'+m+'</b> match, <b>'+b+'</b> do not match</span>';const verifiedPercent=n?Math.round(c/n*100):0;
+  const percentLabel=$('#verifiedPercent');if(percentLabel)percentLabel.textContent=verifiedPercent+'%';
+  const verifiedLabel=$('#verifiedFraction');if(verifiedLabel)verifiedLabel.textContent=c+' of '+n+' items verified';
+  const progressBar=$('#dashboardProgressFill');if(progressBar)progressBar.setAttribute('style','width:'+verifiedPercent+'%');
+  const progressTrack=$('#dashboardProgressTrack');if(progressTrack)progressTrack.setAttribute('aria-valuenow',String(verifiedPercent))}
 function filt(keepEditing=false){let shown=0;document.querySelectorAll('#rows .row').forEach(r=>{const st=r.dataset.st;
   const ok=(filter==='all'||(filter==='bad'&&st==='DO NOT MATCH')||(filter==='none'&&!st))&&ITEMS.find(it=>it[2]===r.dataset.i)[0].toLowerCase().includes(query);
   const visible=ok||(keepEditing&&r.contains(document.activeElement));r.hidden=!visible;if(visible)shown++});$('#empty').hidden=shown>0}
