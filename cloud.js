@@ -80,7 +80,11 @@ function setupReportDownloads(){
  const date=panel.querySelector('#reportDate');
  const hint=panel.querySelector('#reportPeriodHint');
  const status=panel.querySelector('#reportDownloadStatus');
- const button=panel.querySelector('#downloadStockReport');
+ const csvButton=panel.querySelector('#downloadStockReport');
+ const pdfButton=panel.querySelector('#downloadExecutivePdf');
+ const pdfTools=window.StockTakeExecutivePdf;
+ if(!csvButton||!pdfButton||!pdfTools)return;
+ const buttons=[csvButton,pdfButton];
  const all=panel.querySelectorAll('[data-report-period]');
  const selectedDate=document.querySelector('#date')?.value||state.date;
  if(/^\d{4}-\d{2}-\d{2}$/.test(selectedDate))date.value=selectedDate;
@@ -113,11 +117,16 @@ function setupReportDownloads(){
   delete status.dataset.error;
   updateHint();
  });
- button.addEventListener('click',async()=>{
+
+ async function generateReport(format){
   let range;
   try{range=tools.periodRange(kind,date.value)}
-  catch(err){status.dataset.error='true';status.textContent=err.message;date.focus();return}
-  button.disabled=true;
+  catch(err){
+   status.dataset.error='true';status.textContent=err.message;date.focus();return;
+  }
+  const isPdf=format==='pdf',button=isPdf?pdfButton:csvButton;
+  buttons.forEach(b=>b.disabled=true);
+  const original=button.innerHTML;
   button.innerHTML='<span aria-hidden="true">⌛</span> Preparing…';
   status.textContent='Loading saved stock records from Google Sheets…';
   delete status.dataset.error;
@@ -126,20 +135,29 @@ function setupReportDownloads(){
    if(verifierSaveTimer)await new Promise(resolve=>setTimeout(resolve,750));
    await verifierSaveQueue;
    const payload=await api('report',{startDate:range.start,endDate:range.end});
-   const report=tools.makeReport(payload,kind,date.value);
-   tools.download(report);
-   status.textContent='Ready: '+report.filename+' · '+report.activeDays+
-     ' day(s) with saved records · '+report.variances+' variances.';
+   if(isPdf){
+    const report=pdfTools.makeExecutivePdf(payload,kind,date.value);
+    pdfTools.downloadExecutivePdf(report);
+    status.textContent='Executive PDF prepared: '+report.filename+
+      ' · '+report.pages+' page(s) · '+report.variances+' variance(s).';
+   }else{
+    const report=tools.makeReport(payload,kind,date.value);
+    tools.download(report);
+    status.textContent='Detailed CSV prepared: '+report.filename+' · '+report.activeDays+
+      ' day(s) with saved records · '+report.variances+' variance(s).';
+   }
   }catch(err){
    status.dataset.error='true';
    status.textContent=String(err.message||err).includes('Unknown action')
-     ?'The report service needs updating. Copy the latest GitHub Code.gs to Google Apps Script and deploy a new version.'
-     :'Could not download the report: '+String(err.message||err);
+     ?'The reporting service needs updating. Copy the latest GitHub Code.gs to Google Apps Script and deploy a new version.'
+     :'Could not download the '+(isPdf?'PDF':'CSV')+': '+String(err.message||err);
   }finally{
-   button.disabled=false;
-   button.innerHTML='<span aria-hidden="true">↓</span> Download CSV';
+   buttons.forEach(b=>b.disabled=false);
+   button.innerHTML=original;
   }
- });
+ }
+ csvButton.addEventListener('click',()=>generateReport('csv'));
+ pdfButton.addEventListener('click',()=>generateReport('pdf'));
  updateHint();
 }
 
