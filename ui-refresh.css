@@ -365,3 +365,51 @@ body:has(#roleItems) .role-toolbar .role-button:hover{background:#e5e7e9}
   }
 }
 @media(prefers-reduced-motion:reduce){.dashboard-progress-fill{transition:none}}
+
+
+/* Two-output reporting: executive PDF first, full CSV audit trail second. */
+.frame #reportPanel .report-panel-controls{
+  grid-template-columns:minmax(220px,1.3fr) minmax(155px,.72fr) minmax(240px,1fr);
+  gap:12px;
+}
+.report-download-actions{
+  display:flex;align-items:stretch;gap:8px;min-width:0;
+}
+.frame #reportPanel .report-download-actions .report-download{
+  box-sizing:border-box;
+  min-width:0;min-height:46px;
+  flex:1 1 0;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.25;
+  white-space:normal;
+}
+.frame #reportPanel .report-download-primary{
+  flex:1.2 1 0;
+  color:#fff;background:#f36b37;border:1px solid #f36b37;
+}
+.frame #reportPanel .report-download-primary:hover:not(:disabled){
+  background:#df5b29;border-color:#df5b29;
+}
+.frame #reportPanel .report-download-secondary{
+  background:#303237;color:#f2f3f4;
+  border:1px solid #50535a;
+}
+.frame #reportPanel .report-download-secondary:hover:not(:disabled){
+  background:#404349;
+}
+.frame #reportPanel .report-download:disabled{opacity:.6;cursor:wait}
+@media(max-width:1150px){
+  .frame #reportPanel .report-panel-controls{grid-template-columns:1fr 1fr}
+  .frame #reportPanel .report-download-actions{grid-column:1/-1}
+}
+@media(max-width:560px){
+  .frame #reportPanel .report-panel-controls{display:flex;flex-direction:column}
+  .frame #reportPanel .report-download-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .frame #reportPanel .report-download-actions .report-download{width:100%;min-height:48px}
+}
+@media(max-width:350px){
+  .frame #reportPanel .report-download-actions{grid-template-columns:1fr}
+}
