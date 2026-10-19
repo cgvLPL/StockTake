@@ -67,8 +67,10 @@ This version uses **Google Sheets** as the shared stock database, with **Google 
 
 ## Daily, weekly, and monthly report downloads
 
-Verifier users can open **Download stocktake report** on the dashboard, select **Daily**, **Weekly**, or **Monthly**, pick a reference date, and choose **Download CSV**.
+Verifier users can open **Download stocktake report** on the dashboard, select **Daily**, **Weekly**, or **Monthly**, pick a reference date, and choose **Executive PDF** or **Detailed CSV**.
 
+- **Executive PDF** produces a professional, downloadable, A4 multi-page management report with period KPIs, counted item-day coverage, match rate, a 14-day activity snapshot, a full daily summary table, and the 15 most recent variance records (where available). PDF is generated locally in the browser from the authenticated Google Sheets report response, without third-party PDF services. For complete item-by-item details, use the CSV. The executive report clearly flags periods without saved counts.
+- **Detailed CSV** keeps the full item-level audit export for Excel.
 - **Daily** exports the selected day, including all current inventory items and their Actual, System, Difference, Remarks and Status fields, even if no count has been entered.
 - **Weekly** covers Monday through Sunday containing the selected date. **Monthly** covers the entire selected calendar month. Both include daily summaries for every date, and item details for dates that have saved records.
 - The Excel-compatible UTF-8 CSV includes a daily summary (counted, verified, matched, differences, pending and not counted) followed by an item-level detail section. Zero values and decimal quantities are preserved. Exported notes and item names are sanitized to reduce spreadsheet-formula injection risks.
