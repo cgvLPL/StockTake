@@ -75,7 +75,7 @@
       <div>
         <span class="report-eyebrow">EXPORT &amp; ARCHIVE</span>
         <h3 id="reportTitle">Download stocktake report</h3>
-        <p>Export saved records from Google Sheets, including daily summaries and item details.</p>
+        <p>Download a management-ready PDF summary or an item-level CSV audit export.</p>
       </div>
       <span class="report-icon" aria-hidden="true">↓</span>
     </div>
@@ -92,9 +92,14 @@
         <label class="report-label" for="reportDate">Select date</label>
         <input type="date" id="reportDate" required>
       </div>
-      <button type="button" id="downloadStockReport" class="report-download">
-        <span aria-hidden="true">↓</span> Download CSV
-      </button>
+      <div class="report-download-actions" role="group" aria-label="Download report format">
+        <button type="button" id="downloadExecutivePdf" class="report-download report-download-primary">
+          <span aria-hidden="true">↓</span> Executive PDF
+        </button>
+        <button type="button" id="downloadStockReport" class="report-download report-download-secondary">
+          <span aria-hidden="true">↓</span> Detailed CSV
+        </button>
+      </div>
     </div>
     <p id="reportPeriodHint" class="report-hint">Exports one day of item-level records.</p>
     <p id="reportDownloadStatus" class="report-status" role="status" aria-live="polite"></p>
@@ -133,6 +138,7 @@
 <script src="./cloud-config.js" defer></script>
 <script src="./app.js" defer></script>
 <script src="./reports.js" defer></script>
+<script src="./executive-pdf.js" defer></script>
 <script src="./cloud.js?v=login-cleanup-20261014" defer></script>
 <script src="./updates.js" defer></script>
 </body>
