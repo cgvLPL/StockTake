@@ -81,7 +81,7 @@ test('Monthly exception watchlist paginates and escapes unsafe PDF text',()=>{
  assert.equal(pdf.variances,22);
  assert.ok(pdf.pages>=2);
  assert.match(pdfText(pdf),/Showing 15 recent discrepancies of 22/);
- assert.match(pdfText(pdf),/Investigate \\(test\\) \\\\ shift/);
+ assert.ok(pdfText(pdf).includes(String.raw`Investigate \(test\) \\ shift`), 'PDF must escape parentheses and slashes in notes');
  assert.match(pdfText(pdf),/PAGE 1 \/ /);
  assert.doesNotMatch(pdfText(pdf),/\bNaN\b/);
 });
