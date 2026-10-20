@@ -165,40 +165,69 @@ function writer(logo){
   }
   return {newPage,rect,line,text,textRight,image,finish,hasLogo:!!logo,get pages(){return pages;}};
 }
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function formatCoverDate(value){
+  const [y,m,d]=value.split('-').map(Number);
+  return d+' '+MONTHS[m-1]+' '+y;
+}
+function coverPeriodLabel(kind,start,end){
+  if(kind==='daily')return formatCoverDate(start);
+  if(kind==='monthly')return MONTHS[Number(start.slice(5,7))-1]+' '+start.slice(0,4);
+  const [sy,sm]=start.split('-').map(Number),[ey,em]=end.split('-').map(Number);
+  if(sy===ey&&sm===em)return Number(start.slice(8))+' - '+formatCoverDate(end);
+  return formatCoverDate(start)+' - '+formatCoverDate(end);
+}
 function makeExecutivePdf(payload,kind,anchor,generatedAt){
   const s=summarize(payload,kind,anchor),time=generatedAt||new Date();
   if(!(time instanceof Date)||!Number.isFinite(time.valueOf()))throw Error('Invalid report generation timestamp.');
   const pdf=writer(reportLogo()), period=kind.toUpperCase(),range=s.range.start===s.range.end?
     s.range.start:s.range.start+'  -  '+s.range.end;
   const percent=n=>Math.round(n*100)+'%';
-  function footer(page){
-    pdf.line(M,792,RIGHT,792,C.line,.8);
-    pdf.text('CGV STOCKTAKE  /  GOOGLE SHEETS SNAPSHOT',M,801,8,true,C.muted);
-    pdf.textRight('PAGE '+page+' / {{TOTAL}}',RIGHT,801,8,true,C.muted);
+  const coverType=kind.charAt(0).toUpperCase()+kind.slice(1);
+  const coverDate=coverPeriodLabel(kind,s.range.start,s.range.end);
+  const generated=time.toISOString().slice(0,16).replace('T',' ')+' UTC';
+  function logoAt(x,y,w){
+    if(pdf.hasLogo)pdf.image(x,y,w,w*106/520);
+    else{
+      pdf.text('CGV',x,y+8,25,true,C.orange);
+      pdf.text('StockTake',x+65,y+8,24,true,C.ink);
+    }
   }
   function subPage(title,desc){
     pdf.newPage();
-    pdf.rect(0,0,W,96,C.dark);
-    if(pdf.hasLogo)pdf.image(M,14,202,41.2);
-    else{
-      pdf.text('CGV',M,19,17,true,C.orange);
-      pdf.text('STOCKTAKE',M+54,22,12,true,C.white);
-    }
-    pdf.text(title,M,59,18,true,C.white);
-    pdf.textRight(desc,RIGHT,62,9,false,[.76,.79,.81]);
+    // All content stays within the printable A4 margins.
+    logoAt(M,14,207);
+    pdf.line(M,66,RIGHT,66,C.line,.8);
+    pdf.text(title,M,80,18,true,C.ink);
+    pdf.textRight(desc,RIGHT,87,9,false,C.muted);
   }
+
+  // A4 portrait cover: white paper, embedded logo, explicit report type and dates.
   pdf.newPage();
-  pdf.rect(0,0,W,166,C.dark);
-  if(pdf.hasLogo)pdf.image(M,19,306,62.4);
-  else{
-    pdf.rect(M,23,4,30,C.orange);
-    pdf.text('CGV',M+15,17,29,true,C.orange);
-    pdf.text('STOCKTAKE',M+90,26,16,true,C.white);
-  }
-  pdf.textRight('EXECUTIVE  /  '+period,RIGHT,30,9,true,[.79,.81,.83]);
-  pdf.text('Stock count executive report',M,86,22,true,C.white);
-  pdf.text(range,M,121,11,false,[.78,.81,.83]);
-  pdf.textRight('GENERATED  '+time.toISOString().slice(0,16).replace('T',' ')+' UTC',RIGHT,144,8,false,[.74,.78,.8]);
+  logoAt(M,78,410);
+  pdf.line(M,187,RIGHT,187,C.line,1);
+  pdf.text('OPERATIONS  /  STOCKTAKE',M,212,10,true,C.muted);
+  pdf.text(coverType+' Stocktake',M,271,41,true,C.ink);
+  pdf.text('Executive Report',M,338,25,false,C.ink);
+  pdf.rect(M,428,W-2*M,136,C.light);
+  pdf.rect(M,428,4,136,C.orange);
+  pdf.text(kind==='daily'?'REPORT DATE':'REPORTING PERIOD',M+20,448,10,true,C.muted);
+  pdf.text(coverDate,M+20,478,kind==='weekly'?19:23,true,C.ink);
+  pdf.line(M+20,518,RIGHT-20,518,C.line,.8);
+  pdf.text('DATES COVERED',M+20,527,9,true,C.muted);
+  pdf.text(s.range.start+' to '+s.range.end,M+145,527,10,false,C.ink);
+  pdf.line(M,689,RIGHT,689,C.line,.8);
+  pdf.text('PREPARED FOR INTERNAL REVIEW',M,704,10,true,C.ink);
+  pdf.textRight('Generated '+generated,RIGHT,706,9,false,C.muted);
+
+  // Page two begins the executive summary. No black header or footer bars.
+  pdf.newPage();
+  logoAt(M,15,302);
+  pdf.textRight('EXECUTIVE  /  '+period,RIGHT,29,9,true,C.muted);
+  pdf.line(M,83,RIGHT,83,C.line,1);
+  pdf.text('Stocktake executive summary',M,97,22,true,C.ink);
+  pdf.text(range,M,131,11,false,C.muted);
+  pdf.textRight('GENERATED  '+generated,RIGHT,151,8,false,C.muted);
   pdf.text('PERIOD PERFORMANCE',M,186,9,true,C.muted);
   const metrics=[
     ['PHYSICAL COUNT',s.counted,percent(s.coverage)+' coverage'],
@@ -208,15 +237,15 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
   ],gap=9,cw=(W-2*M-gap*3)/4;
   metrics.forEach((m,i)=>{
     const x=M+i*(cw+gap);
-    pdf.rect(x,207,cw,105,i===3&&s.variances?C.dark:C.light);
-    const fg=i===3&&s.variances?C.white:C.ink;
-    const muted=i===3&&s.variances?[.78,.79,.81]:C.muted;
-    pdf.text(m[0],x+12,220,8,true,muted);
-    pdf.text(String(m[1]),x+12,241,27,true,fg);
-    pdf.text(ellipsis(m[2],21),x+12,290,8,false,muted);
+    pdf.rect(x,207,cw,105,C.light);
+    pdf.rect(x,207,cw,3,i===3&&s.variances?C.orange:C.line);
+    pdf.text(m[0],x+12,220,8,true,C.muted);
+    pdf.text(String(m[1]),x+12,241,27,true,C.ink);
+    pdf.text(ellipsis(m[2],21),x+12,290,8,false,C.muted);
   });
   pdf.text('EXECUTIVE SUMMARY',M,337,9,true,C.muted);
-  pdf.rect(M,356,W-M*2,102,C.dark);
+  pdf.rect(M,356,W-M*2,102,C.light);
+  pdf.rect(M,356,4,102,C.orange);
   const message=s.activeDays===0?
     'No saved stocktake records were found for the selected period. The report does not imply zero physical inventory.':
     s.variances>0?
@@ -230,8 +259,8 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
     if((part+' '+word).trim().length>77&&part){wrapped.push(part);part=word;}
     else part+=(part?' ':'')+word;
   });if(part)wrapped.push(part);
-  wrapped.slice(0,3).forEach((l,i)=>pdf.text(l,M+16,371+i*18,11,i===0,C.white));
-  pdf.text('SOURCE  Saved Google Sheets data - read-only export',M+16,433,8,false,[.77,.79,.81]);
+  wrapped.slice(0,3).forEach((l,i)=>pdf.text(l,M+16,371+i*18,11,i===0,C.ink));
+  pdf.text('SOURCE  Saved Google Sheets data - read-only export',M+16,433,8,false,C.muted);
   function progress(label,value,y,caption){
     pdf.text(label,M,y,11,true,C.ink);
     pdf.textRight(caption,RIGHT,y,9,false,C.muted);
@@ -260,14 +289,14 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
     subPage(title||'Report details','CONTINUED');y=126;
   }
   function dailyHead(){
-    pdf.rect(M,y,W-2*M,27,C.dark);
-    pdf.text('DATE',M+9,y+8,8,true,C.white);
-    pdf.textRight('COUNTED',M+164,y+8,8,true,C.white);
-    pdf.textRight('VERIFIED',M+244,y+8,8,true,C.white);
-    pdf.textRight('MATCH',M+320,y+8,8,true,C.white);
-    pdf.textRight('VARIANCE',M+407,y+8,8,true,C.white);
-    pdf.textRight('PENDING',M+481,y+8,8,true,C.white);
-    pdf.textRight('COVER',RIGHT-6,y+8,8,true,C.white);
+    pdf.rect(M,y,W-2*M,27,C.light);
+    pdf.text('DATE',M+9,y+8,8,true,C.ink);
+    pdf.textRight('COUNTED',M+164,y+8,8,true,C.ink);
+    pdf.textRight('VERIFIED',M+244,y+8,8,true,C.ink);
+    pdf.textRight('MATCH',M+320,y+8,8,true,C.ink);
+    pdf.textRight('VARIANCE',M+407,y+8,8,true,C.ink);
+    pdf.textRight('PENDING',M+481,y+8,8,true,C.ink);
+    pdf.textRight('COVER',RIGHT-6,y+8,8,true,C.ink);
     y+=27;
   }
   pdf.text('Daily counting and verification totals',M,y,14,true,C.ink);y+=25;
@@ -296,12 +325,12 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
   }else{
     const subset=s.exceptions.slice(0,15);
     function exceptionHead(){
-      pdf.rect(M,y,W-2*M,25,C.dark);
-      pdf.text('DATE',M+9,y+7,8,true,C.white);
-      pdf.text('ITEM / NOTE',M+101,y+7,8,true,C.white);
-      pdf.textRight('ACTUAL',M+370,y+7,8,true,C.white);
-      pdf.textRight('SYSTEM',M+431,y+7,8,true,C.white);
-      pdf.textRight('DELTA',RIGHT-9,y+7,8,true,C.white);
+      pdf.rect(M,y,W-2*M,25,C.light);
+      pdf.text('DATE',M+9,y+7,8,true,C.ink);
+      pdf.text('ITEM / NOTE',M+101,y+7,8,true,C.ink);
+      pdf.textRight('ACTUAL',M+370,y+7,8,true,C.ink);
+      pdf.textRight('SYSTEM',M+431,y+7,8,true,C.ink);
+      pdf.textRight('DELTA',RIGHT-9,y+7,8,true,C.ink);
       y+=25;
     }
     exceptionHead();
@@ -339,7 +368,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
       temp.commands.push('BT /'+(bold?'F2':'F1')+' '+size+' Tf '+color(shade)+' rg 1 0 0 1 '+
         f(x)+' '+f(H-top-size)+' Tm ('+esc(t)+') Tj ET\n');
     }
-    footerText('CGV STOCKTAKE / SAVED GOOGLE SHEETS',M,802,8,true,C.muted);
+    footerText('CGV STOCKTAKE / EXECUTIVE REPORT',M,802,8,true,C.muted);
     footerText('PAGE '+page+' / '+total,RIGHT-68,802,8,true,C.muted);
     temp.commands=drawCmds.concat(temp.commands);
   });
@@ -347,7 +376,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
   return {filename:'CGV-StockTake-Executive-'+kind+'-'+s.range.start+
     (s.range.start===s.range.end?'':'-to-'+s.range.end)+'.pdf',
     bytes:out.bytes, pages:out.pages,kind,start:s.range.start,end:s.range.end,
-    activeDays:s.activeDays,variances:s.variances,verified:s.verified};
+    activeDays:s.activeDays,variances:s.variances,verified:s.verified,format:'A4 portrait',coverType,coverDate};
 }
 function downloadExecutivePdf(report){
   if(typeof document==='undefined'||typeof URL==='undefined'||typeof Blob==='undefined')
