@@ -85,7 +85,26 @@ function summarize(payload,kind,anchor){
     activeDays:daily.filter(d=>d.hasRecords).length,days:dates.length,
     coverage:expected?counted/expected:0,matchRate:verified?matched/verified:0};
 }
-function writer(){
+
+function imageJpegHex(jpegBase64){
+  if(typeof jpegBase64!=='string'||jpegBase64.length<128||jpegBase64.length>250000)
+    throw Error('Invalid embedded report logo.');
+  const raw=typeof atob==='function'?atob(jpegBase64):
+    (typeof Buffer!=='undefined'?Buffer.from(jpegBase64,'base64').toString('binary'):null);
+  if(!raw||raw.length<100||raw.charCodeAt(0)!==255||raw.charCodeAt(1)!==216||
+     raw.charCodeAt(raw.length-2)!==255||raw.charCodeAt(raw.length-1)!==217)
+    throw Error('Embedded report logo is not a complete JPEG.');
+  const hex=[];
+  for(let i=0;i<raw.length;i++)hex.push(raw.charCodeAt(i).toString(16).padStart(2,'0'));
+  return hex.join('').toUpperCase();
+}
+function reportLogo(){
+  if(root&&root.StockTakeReportLogo)return root.StockTakeReportLogo;
+  if(typeof module!=='undefined'&&module.exports&&typeof require==='function')
+    return require('./brand/cgv-stocktake-report-logo.js');
+  return null;
+}
+function writer(logo){
   const pages=[];let page=null;
   const add=s=>page.commands.push(s);
   function newPage(){page={commands:[]};pages.push(page);return page;}
@@ -102,18 +121,32 @@ function writer(){
   const textRight=(str,right,top,size=11,bold=false,fill=C.ink)=>{
     const width=sane(str).length*size*(bold?.54:.49);text(str,right-width,top,size,bold,fill);
   };
+  const image=(x,y,w,h)=>{
+    if(!logo)return;
+    add('q '+[w,0,0,h,x,H-y-h].map(f).join(' ')+' cm /ReportLogo Do Q\n');
+  };
   function finish(){
     if(!pages.length)newPage();
     const objs=[null];const push=s=>(objs.push(s),objs.length-1);
     const normal=push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
     const bold=push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>');
+    let imageId=null;
+    if(logo){
+      const hex=imageJpegHex(logo.jpegBase64),stream=hex+'>\n';
+      imageId=push('<< /Type /XObject /Subtype /Image /Width '+Number(logo.width)+
+        ' /Height '+Number(logo.height)+' /ColorSpace /DeviceRGB /BitsPerComponent 8'+
+        ' /Filter [/ASCIIHexDecode /DCTDecode] /Length '+stream.length+
+        ' >>\nstream\n'+stream+'endstream');
+    }
     const pagesRef=push(null);
     const pageIds=[];
     for(const p of pages){
       const stream=p.commands.join('');
       const streamId=push('<< /Length '+stream.length+' >>\nstream\n'+stream+'endstream');
       pageIds.push(push('<< /Type /Page /Parent '+pagesRef+' 0 R /MediaBox [0 0 '+f(W)+' '+f(H)+
-        '] /Resources << /Font << /F1 '+normal+' 0 R /F2 '+bold+' 0 R >> >> /Contents '+streamId+' 0 R >>'));
+        '] /Resources << /Font << /F1 '+normal+' 0 R /F2 '+bold+' 0 R >>'+
+        (imageId?' /XObject << /ReportLogo '+imageId+' 0 R >>':'')+
+        ' >> /Contents '+streamId+' 0 R >>'));
     }
     objs[pagesRef]='<< /Type /Pages /Kids ['+pageIds.map(id=>id+' 0 R').join(' ')+'] /Count '+pageIds.length+' >>';
     const catalog=push('<< /Type /Catalog /Pages '+pagesRef+' 0 R >>');
@@ -130,12 +163,12 @@ function writer(){
     body+='trailer\n<< /Size '+objs.length+' /Root '+catalog+' 0 R >>\nstartxref\n'+start+'\n%%EOF\n';
     return {bytes:encoder.encode(body),pages:pages.length};
   }
-  return {newPage,rect,line,text,textRight,finish,get pages(){return pages;}};
+  return {newPage,rect,line,text,textRight,image,finish,hasLogo:!!logo,get pages(){return pages;}};
 }
 function makeExecutivePdf(payload,kind,anchor,generatedAt){
   const s=summarize(payload,kind,anchor),time=generatedAt||new Date();
   if(!(time instanceof Date)||!Number.isFinite(time.valueOf()))throw Error('Invalid report generation timestamp.');
-  const pdf=writer(), period=kind.toUpperCase(),range=s.range.start===s.range.end?
+  const pdf=writer(reportLogo()), period=kind.toUpperCase(),range=s.range.start===s.range.end?
     s.range.start:s.range.start+'  -  '+s.range.end;
   const percent=n=>Math.round(n*100)+'%';
   function footer(page){
@@ -146,16 +179,22 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
   function subPage(title,desc){
     pdf.newPage();
     pdf.rect(0,0,W,96,C.dark);
-    pdf.text('CGV',M,19,17,true,C.orange);
-    pdf.text('STOCKTAKE',M+54,22,12,true,C.white);
-    pdf.text(title,M,51,18,true,C.white);
+    if(pdf.hasLogo)pdf.image(M,14,202,41.2);
+    else{
+      pdf.text('CGV',M,19,17,true,C.orange);
+      pdf.text('STOCKTAKE',M+54,22,12,true,C.white);
+    }
+    pdf.text(title,M,59,18,true,C.white);
     pdf.textRight(desc,RIGHT,62,9,false,[.76,.79,.81]);
   }
   pdf.newPage();
   pdf.rect(0,0,W,166,C.dark);
-  pdf.rect(M,23,4,30,C.orange);
-  pdf.text('CGV',M+15,17,29,true,C.orange);
-  pdf.text('STOCKTAKE',M+90,26,16,true,C.white);
+  if(pdf.hasLogo)pdf.image(M,19,306,62.4);
+  else{
+    pdf.rect(M,23,4,30,C.orange);
+    pdf.text('CGV',M+15,17,29,true,C.orange);
+    pdf.text('STOCKTAKE',M+90,26,16,true,C.white);
+  }
   pdf.textRight('EXECUTIVE  /  '+period,RIGHT,30,9,true,[.79,.81,.83]);
   pdf.text('Stock count executive report',M,86,22,true,C.white);
   pdf.text(range,M,121,11,false,[.78,.81,.83]);
