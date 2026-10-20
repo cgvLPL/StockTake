@@ -41,7 +41,9 @@ test('Executive PDF summarizes daily saved stock correctly including counted zer
  assert.equal(pdf.filename,'CGV-StockTake-Executive-daily-2026-10-14.pdf');
  assert.equal(pdf.variances,1);
  validatePdf(pdf);
- assert.match(pdfText(pdf),/Stock count executive report/);
+ assert.match(pdfText(pdf),/Stocktake executive summary/);
+ assert.match(pdfText(pdf),/Daily Stocktake/);
+ assert.match(pdfText(pdf),/Executive Report/);
  assert.match(pdfText(pdf),/PRIORITY VARIANCES/);
  assert.match(pdfText(pdf),/Daily counting and verification totals/);
  assert.match(pdfText(pdf),/PAGE 1 \/ /);
