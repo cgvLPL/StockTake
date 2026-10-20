@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {makeExecutivePdf,summarize}=require('../executive-pdf.js');
+const {makeExecutivePdf,summarize,buildItemDetails}=require('../executive-pdf.js');
 const items=[
  {id:'stock-001',name:'Coke',uom:'g'},
  {id:'stock-002',name:'Mango Syrup',uom:'ml'},
@@ -134,4 +134,100 @@ test('Executive reports use print-ready A4 portrait pages and a dedicated white 
     assert.doesNotMatch(text,/0 745\.89 595\.28 96 re f/,'No black full-width top stripe on detail');
     assert.equal((text.match(/\/ReportLogo Do Q/g)||[]).length,result.pages,'Logo should appear on every A4 page');
   }
+});
+
+
+test('Daily PDF prints every stock table row, including missing values, zero, notes and statuses',()=>{
+ const payload={start:'2026-10-14',end:'2026-10-14',items,rows:[
+  {date:'2026-10-14',item_id:'stock-001',actual:0,system:0,remarks:'Checked (0)'},
+  {date:'2026-10-14',item_id:'stock-002',actual:1200.5,system:1201.75,remarks:'Physical mismatch'},
+  {date:'2026-10-14',item_id:'stock-003',actual:null,system:10,remarks:'Awaiting count'}
+ ]};
+ const groups=buildItemDetails(payload,summarize(payload,'daily','2026-10-14'));
+ assert.equal(groups.length,1);
+ assert.equal(groups[0].rows.length,3);
+ assert.deepEqual(groups[0].rows.map(r=>r.status),['MATCH','VARIANCE','AWAIT COUNT']);
+ assert.equal(groups[0].rows[0].actual,0);
+ assert.equal(groups[0].rows[1].difference,-1.25);
+ assert.equal(groups[0].rows[2].actual,null);
+ const pdf=makeExecutivePdf(payload,'daily','2026-10-14',stamp);
+ validatePdf(pdf);
+ assert.equal(pdf.detailDays,1);
+ assert.equal(pdf.detailRows,3);
+ assert.ok(pdf.detailPages>=1);
+ const source=pdfText(pdf);
+ for(const phrase of ['Item-level stocktake','ITEM NAME','ACTUAL','SYSTEM','DIFF','REMARKS',
+   'STATUS','Coke','Mango Syrup','Straws','Physical mismatch','Checked \\(0\\)','Awaiting count',
+   '1200.5','1201.75','-1.25','VARIANCE','AWAIT COUNT','NOT COUNTED']){
+   if(phrase==='NOT COUNTED')continue;
+   assert.ok(source.includes(phrase),'Missing printable item data: '+phrase);
+ }
+});
+test('An empty Daily report lists the full catalog as NOT COUNTED without inventing quantities',()=>{
+ const payload={start:'2026-10-14',end:'2026-10-14',items,rows:[]};
+ const groups=buildItemDetails(payload,summarize(payload,'daily','2026-10-14'));
+ assert.equal(groups.length,1);
+ assert.equal(groups[0].rows.length,items.length);
+ assert.ok(groups[0].rows.every(r=>r.actual===null&&r.system===null&&r.difference===null&&r.status==='NOT COUNTED'));
+ const pdf=makeExecutivePdf(payload,'daily','2026-10-14',stamp);
+ assert.equal(pdf.detailRows,items.length);
+ validatePdf(pdf);
+ assert.ok(pdfText(pdf).includes('NOT COUNTED'));
+});
+test('Weekly and monthly item tables include only dates with saved records and preserve archived IDs',()=>{
+ const rows=[
+   {date:'2026-10-12',item_id:'stock-001',actual:4,system:4,remarks:'Day 12'},
+   {date:'2026-10-14',item_id:'stock-002',actual:5,system:2,remarks:'Day 14'},
+   {date:'2026-10-14',item_id:'archived-678',actual:6,system:1,remarks:'Discontinued'}
+ ];
+ for(const kind of ['weekly','monthly']){
+  const range=kind==='weekly'?{start:'2026-10-12',end:'2026-10-18'}:
+    {start:'2026-10-01',end:'2026-10-31'};
+  const payload={...range,items,rows};
+  const groups=buildItemDetails(payload,summarize(payload,kind,'2026-10-14'));
+  assert.deepEqual(groups.map(g=>g.date),['2026-10-12','2026-10-14']);
+  assert.equal(groups[0].rows.length,3);
+  assert.equal(groups[1].rows.length,4);
+  assert.ok(groups[1].rows.some(r=>r.name==='Archived item archived-678'));
+  const pdf=makeExecutivePdf(payload,kind,'2026-10-14',stamp);
+  assert.equal(pdf.detailDays,2);
+  assert.equal(pdf.detailRows,7);
+  validatePdf(pdf);
+  assert.match(pdfText(pdf),/Day 12/);
+  assert.match(pdfText(pdf),/Day 14/);
+  assert.match(pdfText(pdf),/Discontinued/);
+ }
+});
+test('Large item catalogs and long multi-line remarks continue on A4 pages with repeated column headers',()=>{
+ const inventory=Array.from({length:160},(_,i)=>({
+   id:'stock-'+String(i+1).padStart(3,'0'),
+   name:'Item number '+String(i+1)+' with multiword descriptive title for wrapping',
+   uom:'pack'
+ }));
+ const lengthyNote='Long remark with detailed counting observations and supporting context. '.repeat(80);
+ const payload={start:'2026-10-14',end:'2026-10-14',items:inventory,rows:[
+   {date:'2026-10-14',item_id:'stock-001',actual:0,system:1,remarks:lengthyNote},
+   {date:'2026-10-14',item_id:'stock-160',actual:5,system:5,remarks:'Last item verified'}
+ ]};
+ const pdf=makeExecutivePdf(payload,'daily','2026-10-14',stamp);
+ validatePdf(pdf);
+ assert.equal(pdf.detailRows,160);
+ assert.ok(pdf.detailPages>=5,'Expected multiple continuing item table pages');
+ const source=pdfText(pdf);
+ assert.equal((source.match(/\(ITEM NAME\) Tj ET/g)||[]).length,pdf.detailPages);
+ assert.equal((source.match(/\(COUNT DATE: 14 October 2026/g)||[]).length,pdf.detailPages);
+ assert.ok(source.includes('(Last item verified) Tj ET'));
+ assert.ok(source.includes('(VERIFIED) Tj ET')||source.includes('(MATCH) Tj ET'));
+ // First long note has repeated words; ensure the content continues across pages.
+ assert.ok((source.match(/supporting context/g)||[]).length>=25);
+});
+test('Monthly periods without activity do not fabricate date-specific detail tables',()=>{
+ const payload={start:'2026-10-01',end:'2026-10-31',items,rows:[]};
+ const details=buildItemDetails(payload,summarize(payload,'monthly','2026-10-14'));
+ assert.equal(details.length,0);
+ const pdf=makeExecutivePdf(payload,'monthly','2026-10-14',stamp);
+ validatePdf(pdf);
+ assert.equal(pdf.detailRows,0);
+ assert.equal(pdf.detailDays,0);
+ assert.ok(pdfText(pdf).includes('No item-level records were saved for this reporting period.'));
 });
