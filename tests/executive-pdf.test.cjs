@@ -90,3 +90,18 @@ test('Executive PDF rejects invalid data and does not silently mix periods',()=>
  assert.throws(()=>makeExecutivePdf(wrong,'daily','2026-10-14',stamp),/Incomplete data/);
  assert.throws(()=>makeExecutivePdf({},'weekly','2026-10-14',stamp),/Incomplete data/);
 });
+
+test('Executive PDF embeds the uploaded CGV StockTake logo as an image on each page', () => {
+  const logo=require('../brand/cgv-stocktake-report-logo.js');
+  const bytes=Buffer.from(logo.jpegBase64,'base64');
+  assert.equal(bytes.length,6112);
+  assert.equal(logo.width,520);
+  assert.equal(logo.height,106);
+  const pdf=makeExecutivePdf({start:'2026-10-14',end:'2026-10-14',items,rows:[]},
+    'daily','2026-10-14',stamp);
+  const source=pdfText(pdf);
+  assert.match(source,/\/Subtype \/Image \/Width 520 \/Height 106/);
+  assert.match(source,/\/ReportLogo Do Q/);
+  assert.match(source,/\/XObject << \/ReportLogo/);
+  validatePdf(pdf);
+});
