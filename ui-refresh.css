@@ -413,3 +413,57 @@ body:has(#roleItems) .role-toolbar .role-button:hover{background:#e5e7e9}
 @media(max-width:350px){
   .frame #reportPanel .report-download-actions{grid-template-columns:1fr}
 }
+
+
+/* iOS Safari date control: constrain native picker to the same compact row height
+   as the report period selector and prevent its intrinsic width overflowing card. */
+#reportPanel .report-date-field{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+}
+#reportPanel input#reportDate{
+  -webkit-appearance:none;
+  appearance:none;
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  height:48px;
+  min-height:48px;
+  max-height:48px;
+  margin:0;
+  padding:0 14px;
+  border-radius:12px;
+  font-size:16px;
+  line-height:normal;
+  color-scheme:dark;
+  overflow:hidden;
+}
+#reportPanel input#reportDate::-webkit-date-and-time-value{
+  display:flex;
+  align-items:center;
+  width:100%;
+  min-height:0;
+  line-height:normal;
+  text-align:left;
+}
+#reportPanel input#reportDate::-webkit-datetime-edit{
+  padding:0;
+  min-width:0;
+}
+@media(max-width:560px){
+  #reportPanel .report-panel-controls{
+    width:100%;
+    min-width:0;
+    align-items:stretch;
+  }
+  #reportPanel .report-date-field{
+    flex:0 0 auto;
+    align-self:stretch;
+    width:100%;
+    min-width:0;
+    max-width:100%;
+  }
+}
