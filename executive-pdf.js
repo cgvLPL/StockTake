@@ -524,7 +524,7 @@ function downloadExecutivePdf(report){
   document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
-const api={makeExecutivePdf,downloadExecutivePdf,summarize};
+const api={makeExecutivePdf,downloadExecutivePdf,summarize,buildItemDetails};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 if(root)root.StockTakeExecutivePdf=api;
 })(typeof window!=='undefined'?window:null);
