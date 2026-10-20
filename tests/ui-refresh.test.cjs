@@ -38,3 +38,14 @@ test('Deployment includes the visual refresh for online and offline users', () =
   assert.match(workflow,/cp index\.html styles\.css roles\.css ui-refresh\.css/);
   assert.match(worker,/'\.\/ui-refresh\.css'/);
 });
+
+
+test('Executive report date selector remains 48px high and contained on iPhone', () => {
+  const css=file('ui-refresh.css');
+  const html=file('index.html');
+  assert.match(html, /<input type="date" id="reportDate" required>/);
+  assert.match(css, /#reportPanel input#reportDate\s*\{[^}]*height:48px;[^}]*max-height:48px;/s);
+  assert.match(css, /#reportPanel input#reportDate\s*\{[^}]*box-sizing:border-box;[^}]*width:100%;[^}]*min-width:0;/s);
+  assert.match(css, /#reportPanel \.report-date-field\s*\{[^}]*max-width:100%;/s);
+  assert.match(html, /ui-refresh\.css\?v=20261020-datebox/);
+});
