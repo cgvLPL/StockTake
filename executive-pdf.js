@@ -410,6 +410,84 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
         '. Download CSV for the full item-level audit trail.',M,y+8,9,false,C.muted);
     }
   }
+
+  // Full Verifier item table, printed after the executive summary. Every item
+  // with a saved-count date is included, not only mismatched items.
+  const detailGroups=buildItemDetails(payload,s);
+  const DETAIL_COLUMNS={
+    no:M+7,item:M+29,uom:M+170,
+    actual:M+256,system:M+311,diff:M+363,
+    remarks:M+369,status:M+464
+  };
+  let detailPages=0,detailRowCount=0,detailY=0;
+  function detailPage(group,continued){
+    subPage('Item-level stocktake',continued?'COUNT DATE - CONTINUED':'COMPLETE ITEM TABLE');
+    detailPages++;
+    pdf.text('COUNT DATE: '+formatCoverDate(group.date)+(continued?'  /  CONTINUED':''),M,124,12,true,C.ink);
+    pdf.textRight(group.rows.length+' items  |  '+group.recordCount+' saved rows',
+      RIGHT,129,9,false,C.muted);
+    pdf.line(M,149,RIGHT,149,C.line,.7);
+    pdf.rect(M,159,W-2*M,26,C.light);
+    pdf.text('NO',DETAIL_COLUMNS.no,167,7.5,true,C.ink);
+    pdf.text('ITEM NAME',DETAIL_COLUMNS.item,167,7.5,true,C.ink);
+    pdf.text('UOM',DETAIL_COLUMNS.uom,167,7.5,true,C.ink);
+    pdf.textRight('ACTUAL',DETAIL_COLUMNS.actual,167,7.5,true,C.ink);
+    pdf.textRight('SYSTEM',DETAIL_COLUMNS.system,167,7.5,true,C.ink);
+    pdf.textRight('DIFF',DETAIL_COLUMNS.diff,167,7.5,true,C.ink);
+    pdf.text('REMARKS',DETAIL_COLUMNS.remarks,167,7.5,true,C.ink);
+    pdf.text('STATUS',DETAIL_COLUMNS.status,167,7.5,true,C.ink);
+    detailY=185;
+  }
+  if(!detailGroups.length){
+    subPage('Item-level stocktake','NO SAVED COUNT DATES');
+    detailPages++;
+    pdf.rect(M,126,W-2*M,92,C.light);
+    pdf.text('No item-level records were saved for this reporting period.',M+15,145,11,true,C.ink);
+    pdf.text('The daily summaries above still show all calendar dates.',M+15,169,9,false,C.muted);
+    pdf.text('For a full inventory list on an empty date, select a Daily report.',M+15,188,9,false,C.muted);
+  }
+  detailGroups.forEach(group=>{
+    detailPage(group,false);
+    group.rows.forEach((item,index)=>{
+      const name=wrapPdfCell(item.name,31);
+      const uom=wrapPdfCell(item.uom,7);
+      const remarks=wrapPdfCell(item.remarks,22);
+      const status=wrapPdfCell(item.status,13);
+      const lines=Math.max(name.length,uom.length,remarks.length,status.length,1);
+      const lineHeight=10.5,padding=14;
+      let offset=0;
+      while(offset<lines){
+        const available=Math.floor((767-detailY-padding)/lineHeight);
+        if(available<1){detailPage(group,true);continue;}
+        const count=Math.min(available,lines-offset);
+        const height=Math.max(29,padding+count*lineHeight);
+        if(detailY+height>767){detailPage(group,true);continue;}
+        const yTop=detailY;
+        if(index%2===0)pdf.rect(M,yTop,W-2*M,height,C.light);
+        pdf.line(M,yTop+height,RIGHT,yTop+height,C.line,.35);
+        if(offset===0){
+          pdf.text(item.number,DETAIL_COLUMNS.no,yTop+7,7.6,false,C.muted);
+          pdf.textRight(fmtNum(item.actual),DETAIL_COLUMNS.actual,yTop+7,8,false,C.ink);
+          pdf.textRight(fmtNum(item.system),DETAIL_COLUMNS.system,yTop+7,8,false,C.ink);
+          pdf.textRight(fmtNum(item.difference),DETAIL_COLUMNS.diff,yTop+7,8,
+            item.status==='VARIANCE',item.status==='VARIANCE'?C.red:C.ink);
+        }
+        for(let i=0;i<count;i++){
+          const lineNumber=offset+i,at=yTop+7+i*lineHeight;
+          if(lineNumber<name.length)pdf.text(name[lineNumber],DETAIL_COLUMNS.item,at,7.8,false,C.ink);
+          if(lineNumber<uom.length)pdf.text(uom[lineNumber],DETAIL_COLUMNS.uom,at,7.1,false,C.muted);
+          if(lineNumber<remarks.length)pdf.text(remarks[lineNumber],DETAIL_COLUMNS.remarks,at,7.3,false,C.ink);
+          if(lineNumber<status.length)pdf.text(status[lineNumber],DETAIL_COLUMNS.status,at,6.9,
+            lineNumber===0,item.status==='MATCH'?C.green:
+              item.status==='VARIANCE'?C.red:item.status==='PENDING'?C.amber:C.muted);
+        }
+        detailY+=height;
+        offset+=count;
+      }
+      detailRowCount++;
+    });
+  });
+
   // Every page has a stable bottom footer and page count.
   const total=pdf.pages.length;
   pdf.pages.forEach((p,i)=>{
@@ -434,7 +512,8 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
   return {filename:'CGV-StockTake-Executive-'+kind+'-'+s.range.start+
     (s.range.start===s.range.end?'':'-to-'+s.range.end)+'.pdf',
     bytes:out.bytes, pages:out.pages,kind,start:s.range.start,end:s.range.end,
-    activeDays:s.activeDays,variances:s.variances,verified:s.verified,format:'A4 portrait',coverType,coverDate};
+    activeDays:s.activeDays,variances:s.variances,verified:s.verified,format:'A4 portrait',coverType,coverDate,
+    detailPages,detailDays:detailGroups.length,detailRows:detailRowCount};
 }
 function downloadExecutivePdf(report){
   if(typeof document==='undefined'||typeof URL==='undefined'||typeof Blob==='undefined')
