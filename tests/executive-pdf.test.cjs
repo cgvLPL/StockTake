@@ -105,3 +105,31 @@ test('Executive PDF embeds the uploaded CGV StockTake logo as an image on each p
   assert.match(source,/\/XObject << \/ReportLogo/);
   validatePdf(pdf);
 });
+
+
+test('Executive reports use print-ready A4 portrait pages and a dedicated white cover', () => {
+  const periods=[
+    {kind:'daily',anchor:'2026-10-14',start:'2026-10-14',end:'2026-10-14',date:'14 October 2026',heading:'Daily Stocktake'},
+    {kind:'weekly',anchor:'2026-10-14',start:'2026-10-12',end:'2026-10-18',date:'12 - 18 October 2026',heading:'Weekly Stocktake'},
+    {kind:'monthly',anchor:'2026-10-14',start:'2026-10-01',end:'2026-10-31',date:'October 2026',heading:'Monthly Stocktake'}
+  ];
+  for(const p of periods){
+    const result=makeExecutivePdf({start:p.start,end:p.end,items,rows:[]},p.kind,p.anchor,stamp);
+    const text=pdfText(result);
+    validatePdf(result);
+    assert.ok(result.pages>=3,'PDF should include a dedicated cover, summary, and daily detail');
+    assert.equal(result.format,'A4 portrait');
+    assert.equal(result.coverType,p.kind.charAt(0).toUpperCase()+p.kind.slice(1));
+    assert.equal(result.coverDate,p.date);
+    assert.match(text, /\/MediaBox \[0 0 595\.28 841\.89\]/);
+    assert.match(text, new RegExp('\\('+p.heading+'\\) Tj ET'));
+    assert.ok(text.includes('('+p.date+') Tj ET'),'Cover must show the report date or period');
+    assert.ok(text.includes('(REPORTING PERIOD) Tj ET')||text.includes('(REPORT DATE) Tj ET'));
+    assert.match(text,/\(Executive Report\) Tj ET/);
+    assert.match(text,/\(Stocktake executive summary\) Tj ET/);
+    assert.match(text,/\(CGV STOCKTAKE \/ EXECUTIVE REPORT\) Tj ET/);
+    assert.doesNotMatch(text,/0 675\.89 595\.28 166 re f/,'No black full-width top stripe on summary');
+    assert.doesNotMatch(text,/0 745\.89 595\.28 96 re f/,'No black full-width top stripe on detail');
+    assert.equal((text.match(/\/ReportLogo Do Q/g)||[]).length,result.pages,'Logo should appear on every A4 page');
+  }
+});
