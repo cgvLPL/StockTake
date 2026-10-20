@@ -86,6 +86,64 @@ function summarize(payload,kind,anchor){
     coverage:expected?counted/expected:0,matchRate:verified?matched/verified:0};
 }
 
+
+/* Builds the same dated stock-item rows displayed in the Verifier table.
+   A daily export includes every catalog item; longer periods include every
+   item for dates with saved records, plus archived IDs found in those records. */
+function buildItemDetails(payload,summary){
+  const catalog=payload.items.map((item,i)=>({
+    number:i+1,
+    id:String(item.id),
+    name:String(item.name||item.id),
+    uom:String(item.uom||'')
+  }));
+  const ids=new Set(catalog.map(item=>item.id)),byDate=new Map();
+  payload.rows.forEach(rec=>{
+    if(!rec||!rec.item_id||!rec.date||rec.date<summary.range.start||rec.date>summary.range.end)return;
+    if(!byDate.has(rec.date))byDate.set(rec.date,new Map());
+    byDate.get(rec.date).set(String(rec.item_id),rec);
+  });
+  return summary.daily
+    .filter(day=>summary.kind==='daily'||(byDate.get(day.date)?.size||0)>0)
+    .map(day=>{
+      const recs=byDate.get(day.date)||new Map();
+      const unknown=[...recs.keys()].filter(id=>!ids.has(id)).sort()
+        .map((id,i)=>({number:catalog.length+i+1,id,name:'Archived item '+id,uom:''}));
+      const rows=catalog.concat(unknown).map(item=>{
+        const rec=recs.get(item.id)||{};
+        const actual=quantity(rec.actual),system=quantity(rec.system);
+        const difference=actual!==null&&system!==null?
+          Math.round((actual-system)*10000)/10000:null;
+        const status=difference!==null?
+          (difference===0?'MATCH':'VARIANCE'):
+          actual!==null?'PENDING':
+          system!==null?'AWAIT COUNT':'NOT COUNTED';
+        return {...item,actual,system,difference,remarks:String(rec.remarks||''),status};
+      });
+      return {date:day.date,recordCount:recs.size,rows};
+    });
+}
+function wrapPdfCell(value,maxChars){
+  const raw=String(value==null?'':value).replace(/\r\n?/g,'\n').split('\n');
+  const wrapped=[];
+  raw.forEach(part=>{
+    const words=sane(part).trim().split(/\s+/).filter(Boolean);
+    if(!words.length){wrapped.push('');return;}
+    let line='';
+    for(const word of words){
+      if(line&&line.length+1+word.length>maxChars){wrapped.push(line);line='';}
+      let rest=word;
+      while(rest.length>maxChars){
+        wrapped.push(rest.slice(0,maxChars));
+        rest=rest.slice(maxChars);
+      }
+      if(rest)line=line?line+' '+rest:rest;
+    }
+    wrapped.push(line);
+  });
+  return wrapped.length?wrapped:[''];
+}
+
 function imageJpegHex(jpegBase64){
   if(typeof jpegBase64!=='string'||jpegBase64.length<128||jpegBase64.length>250000)
     throw Error('Invalid embedded report logo.');
