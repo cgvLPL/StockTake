@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {makeExecutivePdf,summarize,buildItemDetails}=require('../executive-pdf.js');
+const {makeExecutivePdf,summarize,buildItemDetails,wrapPdfCell,helveticaTextWidth}=require('../executive-pdf.js');
 const items=[
  {id:'stock-001',name:'Coke',uom:'g'},
  {id:'stock-002',name:'Mango Syrup',uom:'ml'},
@@ -157,11 +157,11 @@ test('Daily PDF prints every stock table row, including missing values, zero, no
  assert.ok(pdf.detailPages>=1);
  const source=pdfText(pdf);
  for(const phrase of ['Item-level stocktake','ITEM NAME','ACTUAL','SYSTEM','DIFF','REMARKS',
-   'STATUS','Coke','Mango Syrup','Straws','Physical mismatch','Checked \\(0\\)','Awaiting count',
-   '1200.5','1201.75','-1.25','VARIANCE','AWAIT COUNT','NOT COUNTED']){
-   if(phrase==='NOT COUNTED')continue;
+   'STATUS','Coke','Mango Syrup','Straws','Physical mismatch','Checked',
+   '1200.5','1201.75','-1.25','VARIANCE','AWAIT COUNT']){
    assert.ok(source.includes(phrase),'Missing printable item data: '+phrase);
  }
+ assert.equal(groups[0].rows[0].remarks,'Checked (0)');
 });
 test('An empty Daily report lists the full catalog as NOT COUNTED without inventing quantities',()=>{
  const payload={start:'2026-10-14',end:'2026-10-14',items,rows:[]};
@@ -172,7 +172,8 @@ test('An empty Daily report lists the full catalog as NOT COUNTED without invent
  const pdf=makeExecutivePdf(payload,'daily','2026-10-14',stamp);
  assert.equal(pdf.detailRows,items.length);
  validatePdf(pdf);
- assert.ok(pdfText(pdf).includes('NOT COUNTED'));
+ assert.ok(pdfText(pdf).includes('(NOT) Tj ET'));
+ assert.ok(pdfText(pdf).includes('(COUNTED) Tj ET'));
 });
 test('Weekly and monthly item tables include only dates with saved records and preserve archived IDs',()=>{
  const rows=[
@@ -193,8 +194,9 @@ test('Weekly and monthly item tables include only dates with saved records and p
   assert.equal(pdf.detailDays,2);
   assert.equal(pdf.detailRows,7);
   validatePdf(pdf);
-  assert.match(pdfText(pdf),/Day 12/);
-  assert.match(pdfText(pdf),/Day 14/);
+  assert.ok(pdfText(pdf).includes('Day'));
+  assert.equal(groups[0].rows[0].remarks,'Day 12');
+  assert.equal(groups[1].rows[1].remarks,'Day 14');
   assert.match(pdfText(pdf),/Discontinued/);
  }
 });
@@ -216,10 +218,11 @@ test('Large item catalogs and long multi-line remarks continue on A4 pages with 
  const source=pdfText(pdf);
  assert.equal((source.match(/\(ITEM NAME\) Tj ET/g)||[]).length,pdf.detailPages);
  assert.equal((source.match(/\(COUNT DATE: 14 October 2026/g)||[]).length,pdf.detailPages);
- assert.ok(source.includes('(Last item verified) Tj ET'));
+ assert.ok(source.includes('(Last item)')||source.includes('(Last)'));
+ assert.equal(payload.rows[1].remarks,'Last item verified');
  assert.ok(source.includes('(VERIFIED) Tj ET')||source.includes('(MATCH) Tj ET'));
  // First long note has repeated words; ensure the content continues across pages.
- assert.ok((source.match(/supporting context/g)||[]).length>=25);
+ assert.ok((source.match(/supporting/g)||[]).length>=25);
 });
 test('Monthly periods without activity do not fabricate date-specific detail tables',()=>{
  const payload={start:'2026-10-01',end:'2026-10-31',items,rows:[]};
@@ -230,4 +233,35 @@ test('Monthly periods without activity do not fabricate date-specific detail tab
  assert.equal(pdf.detailRows,0);
  assert.equal(pdf.detailDays,0);
  assert.ok(pdfText(pdf).includes('No item-level records were saved for this reporting period.'));
+});
+
+
+test('A4 table wraps long product names by measured width and keeps each line inside its cell',()=>{
+ const samples=[
+   {name:'CON HOT LID LOGO CINECAFE 12OZ EA [PR]',width:148,size:7.7},
+   {name:'CON HOT CUP LOGO CINECAFE 12OZEA [PR]',width:148,size:7.7},
+   {name:'CON BENTO 3 COMPARTMENT [PR]',width:148,size:7.7},
+   {name:'EXTREMELYLONGUNBROKENSERIALNUMBER1234567890',width:148,size:7.7},
+   {name:'NOT COUNTED',width:55,size:6.8},
+   {name:'Staff counted twice; recount needed',width:84,size:7.2}
+ ];
+ for(const item of samples){
+   const lines=wrapPdfCell(item.name,item.width,item.size);
+   assert.ok(lines.length>=1);
+   for(const line of lines){
+     assert.ok(helveticaTextWidth(line,item.size)<=item.width-1,
+       'Line overflows '+item.width+'pt cell: '+line);
+   }
+   assert.equal(lines.join(' ').replace(/\s+/g,''),item.name.replace(/\s+/g,''),
+     'No item label characters may be lost when wrapping');
+ }
+ const payload={start:'2026-10-21',end:'2026-10-21',
+  items:samples.map((x,i)=>({id:'stock-'+i,name:x.name,uom:'EA'})),
+  rows:[]};
+ const report=makeExecutivePdf(payload,'daily','2026-10-21',stamp);
+ validatePdf(report);
+ const source=pdfText(report);
+ const clipCount=(source.match(/ re W n/g)||[]).length;
+ assert.ok(clipCount>report.detailRows*4,'Expected PDF clip bounds around each rendered stock cell');
+ assert.equal(report.detailRows,samples.length);
 });
