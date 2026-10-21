@@ -123,25 +123,64 @@ function buildItemDetails(payload,summary){
       return {date:day.date,recordCount:recs.size,rows};
     });
 }
-function wrapPdfCell(value,maxChars){
-  const raw=String(value==null?'':value).replace(/\r\n?/g,'\n').split('\n');
-  const wrapped=[];
-  raw.forEach(part=>{
-    const words=sane(part).trim().split(/\s+/).filter(Boolean);
-    if(!words.length){wrapped.push('');return;}
+/* Approximate Standard Helvetica AFM widths (1000ths of an em) so the
+   PDF's stock table wraps by rendered width, not character count. */
+function helveticaTextWidth(value,fontSize,bold=false){
+  const U=[667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611];
+  const L=[556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500];
+  const punctuation={
+    ' ':278,'.':278,',':278,':':278,';':278,'-':333,'_':556,'/':278,
+    "'":222,'"':355,'(':333,')':333,'[':278,']':278,'&':667,
+    '+':584,'=':584,'@':1015,'#':556,'!':278,'?':556,'%':889
+  };
+  let units=0;
+  for(const ch of sane(value)){
+    const code=ch.charCodeAt(0);
+    if(code>=65&&code<=90)units+=U[code-65];
+    else if(code>=97&&code<=122)units+=L[code-97];
+    else if(code>=48&&code<=57)units+=556;
+    else units+=punctuation[ch]??620;
+  }
+  // Bold Helvetica is slightly wider than regular for many glyphs.
+  return units*Number(fontSize)/1000*(bold?1.065:1.015);
+}
+/* Do not split on arbitrary character counts: use each actual cell width,
+   including for long unbroken product names and multi-line staff remarks. */
+function wrapPdfCell(value,maxWidth,fontSize=7.8,bold=false){
+  const lines=[];
+  const paragraphs=String(value??'').replace(/\r\n?/g,'\n').split('\n');
+  const width=Math.max(4,Number(maxWidth)-3);
+  const fits=s=>helveticaTextWidth(s,fontSize,bold)<=width;
+  function appendWord(word,current){
+    let remaining=word;
+    while(remaining){
+      let length=remaining.length;
+      while(length>1&&!fits(remaining.slice(0,length)))length--;
+      const part=remaining.slice(0,length);
+      if(current){
+        lines.push(current);
+        current='';
+      }
+      remaining=remaining.slice(length);
+      if(remaining)lines.push(part);
+      else current=part;
+    }
+    return current;
+  }
+  for(const paragraph of paragraphs){
+    const words=sane(paragraph).trim().split(/\s+/).filter(Boolean);
+    if(!words.length){lines.push('');continue;}
     let line='';
     for(const word of words){
-      if(line&&line.length+1+word.length>maxChars){wrapped.push(line);line='';}
-      let rest=word;
-      while(rest.length>maxChars){
-        wrapped.push(rest.slice(0,maxChars));
-        rest=rest.slice(maxChars);
-      }
-      if(rest)line=line?line+' '+rest:rest;
+      const candidate=line?line+' '+word:word;
+      if(fits(candidate)){line=candidate;continue;}
+      if(line){lines.push(line);line='';}
+      if(fits(word))line=word;
+      else line=appendWord(word,line);
     }
-    wrapped.push(line);
-  });
-  return wrapped.length?wrapped:[''];
+    lines.push(line);
+  }
+  return lines.length?lines:[''];
 }
 
 function imageJpegHex(jpegBase64){
@@ -183,6 +222,14 @@ function writer(logo){
     if(!logo)return;
     add('q '+[w,0,0,h,x,H-y-h].map(f).join(' ')+' cm /ReportLogo Do Q\n');
   };
+  const boxText=(str,x,top,width,size=8,bold=false,fill=C.ink,align='left')=>{
+    const w=Math.max(1,width),h=size+4;
+    const drawX=align==='right'?x+Math.max(0,w-2-helveticaTextWidth(str,size,bold)):x+1;
+    // PDF clip path is a hard boundary: no glyph can enter a neighbouring cell.
+    add('q '+[x,H-top-h+1,w,h].map(f).join(' ')+' re W n\n');
+    text(str,drawX,top,size,bold,fill);
+    add('Q\n');
+  };
   function finish(){
     if(!pages.length)newPage();
     const objs=[null];const push=s=>(objs.push(s),objs.length-1);
@@ -221,7 +268,7 @@ function writer(logo){
     body+='trailer\n<< /Size '+objs.length+' /Root '+catalog+' 0 R >>\nstartxref\n'+start+'\n%%EOF\n';
     return {bytes:encoder.encode(body),pages:pages.length};
   }
-  return {newPage,rect,line,text,textRight,image,finish,hasLogo:!!logo,get pages(){return pages;}};
+  return {newPage,rect,line,text,textRight,boxText,image,finish,hasLogo:!!logo,get pages(){return pages;}};
 }
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function formatCoverDate(value){
@@ -524,7 +571,7 @@ function downloadExecutivePdf(report){
   document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),15000);
 }
-const api={makeExecutivePdf,downloadExecutivePdf,summarize,buildItemDetails};
+const api={makeExecutivePdf,downloadExecutivePdf,summarize,buildItemDetails,wrapPdfCell,helveticaTextWidth};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 if(root)root.StockTakeExecutivePdf=api;
 })(typeof window!=='undefined'?window:null);
