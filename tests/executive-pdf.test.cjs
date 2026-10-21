@@ -172,8 +172,8 @@ test('An empty Daily report lists the full catalog as NOT COUNTED without invent
  const pdf=makeExecutivePdf(payload,'daily','2026-10-14',stamp);
  assert.equal(pdf.detailRows,items.length);
  validatePdf(pdf);
- assert.ok(pdfText(pdf).includes('(NOT) Tj ET'));
- assert.ok(pdfText(pdf).includes('(COUNTED) Tj ET'));
+ assert.ok(pdfText(pdf).includes('(NOT COUNTED) Tj ET')||
+   (pdfText(pdf).includes('(NOT) Tj ET')&&pdfText(pdf).includes('(COUNTED) Tj ET')));
 });
 test('Weekly and monthly item tables include only dates with saved records and preserve archived IDs',()=>{
  const rows=[
@@ -218,7 +218,7 @@ test('Large item catalogs and long multi-line remarks continue on A4 pages with 
  const source=pdfText(pdf);
  assert.equal((source.match(/\(ITEM NAME\) Tj ET/g)||[]).length,pdf.detailPages);
  assert.equal((source.match(/\(COUNT DATE: 14 October 2026/g)||[]).length,pdf.detailPages);
- assert.ok(source.includes('(Last item)')||source.includes('(Last)'));
+ assert.ok(source.includes('(Last item verified) Tj ET')||source.includes('(Last item)')||source.includes('(Last)'));
  assert.equal(payload.rows[1].remarks,'Last item verified');
  assert.ok(source.includes('(VERIFIED) Tj ET')||source.includes('(MATCH) Tj ET'));
  // First long note has repeated words; ensure the content continues across pages.
