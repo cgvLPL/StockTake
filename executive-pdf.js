@@ -472,7 +472,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
     remarks:{x:M+372,w:84},
     status:{x:M+461,w:55}
   };
-  const cell=(key,text,top,size=7.7,bold=false,tint=C.ink,align='left')=>{
+  const detailCell=(key,text,top,size=7.7,bold=false,tint=C.ink,align='left')=>{
     const col=DETAIL_COLUMNS[key];
     pdf.boxText(text,col.x,top,col.w,size,bold,tint,align);
   };
@@ -485,14 +485,14 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
       RIGHT,129,9,false,C.muted);
     pdf.line(M,149,RIGHT,149,C.line,.7);
     pdf.rect(M,159,W-2*M,26,C.light);
-    cell('no','NO',167,7.3,true);
-    cell('item','ITEM NAME',167,7.3,true);
-    cell('uom','UOM',167,7.3,true);
-    cell('actual','ACTUAL',167,7.3,true,C.ink,'right');
-    cell('system','SYSTEM',167,7.3,true,C.ink,'right');
-    cell('diff','DIFF',167,7.3,true,C.ink,'right');
-    cell('remarks','REMARKS',167,7.3,true);
-    cell('status','STATUS',167,7.3,true);
+    detailCell(no','NO',167,7.3,true);
+    detailCell(item','ITEM NAME',167,7.3,true);
+    detailCell(uom','UOM',167,7.3,true);
+    detailCell(actual','ACTUAL',167,7.3,true,C.ink,'right');
+    detailCell(system','SYSTEM',167,7.3,true,C.ink,'right');
+    detailCell(diff','DIFF',167,7.3,true,C.ink,'right');
+    detailCell(remarks','REMARKS',167,7.3,true);
+    detailCell(status','STATUS',167,7.3,true);
     detailY=185;
   }
   if(!detailGroups.length){
@@ -523,7 +523,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
         if(index%2===0)pdf.rect(M,yTop,W-2*M,height,C.light);
         pdf.line(M,yTop+height,RIGHT,yTop+height,C.line,.35);
         if(offset===0){
-          cell('no',String(item.number),yTop+7,7.6,false,C.muted);
+          detailCell(no',String(item.number),yTop+7,7.6,false,C.muted);
           const numeric=(key,value,tint=C.ink,bold=false)=>{
             const displayed=fmtNum(value);
             const maxWidth=DETAIL_COLUMNS[key].w-4;
@@ -538,10 +538,10 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
         }
         for(let i=0;i<count;i++){
           const lineNumber=offset+i,at=yTop+7+i*lineHeight;
-          if(lineNumber<name.length)cell('item',name[lineNumber],at,7.7,false,C.ink);
-          if(lineNumber<uom.length)cell('uom',uom[lineNumber],at,7,false,C.muted);
-          if(lineNumber<remarks.length)cell('remarks',remarks[lineNumber],at,7.2,false,C.ink);
-          if(lineNumber<status.length)cell('status',status[lineNumber],at,6.8,
+          if(lineNumber<name.length)detailCell(item',name[lineNumber],at,7.7,false,C.ink);
+          if(lineNumber<uom.length)detailCell(uom',uom[lineNumber],at,7,false,C.muted);
+          if(lineNumber<remarks.length)detailCell(remarks',remarks[lineNumber],at,7.2,false,C.ink);
+          if(lineNumber<status.length)detailCell(status',status[lineNumber],at,6.8,
             lineNumber===0,item.status==='MATCH'?C.green:
               item.status==='VARIANCE'?C.red:item.status==='PENDING'?C.amber:C.muted);
         }
