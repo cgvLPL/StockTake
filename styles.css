@@ -654,3 +654,84 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
     padding:7px 10px;
   }
 }
+
+
+/* Keep Staff Management and Item Catalogue content inside the popup card. */
+@media(max-width:700px){
+  .staff-popup-backdrop{
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    padding:12px;
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
+  .staff-popup-backdrop .staff-popup{
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    margin:0 auto;
+    overflow:hidden;
+  }
+  .staff-popup-backdrop .staff-popup *,
+  .staff-popup-backdrop .staff-popup *::before,
+  .staff-popup-backdrop .staff-popup *::after{
+    box-sizing:border-box;
+    min-width:0;
+  }
+  .staff-popup-backdrop .staff-popup-heading{
+    width:100%;
+    max-width:100%;
+    padding:14px 16px;
+    gap:10px;
+  }
+  .staff-popup-backdrop .staff-popup-heading h2{
+    flex:1 1 auto;
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-backdrop .staff-popup-close{
+    flex:0 0 38px;
+    width:38px;
+    min-width:38px;
+    height:38px;
+  }
+  .staff-popup-backdrop .staff-popup-content{
+    display:block;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    padding:14px 16px 20px;
+    overflow-x:hidden;
+  }
+  .staff-popup-backdrop .staff-popup-content > *,
+  .staff-popup-backdrop .staff-popup-content .role-admin,
+  .staff-popup-backdrop .staff-popup-content form,
+  .staff-popup-backdrop .staff-popup-content label,
+  .staff-popup-backdrop .staff-popup-content input,
+  .staff-popup-backdrop .staff-popup-content select,
+  .staff-popup-backdrop .staff-popup-content button{
+    max-width:100%;
+  }
+  .staff-popup-backdrop .staff-popup-content .role-admin{
+    width:100%;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding-left:0;
+    padding-right:0;
+  }
+  .staff-popup-backdrop .staff-popup-content .role-admin form{
+    width:100%;
+    grid-template-columns:minmax(0,1fr);
+  }
+  .staff-popup-backdrop .staff-popup-content .role-admin form label{
+    width:100%;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-backdrop .staff-popup-content .role-admin form input,
+  .staff-popup-backdrop .staff-popup-content .role-admin form select{
+    width:100%;
+    min-width:0;
+  }
+}
