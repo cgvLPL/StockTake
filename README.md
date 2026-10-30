@@ -50,57 +50,38 @@ While the app is open, it checks for a new version every minute and when you ret
 
 Existing installations need one normal page refresh to load this notification feature. Future deployments are then detected automatically. Offline users receive the prompt after reconnecting and downloading the update.
 
-## Google Apps Script + Google Sheets synchronization
+## Neon PostgreSQL backend
 
-This version uses **Google Sheets** as the shared stock database, with **Google Apps Script** as the backend. Supabase is not required.
+The deployed Vercel project uses **Neon PostgreSQL** for shared inventory, stock counts, staff accounts and reporting. The frontend calls the same-origin Vercel Function at `/api/index`; database credentials remain server-side.
 
-1. Create a Google Sheet with a `Users` tab. Row 1: `Username | PIN_SHA256 | Role`.
-2. In Apps Script (Extensions → Apps Script), paste `google-apps-script/Code.gs` into `Code.gs`.
-3. Set a Script Property `SHEET_ID` to your Google Sheet's ID (Project Settings → Script properties).
-4. Add users to the `Users` sheet, with usernames, SHA-256 hexadecimal hashes of their PINs, and roles `counter` or `verifier`. Use long, unique random passphrases rather than short numeric PINs. Do not put plaintext credentials in the repository.
-5. Deploy → New deployment → Web app → Execute as **Me**, Who has access **Anyone**. Copy the `/exec` URL to `cloud-config.js` and commit that URL.
-6. Refresh the GitHub Pages app and sign in. Counters enter physical counts; Verifiers view shared counts and upload system quantities and remarks.
+### First-time setup
 
-**Security limitations:** This basic Apps Script deployment authenticates with staff credentials managed in a Google Sheet. It does not provide Google account sign-in, rate limiting, session tokens, or an enterprise-grade audit trail. Anyone with the web app URL can attempt authentication. Use strong random passphrases, protect the Sheet, and do not use this for sensitive production inventory without stronger authentication. Google Apps Script HTML iframe POST responses may be subject to browser restrictions, so validate the integration on your devices before relying on it. Network access is required.
+1. Confirm the Neon integration is connected to the Vercel project and that `POSTGRES_URL` is available in the Vercel environment used by the deployment.
+2. Deploy this branch to a Vercel preview and open the preview URL.
+3. On the first visit, create the initial administrator with a unique username and a password of at least 12 characters. The first admin session seeds the original **103 inventory items** into Neon automatically.
+4. Sign in as the administrator and open **Verifier → Staff management**. Create Counter and Verifier accounts using unique usernames and strong passwords (12+ characters).
+5. Counters enter physical quantities. Verifiers enter system quantities and remarks, view reports, and manage the catalogue.
 
-**Synchronization:** Counter changes save to the shared Sheet after each field change. Verifiers load a snapshot of that data and explicitly upload their system quantities and remarks. Refresh cloud data to see another user's edits. Automatic live updates and conflict resolution are not included. The Verifier dashboard continues to use a local working copy.
+The initial administrator can be created only while the users table is empty. The server enforces role checks for account and catalogue management. Sessions use signed, HttpOnly, Secure, SameSite cookies and expire after 12 hours. Passwords are stored as salted scrypt hashes.
 
-## Daily, weekly, and monthly report downloads
+### Item catalogue management
 
-Verifier users can open **Download stocktake report** on the dashboard, select **Daily**, **Weekly**, or **Monthly**, pick a reference date, and choose **Executive PDF** or **Detailed CSV**.
+Expand **Staff management → Item catalogue** while signed in as the administrator.
 
-- **Executive PDF** produces a print-ready **A4 portrait** report with a dedicated white cover page displaying the CGV StockTake logo, **Daily / Weekly / Monthly** title, date range and generation timestamp. It includes the executive summary, daily totals, priority variances, and a **complete item-by-item table** with item number, name, UOM, Actual, System, Difference, Remarks and Status. Table headings repeat on continuing A4 pages, long names/remarks wrap, and numeric zero values are preserved. Daily reports show every inventory item even if not counted; weekly/monthly reports show all items for each date with saved records (and archived item IDs), without generating rows for dates that had no saved entries. The report retains white headers/footers and 12.7 mm side margins. Print on **A4 paper at 100% / Actual size**. The detailed CSV remains available for spreadsheet analysis.
-- **Detailed CSV** keeps the full item-level audit export for Excel.
-- **Daily** exports the selected day, including all current inventory items and their Actual, System, Difference, Remarks and Status fields, even if no count has been entered.
-- **Weekly** covers Monday through Sunday containing the selected date. **Monthly** covers the entire selected calendar month. Both include daily summaries for every date, and item details for dates that have saved records.
-- The Excel-compatible UTF-8 CSV includes a daily summary (counted, verified, matched, differences, pending and not counted) followed by an item-level detail section. Zero values and decimal quantities are preserved. Exported notes and item names are sanitized to reduce spreadsheet-formula injection risks.
-- Reports are read from the **Google Sheets Counts tab**, not from the current device's local storage. Only **Verifier** accounts are authorized to request reports. The exports do not modify inventory or stock counts.
-- If an item recorded historically is no longer part of the active Inventory list, its item ID appears under an 'Archived item' label.
+- Add a single item using its permanent Item ID, Item Name and UOM.
+- Import a CSV exported from Excel. The required columns are **Item ID**, **Item Name** and **UOM** (also accepts common variants such as `ID`, `Description`, `Unit`).
+- Review the preview before importing. Duplicate IDs within the file and missing fields are rejected.
+- Importing an existing ID updates its name/UOM and reactivates it. Historical count rows remain in the database.
+- Do not reuse an ID for a different product. Archive/deactivation should be preferred to deleting inventory records.
 
-**One-time Apps Script update required:** copy the latest `google-apps-script/Code.gs` into the associated Google Apps Script project, then select **Deploy → Manage deployments → Edit → New version → Deploy**. The GitHub Pages update alone does not enable the new authenticated `report` backend action. Keep the existing deployment URL and Script Properties unchanged.
+The initial 103-item catalogue is bundled in `data/catalog.json` and is seeded once when the first administrator signs in. It does not import historical count records or old Google Sheets user accounts.
 
-## Editable Inventory and Excel-style daily reports
+### Data migration note
 
-After setting `SHEET_ID`, run `seedInventory()` **once** in the Apps Script editor. It creates the `Inventory` tab and imports the original 103 catalog items. Do not run it on a populated Inventory tab.
+The Neon migration preserves the existing item catalogue and the Counter/Verifier workflows, but it does **not** automatically copy historical counts or staff accounts from the former Google Sheets database. Keep the original Sheet as a read-only archive until its records and user list have been exported and reconciled. Create new staff accounts in the Neon administrator dashboard; do not reuse weak legacy PINs.
 
-Inventory columns: `Item ID | Item Name | UOM | Active | Sort Order`. Edit names, UOM, sort order, or the Active checkbox directly in Google Sheets. To add an item, assign a **new permanent ID** such as `stock-104` and mark it active. Never reuse an existing ID, even if the item is inactive. The app reloads this list when Counter or Verifier loads a date or refreshes cloud data.
+### Reports
 
-The backend also generates a formatted daily tab such as `14-Oct-2026` on each save, with the original workbook's eight columns and calculated Difference and Status. A `Summary` tab provides daily totals. `Counts` is the authoritative record store; daily tabs are **generated views** and direct edits to them will be overwritten. To change stock values, use the web app. The date tabs and summary are created for days with saved counts, rather than pre-creating every date of the month.
+Daily, weekly and monthly Executive PDF and Detailed CSV reports are generated from Neon-saved stock records. Only Verifier accounts can request reports. The export includes saved count details, item IDs and archived historical item references where applicable.
 
-For production, test Apps Script permissions and browser communication before rollout. Google Sheets should be shared only with trusted inventory administrators; staff use the web app rather than editing protected records.
 
-## Staff account setup
-
-The backend provides `setupStaffAccounts()` to create or update two accounts:
-- `admin` — `verifier`
-- `stars` — `counter`
-
-In the Apps Script editor, open **Project Settings → Script Properties**, set `ADMIN_PIN` and `STARS_PIN` to the desired PINs, and run `setupStaffAccounts()` once. It writes SHA-256 PIN hashes to the private `Users` tab, not plaintext PINs. Then **Deploy → Manage deployments → Edit → New version → Deploy** so the web app runs the updated code.
-
-A four-digit PIN (including 0000) is weak and not recommended for an internet-exposed application. Prefer long, unique passphrases and add throttling and proper authentication before production use.
-
-## Verifier staff account management
-
-After deploying the latest Apps Script version, sign in as a Verifier and expand **Staff management** on the Verifier dashboard. Verifiers can create additional Counter and Verifier users. Usernames must be unique, and new passwords must be at least eight characters. Counter users cannot call the create-user backend operation. The `Users` sheet stores SHA-256 password hashes. The initial admin/stars accounts still require running `setupStaffAccounts()` in the Apps Script editor; GitHub deployment cannot modify Apps Script project properties or spreadsheet data automatically.
-
-Security: this starter authentication has no brute-force rate limiting, salts, or account recovery. Do not use weak 4-digit PINs on an internet-accessible app in production.
