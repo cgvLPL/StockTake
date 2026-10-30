@@ -202,3 +202,18 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
 .workspace-footer>span{font-size:10px;letter-spacing:.16em;font-weight:700;color:#7b8084}
 .role-card .workspace-footer #roleLogout{margin:0;border:1px solid #d4d7da;border-radius:999px;min-height:38px;padding:8px 17px;background:#e9ebed;color:#1a1c1e}
 @media(max-width:480px){.role-card:has(.workspace-choices){padding:26px 20px}.role-card .workspace-choices{grid-template-columns:1fr;gap:10px}.role-card .workspace-choice{min-height:120px;padding:16px 18px;gap:12px;border-radius:20px}.workspace-choice-icon{width:36px;height:36px;font-size:11px}.workspace-choice-copy strong{font-size:21px}.workspace-choice-copy small{font-size:11px}.workspace-choice-arrow{top:16px;right:18px}.role-card:has(.workspace-choices) .role-logo{margin-bottom:22px}}
+
+/* Neon administrator catalogue dashboard */
+.role-catalog-admin{margin-top:22px;padding-top:20px;border-top:1px solid #d9dcde}
+.role-catalog-admin h3{margin:0 0 7px;font-size:18px;letter-spacing:-.03em}
+.role-catalog-admin>p{font-size:12px;line-height:1.5;color:#73787c}
+.role-catalog-admin form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.role-catalog-admin label{display:grid;gap:6px;font-size:11px;font-weight:650;color:#4c5155}
+.role-catalog-admin input{width:100%;min-width:0;min-height:42px;padding:10px 11px;border:1px solid #d2d6d8;border-radius:9px;background:#fff;color:#17191b;font:inherit}
+.role-catalog-admin .role-button{min-height:42px;padding:10px 16px}
+.role-catalog-admin hr{border:0;border-top:1px solid #e1e3e4;margin:20px 0}
+.role-catalog-admin #catalogPreview{margin:10px 0}
+.role-catalog-admin #catalogItems{max-height:300px;overflow:auto;margin-top:12px}
+.role-catalog-admin #catalogItems .role-item{min-height:46px}
+.role-catalog-admin #catalogImport{margin-top:10px}
+@media(max-width:600px){.role-catalog-admin form{grid-template-columns:1fr}.role-catalog-admin form .role-button{width:100%}}
