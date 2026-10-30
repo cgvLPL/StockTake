@@ -286,6 +286,7 @@ async function verifier(){
   if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());
   if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
   mountStaffAccounts();
+  if(state.isAdmin)mountAdminCatalog();
   setupReportDownloads();
   startVerifierLiveSync();
   /* Counter entries sync from Neon automatically while the verifier tab is open. */
