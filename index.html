@@ -70,15 +70,16 @@
     </div>
     <div class="dashboard-progress-legend"><span>Verified items</span><span>100% target</span></div>
   </section>
-  <section class="report-panel" id="reportPanel" aria-labelledby="reportTitle">
-    <div class="report-panel-heading">
+  <details class="report-panel" id="reportPanel">
+    <summary class="report-panel-heading">
       <div>
         <span class="report-eyebrow">EXPORT &amp; ARCHIVE</span>
         <h3 id="reportTitle">Download stocktake report</h3>
         <p>Download a management-ready PDF summary or an item-level CSV audit export.</p>
       </div>
-      <span class="report-icon" aria-hidden="true">↓</span>
-    </div>
+      <span class="report-icon" aria-hidden="true"><span class="report-chevron">⌄</span></span>
+    </summary>
+    <div class="report-panel-content">
     <div class="report-panel-controls">
       <div class="report-period-field">
         <span class="report-label">Report period</span>
@@ -103,7 +104,8 @@
     </div>
     <p id="reportPeriodHint" class="report-hint">Exports one day of item-level records.</p>
     <p id="reportDownloadStatus" class="report-status" role="status" aria-live="polite"></p>
-  </section>
+    </div>
+  </details>
   <section class="card mc" id="monthCard">
     <details class="month-disclosure" id="monthDisclosure">
       <summary class="month-summary">
