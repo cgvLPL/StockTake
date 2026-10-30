@@ -71,10 +71,24 @@ async function login(){
   }
   const selected=f.querySelector('[data-method].is-selected')?.dataset.method||(f.querySelector('[data-method]')? 'password':(f.querySelector('#credentialLabel')?.textContent.includes('PIN')?'pin':'password'));
   const credential=f.elements.credential?.value||'';
-  b.disabled=true;b.textContent='Signing in…';
-  try{const result=await api('login',{username:f.dataset.username,method:selected,[selected]:credential});state.user=result.user.username;state.role=result.user.role;state.isAdmin=!!result.user.is_admin;welcome();}
-  catch(err){message(err.message)}
-  finally{b.disabled=false;b.textContent='Sign in'}
+  const submitButton=f.querySelector('button[type="submit"]');
+  if(!submitButton||submitButton.dataset.submitting==='yes')return;
+  submitButton.dataset.submitting='yes';submitButton.disabled=true;submitButton.textContent='Signing in…';
+  let recovered=false;
+  const recoveryTimer=setTimeout(()=>{
+   recovered=true;submitButton.disabled=false;submitButton.textContent='Try again';
+   delete submitButton.dataset.submitting;
+   message('Sign-in is taking too long. Please try again. If this keeps happening, the server request is not completing.');
+  },12000);
+  try{
+   const result=await api('login',{username:f.dataset.username,method:selected,[selected]:credential});
+   clearTimeout(recoveryTimer);
+   state.user=result.user.username;state.role=result.user.role;state.isAdmin=!!result.user.is_admin;welcome();
+  }catch(err){message(err.message)}
+  finally{
+   clearTimeout(recoveryTimer);
+   if(!recovered&&submitButton.isConnected){submitButton.disabled=false;submitButton.textContent='Sign in';delete submitButton.dataset.submitting;}
+  }
  };
 }
 function welcome(){
