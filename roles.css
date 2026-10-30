@@ -281,3 +281,9 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
   .role-admin form>* ,.role-catalog-admin form>*{min-width:0;max-width:100%}
   .role-admin button,.role-catalog-admin button{justify-self:stretch}
 }
+
+/* Password / PIN selector */
+.credential-switch{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:4px;margin:4px 0 12px;border:1px solid #dfe2e7;border-radius:13px;background:#f3f4f6}
+.credential-switch button{appearance:none;border:0;border-radius:9px;padding:10px 12px;background:transparent;color:#59616d;font:inherit;font-weight:650;cursor:pointer}
+.credential-switch button.is-selected{background:#fff;color:#202631;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+#roleLogin #credentialLabel input{box-sizing:border-box;width:100%}
