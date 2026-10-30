@@ -501,3 +501,34 @@ body:has(#roleItems) .role-toolbar .role-button:hover{background:#e5e7e9}
   .frame .admin-bento .staff-panel summary{min-height:82px;padding:11px 9px;font-size:12px}
   .frame .admin-bento .staff-panel summary span{font-size:9px}
 }
+
+
+/* Staff management and item catalogue open as modal pop-ups, not accordions. */
+.staff-panel-trigger{
+ width:100%;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:17px 19px;border:0;background:transparent;color:#202328;text-align:left;
+ font:inherit;font-size:15px;font-weight:750;cursor:pointer;
+}
+.staff-panel-trigger>span:first-child{display:flex;flex-direction:column;gap:5px}
+.staff-panel-trigger>span:first-child span{font-size:11px;font-weight:500;color:#858a90}
+.staff-popup-arrow{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:#f0f1f2;color:#272a2e;font-size:17px}
+.staff-popup-backdrop[hidden]{display:none!important}
+.staff-popup-backdrop{
+ position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
+ padding:20px;background:rgba(15,17,20,.52);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+.staff-popup{
+ width:min(680px,100%);max-height:min(86dvh,850px);overflow:auto;
+ padding:23px;border:1px solid #e7e8ea;border-radius:22px;background:#fff;
+ box-shadow:0 24px 80px #0003;overscroll-behavior:contain;
+}
+.staff-popup-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.staff-popup-heading h2{margin:0;font-size:21px;letter-spacing:-.04em}
+.staff-popup-close{width:38px;height:38px;border:0;border-radius:12px;background:#f0f1f2;color:#25282c;font-size:25px;cursor:pointer}
+.staff-popup-content>.role-admin{margin:0}
+body.staff-popup-open{overflow:hidden}
+@media(max-width:700px){
+ .staff-popup-backdrop{align-items:flex-end;padding:0}
+ .staff-popup{width:100%;max-height:88dvh;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));border-radius:23px 23px 0 0}
+ .staff-panel-trigger{min-height:68px;padding:14px}
+}
