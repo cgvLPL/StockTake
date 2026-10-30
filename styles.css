@@ -488,3 +488,22 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
   }
   .brand-header .brand-logo{width:min(100%,520px)}
 }
+
+
+/* Collapsible Export & Archive panel */
+#reportPanel.report-panel{padding:0;overflow:hidden}
+#reportPanel>.report-panel-heading{list-style:none;cursor:pointer;align-items:center;margin:0;padding:clamp(18px,3vw,26px);gap:16px}
+#reportPanel>.report-panel-heading::-webkit-details-marker{display:none}
+#reportPanel>.report-panel-heading::marker{content:""}
+#reportPanel .report-icon{transition:transform .18s ease}
+#reportPanel[open] .report-icon{transform:rotate(180deg)}
+#reportPanel .report-chevron{display:block;line-height:1}
+#reportPanel .report-panel-content{padding:0 clamp(18px,3vw,26px) clamp(18px,3vw,26px)}
+#reportPanel .report-panel-heading h3{margin:7px 0}
+#reportPanel .report-panel-heading p{margin:0}
+@media(max-width:560px){
+ #reportPanel.report-panel{padding:0}
+ #reportPanel>.report-panel-heading{padding:17px}
+ #reportPanel .report-panel-content{padding:0 17px 17px}
+}
+@media(prefers-reduced-motion:reduce){#reportPanel .report-icon{transition:none}}
