@@ -61,7 +61,7 @@ async function login(){
   const selected=f.querySelector('[data-method].is-selected')?.dataset.method||(f.querySelector('[data-method]')? 'password':(f.querySelector('#credentialLabel')?.textContent.includes('PIN')?'pin':'password'));
   const credential=f.elements.credential?.value||'';
   b.disabled=true;b.textContent='Signing in…';
-  try{const result=await api('login',{username:f.dataset.username,method:selected,[selected]:credential});state.user=result.user.username;state.role=result.user.role;state.isAdmin=!!result.user.is_admin;if(state.isAdmin&&!seeded){await api('seedCatalog');seeded=true;}welcome();}
+  try{const result=await api('login',{username:f.dataset.username,method:selected,[selected]:credential});state.user=result.user.username;state.role=result.user.role;state.isAdmin=!!result.user.is_admin;welcome();}
   catch(err){message(err.message)}
   finally{b.disabled=false;b.textContent='Sign in'}
  };
