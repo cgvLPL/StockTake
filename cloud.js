@@ -43,7 +43,7 @@ async function login(){
    finally{b.disabled=false;b.textContent='Create administrator'}
    return;
   }
-  const username=f.elements.username.value.trim().toLowerCase();
+  const username=f.dataset.step==='credential'?f.dataset.username:f.elements.username.value.trim().toLowerCase();
   if(f.dataset.step==='username'){
    b.textContent='Checking…';
    try{
