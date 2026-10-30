@@ -1,0 +1,517 @@
+[
+  {
+    "id": "stock-001",
+    "name": "CON BIB COKE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-002",
+    "name": "CON BIB FANTA",
+    "uom": "g"
+  },
+  {
+    "id": "stock-003",
+    "name": "CON BIB SPRITE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-004",
+    "name": "CON CAPPUCINO POWDER NESTLE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-005",
+    "name": "CON MILO ACTIVE GO NESTLE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-006",
+    "name": "CON CORNSEED BUTTERFLY [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-007",
+    "name": "CON CARAMEL SMN [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-008",
+    "name": "CON SALTY MIX SMN [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-009",
+    "name": "CON POPPING OIL SMN [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-010",
+    "name": "CON COOKING OIL [PR]",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-011",
+    "name": "CON FRENCH FRIES COATED STRAIGHT CUT 13.61KG",
+    "uom": "g"
+  },
+  {
+    "id": "stock-012",
+    "name": "CON ROLL BUN BERNARDI",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-013",
+    "name": "CON BEEF SAUSAGE BERNARDI",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-014",
+    "name": "CON CHICKEN SAUSAGE BERNARDI",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-015",
+    "name": "CON SIOMAY PREMIUM CEDEA",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-016",
+    "name": "CON COLD PAPER CUP 32OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-017",
+    "name": "CON COLD PAPER CUP 22OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-018",
+    "name": "CON COLD PAPER CUP 12OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-019",
+    "name": "CON&CAFE_PAPER CUP 8OZ HOT",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-020",
+    "name": "CON CLEAR CUP - U 16OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-021",
+    "name": "CON SMALL PAPER BAG POPCRON [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-022",
+    "name": "CON MEDIUM PAPER BAG POPCORN [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-023",
+    "name": "CON SNACK TRAY [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-024",
+    "name": "CON PAPER BOX TRAY [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-025",
+    "name": "CON COLD PAPER CUP 16OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-026",
+    "name": "CON LYCHEE CAN DIP",
+    "uom": "g"
+  },
+  {
+    "id": "stock-027",
+    "name": "CON LEMON LOKAL",
+    "uom": "g"
+  },
+  {
+    "id": "stock-028",
+    "name": "CON DAUN MINT",
+    "uom": "g"
+  },
+  {
+    "id": "stock-029",
+    "name": "CON CORNSEED MUSHROOM [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-030",
+    "name": "CON CUTLERY SET (SPOON + FORK + TISSUE) [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-031",
+    "name": "CON PAPER BOWL 650ML [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-032",
+    "name": "CON FLAT LID PAPER BOWL 650ML [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-033",
+    "name": "CON MIE SEDAAP GORENG 91GR BAG - WINGS",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-034",
+    "name": "CON LYCHEE SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-035",
+    "name": "CON BUCKET POPCORN 110OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-036",
+    "name": "CON SJORA MANGO PEACH CONCENTRATE 1L NESTLE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-037",
+    "name": "CON KALAMANSI SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-038",
+    "name": "CON HOT LID LOGO CINECAFE 12OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-039",
+    "name": "CON HOT CUP LOGO CINECAFE 12OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-040",
+    "name": "CON CHICKEN KARAGE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-041",
+    "name": "CON BLACKCURRANT NESTLE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-042",
+    "name": "CON LEMONADE NESTLE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-043",
+    "name": "CON HONEY SYRUP DIP",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-044",
+    "name": "CON CLEAR CUP PP 22OZ [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-045",
+    "name": "CON TROPICAL JELLY SANTINO",
+    "uom": "g"
+  },
+  {
+    "id": "stock-046",
+    "name": "CON SIMPLE SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-047",
+    "name": "CON SAUCE AYAM MADU - JSF",
+    "uom": "g"
+  },
+  {
+    "id": "stock-048",
+    "name": "CON JELLY BOBBA PMN",
+    "uom": "g"
+  },
+  {
+    "id": "stock-049",
+    "name": "CON YAKULT DIP",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-050",
+    "name": "CON BENTO 3 COMPARTMENT [PR]",
+    "uom": "Set"
+  },
+  {
+    "id": "stock-051",
+    "name": "CON BLACK TEA JUMBO SUKANDA",
+    "uom": "g"
+  },
+  {
+    "id": "stock-052",
+    "name": "CON SHOPPING BAG CGV [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-053",
+    "name": "CON POPCORN CHOCOLATE SMN [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-054",
+    "name": "CON SAKURA SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-055",
+    "name": "CON TWIN CUP SET",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-056",
+    "name": "CON POPCORN BOX MINI [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-057",
+    "name": "CON MANGO POPPING BOBA SANTINO",
+    "uom": "g"
+  },
+  {
+    "id": "stock-058",
+    "name": "CON OSMANTHUS SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-059",
+    "name": "CON CHOCOMALT TOPPING CRUMB 500GR BONALLIE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-060",
+    "name": "CON SNACK TRAY PP [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-061",
+    "name": "CON CHIA SEED DIP",
+    "uom": "g"
+  },
+  {
+    "id": "stock-062",
+    "name": "CON WHITE CHEESE SAUCE [PR]",
+    "uom": "g"
+  },
+  {
+    "id": "stock-063",
+    "name": "CON BIB ZERO COKE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-064",
+    "name": "CON BIB JASMINE TEA",
+    "uom": "g"
+  },
+  {
+    "id": "stock-065",
+    "name": "CON BIB LEMON TEA",
+    "uom": "g"
+  },
+  {
+    "id": "stock-066",
+    "name": "CON WATERMELON SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-067",
+    "name": "COFFEE JELLY DIP",
+    "uom": "g"
+  },
+  {
+    "id": "stock-068",
+    "name": "CON HYDROCOCO 500ML - KALBE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-069",
+    "name": "CON MIXEDBERRIES SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-070",
+    "name": "CON CHEESE SEASONING POWDER [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-071",
+    "name": "CON BBQ SEASONING POWDER [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-072",
+    "name": "CON PAPER BAG SHAKE SERIES [PR]",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-073",
+    "name": "CON GINGERBREAD SYRUP BONALLIE",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-074",
+    "name": "CON SEASALT FOAM BONALLIE",
+    "uom": "g"
+  },
+  {
+    "id": "stock-075",
+    "name": "CON FRUIT COCKTAIL - DIP",
+    "uom": "g"
+  },
+  {
+    "id": "stock-076",
+    "name": "CON CHOCOLATE SAUCE - PMN",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-077",
+    "name": "CON COOKIE CRUMB - PMN",
+    "uom": "g"
+  },
+  {
+    "id": "stock-078",
+    "name": "CON SANTAN CAIR 65ML - SASA",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-079",
+    "name": "CON BUNGA TELANG - PMN",
+    "uom": "g"
+  },
+  {
+    "id": "stock-080",
+    "name": "CON POPPING CANDY – TOFFIN",
+    "uom": "g"
+  },
+  {
+    "id": "stock-081",
+    "name": "CON BUBBLEGUM - SANTINO",
+    "uom": "g"
+  },
+  {
+    "id": "stock-082",
+    "name": "CON NATAKU BAG 1000 ML",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-083",
+    "name": "CON FO BLUE CURACAO - TOFFIN",
+    "uom": "ml"
+  },
+  {
+    "id": "stock-084",
+    "name": "Chocolatos Pillow 21 g",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-085",
+    "name": "Garuda Rosta Bawang 20+4 g",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-086",
+    "name": "Garuda Crunchy Corn Tornado Sea Salt 13+4 g",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-087",
+    "name": "CON RTD AQUA MINERAL WATER 600ML",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-088",
+    "name": "CON RTD MIZONE",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-089",
+    "name": "CON RTD MINUTE MAID PULPY ORANGE",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-090",
+    "name": "FANTASTIC BEAST COLLECTIBLE (BUKAN PLU SALES)",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-091",
+    "name": "MERCHANDISE  2D CHARACTER STRAWS ( 2 DESIGN : JUDY & NICK ) - ZOOTOPIA",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-092",
+    "name": "CON RTD FRESTEA LEMONGRASS 500ML",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-093",
+    "name": "CON RTD FRESTEA BLACKCURRANT 500ML",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-094",
+    "name": "CON DOUBLE SCOOP CHOCOLATE JOYDAY",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-095",
+    "name": "CON DOUBLE SCOOP STRAWBERRY JOYDAY",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-096",
+    "name": "CON TRAY FUN BOX",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-097",
+    "name": "ADD BROWN PAPER BAG",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-098",
+    "name": "MKT_MOVIE PASSPORT (UK A6-COVER AC 260GSM,210GSM - ISI HVS INCLUDE STICKER-FIN STEPLES, ROUNDED)",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-099",
+    "name": "MKT_LUNCH BAG FOIL (D600 KOMBINASI PRINTING BAHAN TASLAN- 1 SISI FULL COLOUR) ORANGE/HIJAU",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-100",
+    "name": "MKT_BUCKET POPCORN ( UK 1 LTR - MATERIAL PLASTIK FOOD GRADE, PRINTING, INCLUDE TALI + 2 PENGAIT )",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-101",
+    "name": "CAP LANG AROMATHERAPY ROLL ON ( ORIGINAL, LAVENDER & ROSE )",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-102",
+    "name": "CON_Coke 250ml PET (FREE)",
+    "uom": "EA"
+  },
+  {
+    "id": "stock-103",
+    "name": "FREE COCA COLA PET 250ml",
+    "uom": "EA"
+  }
+]
