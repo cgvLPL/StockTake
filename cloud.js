@@ -21,7 +21,7 @@ async function login(){
  try{setup=(await api('status')).needsSetup===true}catch(err){}
  const form=setup
  ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
- : '<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><div class="credential-switch" role="group" aria-label="Sign-in method"><button type="button" class="is-selected" data-method="password">Password</button><button type="button" data-method="pin">PIN</button></div><label id="credentialLabel">Password<input name="credential" type="password" autocomplete="current-password" required></label><input type="hidden" name="method" value="password"><button class="role-button">Sign in</button></form>';
+ : '<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><div class="credential-switch" role="group" aria-label="Sign-in method"><button type="button" class="is-selected" data-method="password">Password</button><button type="button" data-method="pin">PIN</button></div><label id="credentialLabel">Password<input name="credential" type="password" autocomplete="current-password" required></label><input type="hidden" name="method" value="password"><button type="submit" class="role-button">Sign in</button></form>';
  shell(form);
  if(!setup){
   const formEl=root.querySelector('#roleLogin');
@@ -44,7 +44,7 @@ async function login(){
   });
  }
  root.querySelector('form').onsubmit=async e=>{
-  e.preventDefault();const f=e.target,b=f.querySelector('button');b.disabled=true;b.textContent=setup?'Creating…':'Signing in…';message('');
+  e.preventDefault();const f=e.target,b=f.querySelector('button[type="submit"]');b.disabled=true;b.textContent=setup?'Creating…':'Signing in…';message('');
   state.user=f.elements.username.value.trim().toLowerCase();
   try{
    const method=f.elements.method?.value||'password';const credential=f.elements.credential?.value||f.elements.password?.value||'';const result=await api(setup?'setup':'login',setup?{username:state.user,password:credential}:{username:state.user,method,[method]:credential});
@@ -77,7 +77,7 @@ function mountStaffAccounts(){
   staffForm.onsubmit=async e=>{
    e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]')||form.querySelector('button'),result=area.querySelector('#staffResult');
    button.disabled=true;result.textContent='Creating account…';
-   try{const response=await api('createUser',{newUsername:form.elements.username.value,credential:form.elements.credential.value,credentialType:form.elements.credentialType.value,newRole:form.elements.role.value});result.textContent='Created '+response.username+' ('+response.role+').';form.reset()}
+   try{const response=await api('createUser',{newUsername:form.elements.username.value,credential:form.elements.credential.value,credentialType:form.elements.credentialType.value,newRole:form.elements.role.value});result.textContent='Created '+response.username+' ('+response.role+').';form.reset();updateCredential()}
    catch(err){result.textContent='Account not created: '+err.message}
    finally{button.disabled=false}
   };
