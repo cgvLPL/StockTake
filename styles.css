@@ -519,3 +519,138 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
 }
 .credential-reveal:hover{background:#eceff2}
 .credential-reveal:focus-visible{outline:2px solid #ff681f;outline-offset:2px}
+
+
+/* Mobile alignment for Staff Management and Item Catalogue popups. */
+@media(max-width:700px){
+  .staff-popup,
+  .staff-popup-content,
+  .staff-popup-heading,
+  .staff-popup-content .role-admin,
+  .staff-popup-content .role-catalog-admin{
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+  }
+  .staff-popup-content{
+    padding:16px 14px calc(20px + env(safe-area-inset-bottom,0px));
+    overflow-x:hidden;
+  }
+  .staff-popup-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:16px;
+  }
+  .staff-popup-heading h2{
+    min-width:0;
+    margin:0;
+    font-size:20px;
+    line-height:1.25;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-content .role-admin h3{
+    margin:4px 0 8px;
+    font-size:18px;
+    line-height:1.3;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-content .role-admin>p{
+    margin:0 0 16px;
+    font-size:13px;
+    line-height:1.55;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-content .role-admin form,
+  .staff-popup-content #newStaffForm,
+  .staff-popup-content #catalogAddForm,
+  .staff-popup-content #existingPinForm{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    align-items:stretch;
+    gap:13px;
+    width:100%;
+    min-width:0;
+  }
+  .staff-popup-content .role-admin form>label,
+  .staff-popup-content .role-admin>label{
+    display:block;
+    position:relative;
+    width:100%;
+    min-width:0;
+    margin:0;
+    font-size:13px;
+    line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-content .role-admin form>label input,
+  .staff-popup-content .role-admin form>label select,
+  .staff-popup-content .role-admin>label input,
+  .staff-popup-content .role-admin>label select{
+    display:block;
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    min-height:46px;
+    margin-top:7px;
+    font-size:16px;
+  }
+  .staff-popup-content .role-admin form>button,
+  .staff-popup-content .role-admin>button{
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    min-height:46px;
+    justify-self:stretch;
+    white-space:normal;
+    line-height:1.3;
+  }
+  .staff-popup-content .role-admin hr{
+    width:100%;
+    margin:18px 0;
+  }
+  .staff-popup-content #catalogPreview,
+  .staff-popup-content #catalogItems,
+  .staff-popup-content #catalogResult,
+  .staff-popup-content #staffResult,
+  .staff-popup-content #existingPinResult{
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+    line-height:1.5;
+  }
+  .staff-popup-content .role-item{
+    min-width:0;
+    width:100%;
+    gap:10px;
+    align-items:center;
+  }
+  .staff-popup-content .role-item span{
+    min-width:0;
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-content .role-item b,
+  .staff-popup-content .role-item small{
+    overflow-wrap:anywhere;
+  }
+  .staff-popup-content .role-admin label:has(.credential-reveal){
+    display:block;
+    position:relative;
+    padding-bottom:0;
+  }
+  .staff-popup-content .role-admin label:has(.credential-reveal) input{
+    width:100%;
+    padding-right:76px;
+  }
+  .staff-popup-content .credential-reveal{
+    position:absolute;
+    right:6px;
+    bottom:5px;
+    min-height:34px;
+    padding:7px 10px;
+  }
+}
