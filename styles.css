@@ -405,3 +405,51 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
  .report-hint{line-height:1.5}
 }
 @media(prefers-reduced-motion:reduce){.report-period,.report-download{transition:none}}
+
+
+/* Mobile sizing pass — prevent dashboard panels and controls from overflowing narrow screens. */
+@media(max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .frame{width:100%;max-width:100%;margin:0;padding:0;border:0;border-radius:0;min-height:100dvh;box-shadow:none}
+  .panel{width:100%;min-width:0;padding:12px 10px calc(112px + env(safe-area-inset-bottom,0px));border-radius:0;gap:13px}
+  .brand-header{width:100%;min-width:0}
+  .brand-logo{width:min(240px,100%);height:auto}
+  .top{min-width:0}
+  .barpill{width:100%;min-width:0;justify-content:flex-start}
+  .dt{min-width:0}
+  .dt b,.dt span{overflow-wrap:anywhere}
+  .grp{min-width:0;max-width:100%}
+  .grp button{min-width:0;padding:9px 10px;font-size:12px}
+  .grp input{min-width:0;width:100%;font-size:16px}
+  .acts{min-width:0}
+  .pb{min-width:0;padding:11px 12px;font-size:12px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
+  .stat{min-width:0;padding:12px 11px}
+  .stat b{font-size:clamp(28px,8vw,35px);overflow-wrap:anywhere}
+  .stat small{overflow-wrap:anywhere}
+  .dashboard-progress,.report-panel,.mc,.staff-panel,.wrap{width:100%;min-width:0;max-width:100%}
+  .report-panel{padding:15px}
+  .report-panel-controls,.report-panel-heading{min-width:0}
+  .report-download-actions{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
+  .report-download-actions .report-download{width:100%;min-width:0}
+  .month-summary{min-width:0}
+  .month-toggle{gap:5px}
+  .wrap{overflow:visible}
+  #rows{width:100%;min-width:0;grid-template-columns:minmax(0,1fr)}
+  #rows .row{width:100%;min-width:0;grid-template-columns:repeat(6,minmax(0,1fr));padding:12px 10px;gap:8px}
+  #rows .row .nm{min-width:0;overflow-wrap:anywhere}
+  #rows .row .field{min-width:0}
+  #rows .row input{min-width:0;width:100%;max-width:100%;padding:9px 8px}
+  .table-sortbar{width:100%;min-width:0}
+  .table-sortbar select{flex:1;min-width:0;max-width:100%}
+  .rail{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));height:58px}
+}
+@media(max-width:380px){
+  .panel{padding-left:8px;padding-right:8px}
+  .brand-header{padding:10px}
+  .srow .grp button{font-size:11px;padding:9px 4px}
+  .stat{padding:10px 9px}
+  .stat b{font-size:28px}
+  .report-panel{padding:13px}
+  #rows .row{padding:11px 9px}
+}
