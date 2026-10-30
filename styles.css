@@ -507,3 +507,15 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
  #reportPanel .report-panel-content{padding:0 17px 17px}
 }
 @media(prefers-reduced-motion:reduce){#reportPanel .report-icon{transition:none}}
+
+
+/* Show/hide controls for password and PIN fields in Staff Management. */
+.role-admin label:has(.credential-reveal){position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.role-admin label:has(.credential-reveal) input{flex:1 1 180px;min-width:0}
+.credential-reveal{
+ flex:none;min-height:36px;padding:7px 12px;border:1px solid #d8dce1;
+ border-radius:9px;background:#f7f8fa;color:#343a40;
+ font:650 12px/1.2 inherit;cursor:pointer;
+}
+.credential-reveal:hover{background:#eceff2}
+.credential-reveal:focus-visible{outline:2px solid #ff681f;outline-offset:2px}
