@@ -217,3 +217,35 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
 .role-catalog-admin #catalogItems .role-item{min-height:46px}
 .role-catalog-admin #catalogImport{margin-top:10px}
 @media(max-width:600px){.role-catalog-admin form{grid-template-columns:1fr}.role-catalog-admin form .role-button{width:100%}}
+
+
+/* Mobile sizing pass — admin catalogue, account forms and role workspaces. */
+@media(max-width:700px){
+  .role-shell{box-sizing:border-box;width:100%;max-width:100%;overflow-x:hidden}
+  .role-card{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+  .role-topbar{box-sizing:border-box;width:calc(100% - 16px);max-width:calc(100% - 16px);margin:8px auto 0;flex-wrap:wrap}
+  .role-topbar-title{flex:1 1 120px;min-width:0}
+  .role-topbar-actions{display:flex;flex:0 1 auto;min-width:0;gap:6px}
+  .role-topbar-actions .role-button{min-width:0;padding:9px 10px;font-size:11px}
+  .role-sync-state{overflow-wrap:anywhere}
+  .role-admin,.role-catalog-admin{width:100%;min-width:0;max-width:100%}
+  .role-catalog-admin{overflow:hidden}
+  .role-catalog-admin form{grid-template-columns:minmax(0,1fr);width:100%;min-width:0}
+  .role-catalog-admin label,.role-catalog-admin input,.role-catalog-admin select{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+  .role-catalog-admin .role-button{width:100%;max-width:100%}
+  .role-catalog-admin #catalogPreview{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+  .role-catalog-admin #catalogItems{width:100%;max-width:100%;overflow-x:hidden;overflow-y:auto}
+  .role-catalog-admin #catalogItems .role-item{display:grid!important;grid-template-columns:minmax(0,1fr) 88px;gap:8px;min-width:0}
+  .role-catalog-admin #catalogItems .role-item span{min-width:0;overflow-wrap:anywhere}
+  .role-catalog-admin #catalogItems .role-item input{width:100%;min-width:0;max-width:100%}
+  .role-admin form{grid-template-columns:minmax(0,1fr)}
+  .role-admin form>*{min-width:0;max-width:100%}
+  .role-admin input,.role-admin select{box-sizing:border-box;width:100%;min-width:0;max-width:100%}
+  .role-item{min-width:0}
+}
+@media(max-width:380px){
+  .role-card{padding-left:16px;padding-right:16px}
+  .role-topbar{padding:10px}
+  .role-topbar-actions .role-button{padding:8px 9px;font-size:10px}
+  .role-catalog-admin #catalogItems .role-item{grid-template-columns:minmax(0,1fr) 76px}
+}
