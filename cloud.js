@@ -276,6 +276,28 @@ function setupReportDownloads(){
 
 let verifierSaveTimer=null;
 let verifierSaveQueue=Promise.resolve();
+function setupAdminPopups(){
+ ['verifierStaffPanel','itemCataloguePanel'].forEach(id=>{
+  const panel=document.getElementById(id);
+  if(!panel||panel.dataset.popupReady==='yes')return;
+  const summary=panel.querySelector(':scope > summary');
+  if(!summary)return;
+  const trigger=document.createElement('button');
+  trigger.type='button';trigger.className='staff-panel-trigger';
+  trigger.innerHTML=summary.innerHTML+'<span class="staff-popup-arrow" aria-hidden="true">↗</span>';
+  const backdrop=document.createElement('div');
+  backdrop.className='staff-popup-backdrop';backdrop.hidden=true;
+  backdrop.innerHTML='<section class="staff-popup" role="dialog" aria-modal="true" aria-label="'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'"><div class="staff-popup-heading"><h2>'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'</h2><button type="button" class="staff-popup-close" aria-label="Close">×</button></div><div class="staff-popup-content"></div></section>';
+  const content=backdrop.querySelector('.staff-popup-content');
+  [...panel.children].forEach(child=>{if(child!==summary)content.appendChild(child)});
+  panel.replaceChildren(trigger,backdrop);panel.dataset.popupReady='yes';
+  const close=()=>{backdrop.hidden=true;document.body.classList.remove('staff-popup-open');trigger.focus()};
+  trigger.addEventListener('click',()=>{backdrop.hidden=false;document.body.classList.add('staff-popup-open');backdrop.querySelector('.staff-popup-close').focus()});
+  backdrop.querySelector('.staff-popup-close').addEventListener('click',close);
+  backdrop.addEventListener('click',e=>{if(e.target===backdrop)close()});
+  backdrop.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+ });
+}
 function setupMobileBento(){
  const panel=document.querySelector('.frame .panel');
  const month=document.querySelector('#monthCard');
@@ -285,6 +307,7 @@ function setupMobileBento(){
  const bento=document.createElement('div');bento.id='adminBento';bento.className='admin-bento';
  month.parentNode.insertBefore(bento,month);
  [month,staff,catalogue].forEach(card=>bento.appendChild(card));
+ setupAdminPopups();
 }
 
 async function verifier(){
