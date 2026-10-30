@@ -467,3 +467,37 @@ body:has(#roleItems) .role-toolbar .role-button:hover{background:#e5e7e9}
     max-width:100%;
   }
 }
+
+
+/* Compact mobile bento group for the three secondary dashboard panels. */
+.admin-bento{display:contents}
+@media(max-width:700px){
+  .frame .admin-bento{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-areas:"month month" "staff catalogue";
+    gap:9px;
+    width:100%;min-width:0;
+  }
+  .frame .admin-bento #monthCard{grid-area:month;margin:0;min-width:0;border-radius:16px}
+  .frame .admin-bento #verifierStaffPanel{grid-area:staff}
+  .frame .admin-bento #itemCataloguePanel{grid-area:catalogue}
+  .frame .admin-bento .staff-panel{min-width:0;margin:0;border-radius:16px;overflow:hidden}
+  .frame .admin-bento .staff-panel summary{
+    min-height:88px;padding:13px 12px;display:flex;flex-direction:column;
+    align-items:flex-start;justify-content:center;gap:5px;font-size:13px;line-height:1.25;
+  }
+  .frame .admin-bento .staff-panel summary span{font-size:10px;line-height:1.35;color:#73777e}
+  .frame .admin-bento #monthCard .month-summary{min-height:76px;padding:13px 15px}
+  .frame .admin-bento #monthCard .month-summary-text strong{font-size:17px}
+  .frame .admin-bento #monthCard .month-summary-text span{font-size:11px}
+  .frame .admin-bento #monthCard .month-toggle-label{font-size:10px}
+  .frame .admin-bento #monthCard .month-toggle{font-size:11px}
+  .frame .admin-bento #monthCard .month-content{padding:10px}
+  .frame .admin-bento .role-admin{margin:0;padding:12px;border-top:1px solid #eceef0}
+}
+@media(max-width:380px){
+  .frame .admin-bento{gap:7px}
+  .frame .admin-bento .staff-panel summary{min-height:82px;padding:11px 9px;font-size:12px}
+  .frame .admin-bento .staff-panel summary span{font-size:9px}
+}
