@@ -109,7 +109,14 @@ function mountStaffAccounts(){
   area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access, or add a PIN to an existing account.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>Sign-in method<select name="credentialType"><option value="password">Password</option><option value="pin">PIN (4–8 digits)</option></select></label><label id="staffCredentialLabel">New password<input name="credential" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
   adminPanelContent('verifierStaffPanel').appendChild(area);
   const staffForm=area.querySelector('form');
-  const updateCredential=()=>{const pin=staffForm.elements.credentialType.value==='pin',input=staffForm.elements.credential,label=staffForm.querySelector('#staffCredentialLabel');label.firstChild.textContent=pin?'New PIN':'New password';input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.autocomplete=pin?'off':'new-password';input.value='';};
+  function addReveal(label,input,shownType='text'){
+   const toggle=document.createElement('button');toggle.type='button';toggle.className='credential-reveal';toggle.textContent='Show';toggle.setAttribute('aria-label','Show credential');toggle.setAttribute('aria-pressed','false');
+   toggle.addEventListener('click',()=>{const reveal=input.type==='password';input.type=reveal?shownType:'password';toggle.textContent=reveal?'Hide':'Show';toggle.setAttribute('aria-label',reveal?'Hide credential':'Show credential');toggle.setAttribute('aria-pressed',String(reveal));});
+   label.appendChild(toggle);
+  }
+  const staffCredential=staffForm.elements.credential;
+  addReveal(staffForm.querySelector('#staffCredentialLabel'),staffCredential,'text');
+  const updateCredential=()=>{const pin=staffForm.elements.credentialType.value==='pin',input=staffForm.elements.credential,label=staffForm.querySelector('#staffCredentialLabel'),toggle=label.querySelector('.credential-reveal');label.firstChild.textContent=pin?'New PIN':'New password';input.type='password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.autocomplete=pin?'off':'new-password';input.value='';if(toggle){toggle.textContent='Show';toggle.setAttribute('aria-label','Show credential');toggle.setAttribute('aria-pressed','false')}};
   staffForm.elements.credentialType.onchange=updateCredential;
   updateCredential();
   staffForm.onsubmit=async e=>{
@@ -120,9 +127,10 @@ function mountStaffAccounts(){
    finally{button.disabled=false}
   };
   const pinArea=document.createElement('div');pinArea.className='role-admin';pinArea.style.marginTop='18px';
-  pinArea.innerHTML='<h4>Add PIN to existing account</h4><form id="existingPinForm"><label>Existing account<select name="username" required><option value="">Loading accounts…</option></select></label><label>New PIN<input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="new-password" placeholder="4–8 digits" required></label><button type="submit" class="role-button">Set PIN</button></form><p id="existingPinResult" role="status"></p>';
+  pinArea.innerHTML='<h4>Add PIN to existing account</h4><form id="existingPinForm"><label>Existing account<select name="username" required><option value="">Loading accounts…</option></select></label><label id="existingPinLabel">New PIN<input name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" autocomplete="new-password" placeholder="4–8 digits" required></label><button type="submit" class="role-button">Set PIN</button></form><p id="existingPinResult" role="status"></p>';
   area.appendChild(pinArea);
   const pinForm=pinArea.querySelector('#existingPinForm'),pinResult=pinArea.querySelector('#existingPinResult');
+  addReveal(pinForm.querySelector('#existingPinLabel'),pinForm.elements.pin,'tel');
   (async()=>{try{const data=await api('listUsers');const select=pinForm.elements.username;select.innerHTML='<option value="">Select an account</option>'+(data.users||[]).filter(u=>u.active).map(u=>'<option value="'+esc(u.username)+'">'+esc(u.username)+' · '+esc(u.role)+'</option>').join('')}catch(err){pinForm.elements.username.innerHTML='<option value="">Could not load accounts</option>';pinResult.textContent=err.message}})();
   pinForm.onsubmit=async e=>{e.preventDefault();const btn=pinForm.querySelector('button');btn.disabled=true;pinResult.textContent='Saving PIN…';try{const result=await api('setUserPin',{username:pinForm.elements.username.value,pin:pinForm.elements.pin.value});pinResult.textContent='PIN added for '+result.username+'. They can now choose PIN on the login screen.';pinForm.elements.pin.value=''}catch(err){pinResult.textContent='PIN not saved: '+err.message}finally{btn.disabled=false}};
   
