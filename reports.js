@@ -78,7 +78,7 @@
     add(['Period', expected.start + ' to ' + expected.end]);
     const timestamp = generatedAt || new Date();
     add(['Generated (UTC)', timestamp.toISOString()]);
-    add(['Data source', 'Google Sheets (saved cloud records)']);
+    add(['Data source', 'Neon PostgreSQL (saved cloud records)']);
     add([]);
     add(['DAILY SUMMARY']);
     add(['Date', 'Items', 'Actual counted', 'Verified', 'Match', 'Do not match',
