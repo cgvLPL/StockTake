@@ -21,38 +21,49 @@ async function login(){
  try{setup=(await api('status')).needsSetup===true}catch(err){}
  const form=setup
  ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
- : '<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><div class="credential-switch" role="group" aria-label="Sign-in method"><button type="button" class="is-selected" data-method="password">Password</button><button type="button" data-method="pin">PIN</button></div><label id="credentialLabel">Password<input name="credential" type="password" autocomplete="current-password" required></label><input type="hidden" name="method" value="password"><button type="submit" class="role-button">Sign in</button></form>';
+ : '<div class="workspace-intro"><span class="workspace-eyebrow">WELCOME BACK</span><h2>Sign in</h2><p>Enter your username to continue.</p></div><form id="roleLogin" data-step="username"><label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><button type="submit" class="role-button">Continue</button></form>';
  shell(form);
- if(!setup){
-  const formEl=root.querySelector('#roleLogin');
-  const switchButtons=formEl.querySelectorAll('[data-method]');
-  const label=formEl.querySelector('#credentialLabel');
-  const credential=formEl.elements.credential;
-  switchButtons.forEach(btn=>btn.onclick=()=>{
-   const pin=btn.dataset.method==='pin';
-   switchButtons.forEach(x=>x.classList.toggle('is-selected',x===btn));
-   formEl.elements.method.value=pin?'pin':'password';
-   label.firstChild.textContent=pin?'PIN':'Password';
-   credential.type=pin?'tel':'password';
-   credential.inputMode=pin?'numeric':'text';
-   credential.autocomplete=pin?'one-time-code':'current-password';
-   credential.pattern=pin?'[0-9]{4,8}':'';
-   credential.minLength=pin?4:0;
-   credential.maxLength=pin?8:256;
-   credential.placeholder=pin?'Enter 4–8 digit PIN':'Enter your password';
-   credential.value='';
-  });
- }
- root.querySelector('form').onsubmit=async e=>{
-  e.preventDefault();const f=e.target,b=f.querySelector('button[type="submit"]');b.disabled=true;b.textContent=setup?'Creating…':'Signing in…';message('');
-  state.user=f.elements.username.value.trim().toLowerCase();
-  try{
-   const method=f.elements.method?.value||'password';const credential=f.elements.credential?.value||f.elements.password?.value||'';const result=await api(setup?'setup':'login',setup?{username:state.user,password:credential}:{username:state.user,method,[method]:credential});
-   state.role=result.user.role;state.isAdmin=!!result.user.is_admin;
-   if(state.isAdmin&&!seeded){await api('seedCatalog');seeded=true;}
-   welcome();
-  }catch(err){message(err.message)}
-  finally{b.disabled=false;b.textContent=setup?'Create administrator':'Sign in'}
+ const formEl=root.querySelector('#roleLogin');
+ formEl.onsubmit=async e=>{
+  e.preventDefault();const f=e.currentTarget,b=f.querySelector('button[type="submit"]')||f.querySelector('button');b.disabled=true;message('');
+  if(setup){
+   b.textContent='Creating…';
+   try{const result=await api('setup',{username:f.elements.username.value.trim().toLowerCase(),password:f.elements.password.value});state.user=result.user.username;state.role=result.user.role;state.isAdmin=!!result.user.is_admin;if(state.isAdmin&&!seeded){await api('seedCatalog');seeded=true;}welcome();}
+   catch(err){message(err.message)}
+   finally{b.disabled=false;b.textContent='Create administrator'}
+   return;
+  }
+  const username=f.elements.username.value.trim().toLowerCase();
+  if(f.dataset.step==='username'){
+   b.textContent='Checking…';
+   try{
+    const result=await api('loginMethods',{username});
+    const methods=result.methods||{};
+    if(!methods.password&&!methods.pin)throw Error('No sign-in method is configured for this account.');
+    const choices=(methods.password&&methods.pin)
+      ?'<div class="credential-switch" role="group" aria-label="Sign-in method"><button type="button" class="is-selected" data-method="password">Password</button><button type="button" data-method="pin">PIN</button></div>'
+      :'<p class="workspace-access">'+(methods.pin?'PIN sign-in':'Password sign-in')+'</p>';
+    const method=methods.password?'password':'pin';
+    f.dataset.step='credential';f.dataset.username=username;
+    f.innerHTML='<div class="workspace-intro"><span class="workspace-eyebrow">ACCOUNT FOUND</span><h2>Welcome, '+esc(username)+'</h2><p>'+(methods.password&&methods.pin?'Choose how you would like to sign in.':'Enter your '+(methods.pin?'PIN':'password')+' to continue.')+'</p></div>'+choices+'<label id="credentialLabel">'+(method==='pin'?'PIN':'Password')+'<input name="credential" type="'+(method==='pin'?'tel':'password')+'" autocomplete="'+(method==='pin'?'one-time-code':'current-password')+'" '+(method==='pin'?'inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8"':'')+' required placeholder="'+(method==='pin'?'Enter 4–8 digit PIN':'Enter your password')+'"></label><button type="submit" class="role-button">Sign in</button><button type="button" id="backToUsername" class="role-button role-secondary">Back</button>';
+    f.querySelectorAll('[data-method]').forEach(btn=>btn.onclick=()=>{
+      const pin=btn.dataset.method==='pin';
+      f.querySelectorAll('[data-method]').forEach(x=>x.classList.toggle('is-selected',x===btn));
+      const label=f.querySelector('#credentialLabel');label.firstChild.textContent=pin?'PIN':'Password';
+      const input=f.elements.credential;input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.autocomplete=pin?'one-time-code':'current-password';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:0;input.maxLength=pin?8:256;input.placeholder=pin?'Enter 4–8 digit PIN':'Enter your password';input.value='';
+    });
+    f.querySelector('#backToUsername').onclick=()=>login();
+    f.querySelector('button[type="submit"]').focus();
+   }catch(err){message(err.message)}
+   finally{b.disabled=false;if(f.dataset.step==='username')b.textContent='Continue'}
+   return;
+  }
+  const selected=f.querySelector('[data-method].is-selected')?.dataset.method||(f.querySelector('[data-method]')? 'password':(f.querySelector('#credentialLabel')?.textContent.includes('PIN')?'pin':'password'));
+  const credential=f.elements.credential?.value||'';
+  b.disabled=true;b.textContent='Signing in…';
+  try{const result=await api('login',{username:f.dataset.username,method:selected,[selected]:credential});state.user=result.user.username;state.role=result.user.role;state.isAdmin=!!result.user.is_admin;if(state.isAdmin&&!seeded){await api('seedCatalog');seeded=true;}welcome();}
+  catch(err){message(err.message)}
+  finally{b.disabled=false;b.textContent='Sign in'}
  };
 }
 function welcome(){
