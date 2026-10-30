@@ -164,6 +164,7 @@ function counterView(){
  root.querySelector('#roleBack').onclick=welcome;root.querySelector('#roleOut').onclick=logout;
  root.querySelector('#roleSearch').oninput=e=>{const q=e.target.value.toLowerCase();root.querySelectorAll('.role-item').forEach(el=>el.hidden=!el.dataset.name.includes(q))};
  root.querySelector('#roleDate').onchange=async e=>{state.date=e.target.value;try{await load();counterView()}catch(err){message(err.message)}};
+ startCounterLiveSync();
  const pendingSaves=new WeakMap();
  async function saveCounterInput(inp){
   clearTimeout(pendingSaves.get(inp));
@@ -187,6 +188,35 @@ function counterView(){
  });
 }
 async function counter(){try{await load();counterView()}catch(err){message('Unable to load counts: '+err.message)}}
+
+// Counter devices also poll Neon so administrator corrections appear without refresh.
+let counterPollTimer=null,counterPollBusy=false;
+async function syncCounterActuals(){
+ if(state.role!=='counter'||!root.querySelector('#roleItems')||document.visibilityState==='hidden'||counterPollBusy)return;
+ const date=root.querySelector('#roleDate')?.value||state.date;
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+ counterPollBusy=true;
+ try{
+  const result=await api('load',{date});
+  state.date=date;
+  for(const row of result.rows||[]){
+   const id=row.item_id;
+   state.records[id]={...state.records[id],...row};
+   const input=root.querySelector('#roleItems input[data-id="'+CSS.escape(id)+'"]');
+   if(input&&document.activeElement!==input){
+    const next=row.actual==null?'':String(row.actual);
+    if(input.value!==next)input.value=next;
+   }
+  }
+  refreshCounterProgress();
+ }catch(err){message('Live sync reconnecting…')}
+ finally{counterPollBusy=false}
+}
+function startCounterLiveSync(){
+ if(counterPollTimer)clearInterval(counterPollTimer);
+ syncCounterActuals();
+ counterPollTimer=setInterval(syncCounterActuals,1000);
+}
 function setupReportDownloads(){
  const panel=document.querySelector('#reportPanel');
  const tools=window.StockTakeReports;
@@ -385,6 +415,35 @@ function queueVerifierSave(){
  },650);
 }
 document.querySelector('#rows')?.addEventListener('change',queueVerifierSave);
+
+// Admins may correct Actual values from the Verifier dashboard.
+// The API checks is_admin and only this explicit field can update Actual.
+const adminActualTimers=new Map();
+document.querySelector('#rows')?.addEventListener('input',e=>{
+ const input=e.target;
+ if(!state.isAdmin||input.dataset.k!=='a')return;
+ const row=input.closest('.row');if(!row)return;
+ const id=row.dataset.i,date=document.querySelector('#date')?.value||state.date;
+ clearTimeout(adminActualTimers.get(id));
+ message('Saving Actual correction…');
+ adminActualTimers.set(id,setTimeout(async()=>{
+  const raw=input.value.trim(),value=raw===''?'':Number(raw.replace(',','.'));
+  if(raw!==''&&(!Number.isFinite(value)||value<0||!/^\\d+(?:[.,]\\d{1,4})?$/.test(raw))){
+   message('Enter a non-negative quantity with up to 4 decimals.');return;
+  }
+  try{
+   await api('save',{date,item_id:id,value:value===''?'':String(value),field:'actual'});
+   state.records[id]={...state.records[id],actual:value===''?null:value};
+   message('Actual correction saved · synced to Counter.');
+  }catch(err){message('Actual correction not saved: '+err.message)}
+ },500));
+});
+document.querySelector('#rows')?.addEventListener('change',e=>{
+ const input=e.target;
+ if(!state.isAdmin||input.dataset.k!=='a')return;
+ clearTimeout(adminActualTimers.get(input.closest('.row')?.dataset.i));
+ input.dispatchEvent(new Event('input',{bubbles:true}));
+});
 
 window.STOCKTAKE_CLOUD_ACTIVE=true;
 login();
