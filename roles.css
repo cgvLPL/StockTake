@@ -249,3 +249,35 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
   .role-topbar-actions .role-button{padding:8px 9px;font-size:10px}
   .role-catalog-admin #catalogItems .role-item{grid-template-columns:minmax(0,1fr) 76px}
 }
+
+
+/* Fix mobile horizontal overflow in account and catalogue form buttons.
+   The previous 100% button widths were calculated content-box, so padding
+   pushed them beyond the white admin card on iOS Safari. */
+.role-card,.role-card *,.role-card *::before,.role-card *::after,
+.role-admin,.role-admin *,.role-catalog-admin,.role-catalog-admin *{
+  box-sizing:border-box;
+}
+.role-card form,.role-admin form,.role-catalog-admin form{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+.role-card .role-button,
+.role-admin .role-button,
+.role-catalog-admin .role-button,
+#newStaffForm>.role-button{
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  margin-left:0;
+  margin-right:0;
+}
+@media(max-width:700px){
+  .role-card,.role-admin,.role-catalog-admin{min-width:0;max-width:100%}
+  .role-admin form,.role-catalog-admin form{grid-template-columns:minmax(0,1fr)}
+  .role-admin form>* ,.role-catalog-admin form>*{min-width:0;max-width:100%}
+  .role-admin button,.role-catalog-admin button{justify-self:stretch}
+}
