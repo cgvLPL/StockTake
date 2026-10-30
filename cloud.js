@@ -70,10 +70,13 @@ function mountStaffAccounts(){
   const area=document.createElement('section');area.className='role-admin';
   area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>Sign-in method<select name="credentialType"><option value="password">Password</option><option value="pin">PIN (4–8 digits)</option></select></label><label id="staffCredentialLabel">New password<input name="credential" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
   document.querySelector('#verifierStaffPanel').appendChild(area);
-  area.querySelector('form').onsubmit=async e=>{
-   e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),result=area.querySelector('#staffResult');
+  const staffForm=area.querySelector('form');
+  const updateCredential=()=>{const pin=staffForm.elements.credentialType.value==='pin',input=staffForm.elements.credential,label=staffForm.querySelector('#staffCredentialLabel');label.firstChild.textContent=pin?'New PIN':'New password';input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.autocomplete=pin?'off':'new-password';input.value='';};
+  staffForm.elements.credentialType.onchange=updateCredential;
+  updateCredential();
+  staffForm.onsubmit=async e=>{
+   e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type="submit"]')||form.querySelector('button'),result=area.querySelector('#staffResult');
    button.disabled=true;result.textContent='Creating account…';
-   const updateCredential=()=>{const pin=form.elements.credentialType.value==='pin',input=form.elements.credential,label=form.querySelector('#staffCredentialLabel');label.firstChild.textContent=pin?'New PIN':'New password';input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.value='';};form.elements.credentialType.onchange=updateCredential;updateCredential();
    try{const response=await api('createUser',{newUsername:form.elements.username.value,credential:form.elements.credential.value,credentialType:form.elements.credentialType.value,newRole:form.elements.role.value});result.textContent='Created '+response.username+' ('+response.role+').';form.reset()}
    catch(err){result.textContent='Account not created: '+err.message}
    finally{button.disabled=false}
