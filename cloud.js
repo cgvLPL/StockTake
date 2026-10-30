@@ -247,7 +247,7 @@ async function syncVerifierActuals(){
 function startVerifierLiveSync(){
  if(verifierPollTimer)clearInterval(verifierPollTimer);
  syncVerifierActuals();
- verifierPollTimer=setInterval(syncVerifierActuals,2500);
+ verifierPollTimer=setInterval(syncVerifierActuals,1000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncVerifierActuals()});
 }
 
