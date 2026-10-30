@@ -29,6 +29,7 @@ function shell(inner){root.innerHTML='<div class="role-shell"><div class="role-c
 async function login(){
  document.querySelector('.frame').hidden=true;
  let setup=false;
+ try{const status=await api('status');setup=!!status.needsSetup;}catch(err){shell('<div class="workspace-intro"><h2>Unable to connect</h2><p>'+esc(err.message)+'</p></div><button type="button" class="role-button" onclick="location.reload()">Try again</button>');return;}
  const form=setup
  ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
  : '<div class="workspace-intro"><span class="workspace-eyebrow">WELCOME BACK</span><h2>Sign in</h2><p>Enter your username to continue.</p></div><form id="roleLogin" data-step="username"><label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><button type="submit" class="role-button">Continue</button></form>';
