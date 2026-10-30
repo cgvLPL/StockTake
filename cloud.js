@@ -18,7 +18,6 @@ function shell(inner){root.innerHTML='<div class="role-shell"><div class="role-c
 async function login(){
  document.querySelector('.frame').hidden=true;
  let setup=false;
- try{setup=(await api('status')).needsSetup===true}catch(err){}
  const form=setup
  ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
  : '<div class="workspace-intro"><span class="workspace-eyebrow">WELCOME BACK</span><h2>Sign in</h2><p>Enter your username to continue.</p></div><form id="roleLogin" data-step="username"><label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><button type="submit" class="role-button">Continue</button></form>';
@@ -38,6 +37,7 @@ async function login(){
    b.textContent='Checking…';
    try{
     const result=await api('loginMethods',{username});
+    if(result.needsSetup){setup=true;f.innerHTML='<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><label>Admin username<input name="username" value="'+esc(username)+'" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button type="submit" class="role-button">Create administrator</button>';return;}
     const methods=result.methods||{};
     if(!methods.password&&!methods.pin)throw Error('No sign-in method is configured for this account.');
     const choices=(methods.password&&methods.pin)
