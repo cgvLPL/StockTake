@@ -1,41 +1,44 @@
-/* StockTake cloud roles with Google Apps Script + Google Sheets. */
+/* StockTake cloud roles with Neon PostgreSQL. */
 (() => {
 'use strict';
-const cfg=window.STOCKTAKE_CLOUD||{};
+const API_URL='/api/index';
 const root=document.createElement('div');root.id='roleApp';document.body.prepend(root);
-const state={token:null,user:null,role:null,date:new Date().toLocaleDateString('en-CA'),records:{},busy:false};
+const state={user:null,role:null,isAdmin:false,date:new Date().toLocaleDateString('en-CA'),records:{},busy:false};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const configured=Boolean(cfg.scriptUrl&&/^https:\/\/script\.google\.com\/macros\/s\//.test(cfg.scriptUrl));
-let requestNumber=0;
-function api(action,params={}){
- return new Promise((resolve,reject)=>{
-  if(!configured)return reject(Error('Configure the Google Apps Script deployment URL.'));
-  const id='stocktake-post-'+(++requestNumber),frame=document.createElement('iframe');
-  frame.name=id;frame.hidden=true;frame.setAttribute('aria-hidden','true');document.body.appendChild(frame);
-  const form=document.createElement('form');form.method='POST';form.action=cfg.scriptUrl;form.target=id;form.hidden=true;
-  const fields={action,requestId:id,username:state.user,pin:state.token,...params};
-  Object.entries(fields).forEach(([k,v])=>{const input=document.createElement('input');input.name=k;input.value=v??'';form.appendChild(input)});
-  document.body.appendChild(form);
-  let timer;
-  const finish=()=>{clearTimeout(timer);window.removeEventListener('message',receive);form.remove();frame.remove()};
-  const receive=e=>{if(!e.data||e.data.stocktake!==true||e.data.requestId!==id||!(e.origin==='https://script.google.com'||e.origin.endsWith('.googleusercontent.com')))return;finish();e.data.result?.ok?resolve(e.data.result.data):reject(Error(e.data.result?.error||'Backend error'))};
-  window.addEventListener('message',receive);
-  timer=setTimeout(()=>{finish();reject(Error('Google Apps Script did not respond. Check that the latest Code.gs is deployed as a Web App accessible to Anyone, then try again.'))},action==='report'?45000:10000);
-  form.submit();
- });
+let seeded=false;
+async function api(action,params={}){
+ const response=await fetch(API_URL,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...params})});
+ let result={};try{result=await response.json()}catch(e){}
+ if(!response.ok)throw Error(result.error||'Backend request failed.');
+ return result;
 }
 const message=(s)=>{const e=root.querySelector('#roleMessage');if(e)e.textContent=s};
 const button=(id,label)=>'<button type="button" id="'+id+'" class="role-button">'+label+'</button>';
 function shell(inner){root.innerHTML='<div class="role-shell"><div class="role-card"><img src="./brand/cgv-stocktake.svg" alt="CGV StockTake" class="role-logo">'+inner+'<p id="roleMessage" role="status"></p></div></div>'}
-function login(){
+async function login(){
  document.querySelector('.frame').hidden=true;
- shell('<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><label>PIN<input type="password" name="pin" autocomplete="off" required></label><button class="role-button">Sign in</button></form>'+(!configured?'<p class="role-error">Google Apps Script URL is not configured. See README.</p>':''));
- root.querySelector('form').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;b.textContent='Signing in…';message('Connecting to Google Sheets…');state.user=e.target.elements.username.value.trim();state.token=e.target.elements.pin.value;try{const x=await api('login');state.role=x.role;welcome()}catch(err){message(err.message)}finally{b.disabled=false;b.textContent='Sign in'}};
+ let setup=false;
+ try{setup=(await api('status')).needsSetup===true}catch(err){}
+ const form=setup
+ ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
+ : '<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="role-button">Sign in</button></form>';
+ shell(form);
+ root.querySelector('form').onsubmit=async e=>{
+  e.preventDefault();const f=e.target,b=f.querySelector('button');b.disabled=true;b.textContent=setup?'Creating…':'Signing in…';message('Connecting to Neon…');
+  state.user=f.elements.username.value.trim().toLowerCase();
+  try{
+   const result=await api(setup?'setup':'login',{username:state.user,password:f.elements.password.value});
+   state.role=result.user.role;state.isAdmin=!!result.user.is_admin;
+   if(state.isAdmin&&!seeded){await api('seedCatalog');seeded=true;}
+   welcome();
+  }catch(err){message(err.message)}
+  finally{b.disabled=false;b.textContent=setup?'Create administrator':'Sign in'}
+ };
 }
 function welcome(){
  document.querySelector('.frame').hidden=true;
  const r=state.role;
- shell('<div class="workspace-intro"><span class="workspace-eyebrow">SELECT WORKSPACE</span><h2>Choose your workspace</h2><p>Signed in as <strong>'+esc(state.user)+'</strong> <span class="workspace-access">'+esc(r)+'</span></p></div><div class="role-choices workspace-choices"><button type="button" id="enterCounter" class="role-button workspace-choice"><span class="workspace-choice-icon" aria-hidden="true">01</span><span class="workspace-choice-copy"><strong>Counter</strong><small>Enter physical stock quantities</small></span><span class="workspace-choice-arrow" aria-hidden="true">↗</span></button><button type="button" id="enterVerifier" class="role-button workspace-choice"><span class="workspace-choice-icon" aria-hidden="true">02</span><span class="workspace-choice-copy"><strong>Verifier</strong><small>Review counts and manage stock</small></span><span class="workspace-choice-arrow" aria-hidden="true">↗</span></button></div><div class="workspace-footer"><span>CGV · STOCKTAKE</span>'+button('roleLogout','Sign out')+'</div>');
+ shell('<div class="workspace-intro"><span class="workspace-eyebrow">SELECT WORKSPACE</span><h2>Choose your workspace</h2><p>Signed in as <strong>'+esc(state.user)+'</strong> <span class="workspace-access">'+esc(state.isAdmin?'admin':r)+'</span></p></div><div class="role-choices workspace-choices"><button type="button" id="enterCounter" class="role-button workspace-choice"><span class="workspace-choice-icon" aria-hidden="true">01</span><span class="workspace-choice-copy"><strong>Counter</strong><small>Enter physical stock quantities</small></span><span class="workspace-choice-arrow" aria-hidden="true">↗</span></button><button type="button" id="enterVerifier" class="role-button workspace-choice"><span class="workspace-choice-icon" aria-hidden="true">02</span><span class="workspace-choice-copy"><strong>Verifier</strong><small>Review counts and manage stock</small></span><span class="workspace-choice-arrow" aria-hidden="true">↗</span></button></div><div class="workspace-footer"><span>CGV · STOCKTAKE</span>'+button('roleLogout','Sign out')+'</div>');
  root.querySelector('#enterCounter').disabled=r!=='counter';root.querySelector('#enterVerifier').disabled=r!=='verifier';
  root.querySelector('#enterCounter').onclick=()=>counter();
  root.querySelector('#enterVerifier').onclick=()=>verifier();
@@ -44,7 +47,7 @@ function welcome(){
 }
 function mountStaffAccounts(){
   const area=document.createElement('section');area.className='role-admin';
-  area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>New password<input name="password" type="password" required minlength="8" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
+  area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>New password<input name="password" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
   document.querySelector('#verifierStaffPanel').appendChild(area);
   area.querySelector('form').onsubmit=async e=>{
    e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),result=area.querySelector('#staffResult');
@@ -53,9 +56,35 @@ function mountStaffAccounts(){
    catch(err){result.textContent='Account not created: '+err.message}
    finally{button.disabled=false}
   };
+  if(state.isAdmin)mountAdminCatalog();
+}
+function parseCSV(text){
+ const rows=[];let row=[],cell='',quoted=false;
+ for(let i=0;i<text.length;i++){const ch=text[i];if(quoted){if(ch==='"'&&text[i+1]==='"'){cell+='"';i++}else if(ch==='"')quoted=false;else cell+=ch;}else if(ch==='"')quoted=true;else if(ch===','){row.push(cell);cell='';}else if(ch==='\\n'||ch==='\\r'){if(ch==='\\r'&&text[i+1]==='\\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell='';}else cell+=ch;}
+ row.push(cell);if(row.some(v=>v.trim()))rows.push(row);
+ if(rows.length<2)throw Error('CSV must include a header and at least one item.');
+ const norm=s=>String(s||'').trim().toLowerCase().replace(/[ _-]/g,'');
+ const headers=rows[0].map(norm);
+ const find=keys=>headers.findIndex(h=>keys.includes(h));
+ const ix={id:find(['id','itemid','code','itemcode']),name:find(['name','itemname','description']),uom:find(['uom','unit','unitofmeasure'])};
+ if(Object.values(ix).some(v=>v<0))throw Error('CSV headers must include Item ID, Item Name and UOM.');
+ return rows.slice(1).map((r,i)=>({id:String(r[ix.id]||'').trim(),name:String(r[ix.name]||'').trim(),uom:String(r[ix.uom]||'').trim(),line:i+2}));
+}
+function mountAdminCatalog(){
+ const area=document.createElement('section');area.className='role-admin role-catalog-admin';
+ area.innerHTML='<h3>Item catalogue</h3><p>Add stock items or import a CSV file. Existing IDs will be updated; archived items can be restored by importing them again.</p><form id="catalogAddForm"><label>Item ID<input name="id" required placeholder="e.g. stock-104"></label><label>Item name<input name="name" required></label><label>UOM<input name="uom" required placeholder="EA, g, ml"></label><button class="role-button">Add item</button></form><hr><label>Import CSV<input id="catalogFile" type="file" accept=".csv,text/csv"></label><div id="catalogPreview" aria-live="polite"></div><button type="button" class="role-button" id="catalogImport" disabled>Import catalogue</button><p id="catalogResult" role="status"></p><div id="catalogItems"></div>';
+ document.querySelector('#verifierStaffPanel').appendChild(area);
+ const result=area.querySelector('#catalogResult'),preview=area.querySelector('#catalogPreview'),importButton=area.querySelector('#catalogImport');let pending=[];
+ async function refresh(){
+  try{const data=await api('catalog');state.catalog=(data.items||[]).map(x=>[x.name,x.uom,x.id]);if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(state.catalog);area.querySelector('#catalogItems').innerHTML='<p><strong>'+state.catalog.length+' active items</strong></p>'+state.catalog.map(x=>'<div class="role-item"><span><b>'+esc(x[0])+'</b><small>'+esc(x[2])+' · '+esc(x[1])+'</small></span></div>').join('');}
+  catch(err){result.textContent='Could not load catalogue: '+err.message}
  }
-
-function logout(){state.token=null;state.user=null;state.role=null;login()}
+ area.querySelector('#catalogAddForm').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await api('upsertItem',{item:{id:f.elements.id.value,name:f.elements.name.value,uom:f.elements.uom.value}});result.textContent='Item saved.';f.reset();await refresh()}catch(err){result.textContent=err.message}finally{b.disabled=false}};
+ area.querySelector('#catalogFile').onchange=async e=>{pending=[];importButton.disabled=true;try{const file=e.target.files[0];if(!file)return;if(!file.name.toLowerCase().endsWith('.csv'))throw Error('Please export your Excel item list as CSV first.');pending=parseCSV(await file.text());const ids=new Set();for(const x of pending){if(!x.id||!x.name||!x.uom)throw Error('Missing ID, name or UOM on CSV row '+x.line+'.');if(ids.has(x.id))throw Error('Duplicate item ID '+x.id+' in CSV.');ids.add(x.id)}preview.innerHTML='<p>Preview: <strong>'+pending.length+' valid items</strong></p><div class="role-item"><span><b>'+esc(pending[0].id)+' · '+esc(pending[0].name)+'</b><small>'+esc(pending[0].uom)+'</small></span></div>'+(pending.length>1?'<p>… and '+(pending.length-1)+' more rows</p>':'');importButton.disabled=false;result.textContent='Review the preview, then import.';}catch(err){preview.textContent='';result.textContent=err.message}};
+ importButton.onclick=async()=>{if(!pending.length)return;importButton.disabled=true;result.textContent='Importing '+pending.length+' items…';try{const r=await api('importItems',{items:pending.map(({id,name,uom})=>({id,name,uom}))});result.textContent='Import complete: '+r.created+' created, '+r.updated+' updated.';pending=[];preview.textContent='';area.querySelector('#catalogFile').value='';await refresh()}catch(err){result.textContent='Import failed: '+err.message;importButton.disabled=false}};
+ refresh();
+}
+function logout(){state.user=null;state.role=null;state.isAdmin=false;seeded=false;api('logout').catch(()=>{});login()}
 async function load(){const result=await api('load',{date:state.date});const rows=result.rows;state.records=Object.fromEntries(rows.map(r=>[r.item_id,r]));state.catalog=(result.items||[]).map(it=>[it.name,it.uom,it.id]);return rows}
 const catalog=()=>state.catalog||[];
 function counterProgress(){const items=catalog(),done=items.filter(i=>state.records[i[2]]?.actual!=null).length,total=items.length,pct=total?Math.round(done/total*100):0;const n=30,filled=Math.round(pct*n/100);return '<section class="count-progress" aria-label="Counting progress"><div class="count-progress-top"><span>DAILY PROGRESS</span><span>'+esc(state.date)+'</span></div><div class="count-progress-metric"><strong id="countPercent">'+pct+'%</strong><span id="roleProgress">'+done+' of '+total+' items counted</span></div><div class="count-segments" id="countSegments" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'" aria-label="Stock items counted">'+Array.from({length:n},(_,i)=>'<i class="'+(i<filled?'filled':'')+'"></i>').join('')+'</div><div class="count-progress-bottom"><span>COMPLETED</span><span id="countRemaining">'+(total-done)+' REMAINING</span></div></section>'}
@@ -128,7 +157,7 @@ function setupReportDownloads(){
   buttons.forEach(b=>b.disabled=true);
   const original=button.innerHTML;
   button.innerHTML='<span aria-hidden="true">⌛</span> Preparing…';
-  status.textContent='Loading saved stock records from Google Sheets…';
+  status.textContent='Loading saved stock records from Neon…';
   delete status.dataset.error;
   try{
    // Wait for edits which are still in the verifier's auto-save debounce/queue.
@@ -149,7 +178,7 @@ function setupReportDownloads(){
   }catch(err){
    status.dataset.error='true';
    status.textContent=String(err.message||err).includes('Unknown action')
-     ?'The reporting service needs updating. Copy the latest GitHub Code.gs to Google Apps Script and deploy a new version.'
+     ?'The reporting service needs updating.'
      :'Could not download the '+(isPdf?'PDF':'CSV')+': '+String(err.message||err);
   }finally{
    buttons.forEach(b=>b.disabled=false);
