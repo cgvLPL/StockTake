@@ -105,7 +105,7 @@ function mountStaffAccounts(){
   if(!state.isAdmin)return;
   const area=document.createElement('section');area.className='role-admin';
   area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access, or add a PIN to an existing account.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>Sign-in method<select name="credentialType"><option value="password">Password</option><option value="pin">PIN (4–8 digits)</option></select></label><label id="staffCredentialLabel">New password<input name="credential" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
-  document.querySelector('#verifierStaffPanel').appendChild(area);
+  document.querySelector('#itemCataloguePanel').appendChild(area);
   const staffForm=area.querySelector('form');
   const updateCredential=()=>{const pin=staffForm.elements.credentialType.value==='pin',input=staffForm.elements.credential,label=staffForm.querySelector('#staffCredentialLabel');label.firstChild.textContent=pin?'New PIN':'New password';input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.autocomplete=pin?'off':'new-password';input.value='';};
   staffForm.elements.credentialType.onchange=updateCredential;
@@ -123,7 +123,7 @@ function mountStaffAccounts(){
   const pinForm=pinArea.querySelector('#existingPinForm'),pinResult=pinArea.querySelector('#existingPinResult');
   (async()=>{try{const data=await api('listUsers');const select=pinForm.elements.username;select.innerHTML='<option value="">Select an account</option>'+(data.users||[]).filter(u=>u.active).map(u=>'<option value="'+esc(u.username)+'">'+esc(u.username)+' · '+esc(u.role)+'</option>').join('')}catch(err){pinForm.elements.username.innerHTML='<option value="">Could not load accounts</option>';pinResult.textContent=err.message}})();
   pinForm.onsubmit=async e=>{e.preventDefault();const btn=pinForm.querySelector('button');btn.disabled=true;pinResult.textContent='Saving PIN…';try{const result=await api('setUserPin',{username:pinForm.elements.username.value,pin:pinForm.elements.pin.value});pinResult.textContent='PIN added for '+result.username+'. They can now choose PIN on the login screen.';pinForm.elements.pin.value=''}catch(err){pinResult.textContent='PIN not saved: '+err.message}finally{btn.disabled=false}};
-  if(state.isAdmin)mountAdminCatalog();
+  
 }
 function parseCSV(text){
  const rows=[];let row=[],cell='',quoted=false;
