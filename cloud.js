@@ -291,7 +291,14 @@ function setupAdminPopups(){
   backdrop.innerHTML='<section class="staff-popup" role="dialog" aria-modal="true" aria-label="'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'"><div class="staff-popup-heading"><h2>'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'</h2><button type="button" class="staff-popup-close" aria-label="Close">×</button></div><div class="staff-popup-content"></div></section>';
   const content=backdrop.querySelector('.staff-popup-content');
   [...panel.children].forEach(child=>{if(child!==summary)content.appendChild(child)});
-  panel.replaceChildren(trigger,backdrop);panel.dataset.popupReady='yes';
+  // Replace the <details> disclosure itself: putting a button directly inside
+  // <details> without a <summary> leaves it hidden on mobile (and some browsers).
+  const card=document.createElement('section');
+  card.id=panel.id;
+  card.className=panel.className;
+  card.dataset.popupReady='yes';
+  card.append(trigger,backdrop);
+  panel.replaceWith(card);
   const close=()=>{backdrop.hidden=true;document.body.classList.remove('staff-popup-open');trigger.focus()};
   trigger.addEventListener('click',()=>{backdrop.hidden=false;document.body.classList.add('staff-popup-open');backdrop.querySelector('.staff-popup-close').focus()});
   backdrop.querySelector('.staff-popup-close').addEventListener('click',close);
