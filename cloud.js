@@ -96,10 +96,26 @@ function counterView(){
  root.querySelector('#roleBack').onclick=welcome;root.querySelector('#roleOut').onclick=logout;
  root.querySelector('#roleSearch').oninput=e=>{const q=e.target.value.toLowerCase();root.querySelectorAll('.role-item').forEach(el=>el.hidden=!el.dataset.name.includes(q))};
  root.querySelector('#roleDate').onchange=async e=>{state.date=e.target.value;try{await load();counterView()}catch(err){message(err.message)}};
- root.querySelectorAll('[data-id]').forEach(inp=>inp.onchange=async()=>{
- const id=inp.dataset.id,raw=inp.value.trim(),v=raw===''?null:Number(raw.replace(',','.'));
- if(raw!==''&&(!Number.isFinite(v)||v<0||!/^\d+(?:[.,]\d{1,4})?$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimals.');return}
- inp.disabled=true;try{await api('save',{date:state.date,item_id:id,value:v===null?'':String(v)});state.records[id]={...state.records[id],actual:v};message('Saved to cloud.');refreshCounterProgress()}catch(err){message('Not saved: '+err.message)}finally{inp.disabled=false}
+ const pendingSaves=new WeakMap();
+ async function saveCounterInput(inp){
+  clearTimeout(pendingSaves.get(inp));
+  const id=inp.dataset.id,raw=inp.value.trim(),v=raw===''?null:Number(raw.replace(',','.'));
+  if(raw!==''&&(!Number.isFinite(v)||v<0||!/^\\d+(?:[.,]\\d{1,4})?$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimals.');return}
+  inp.disabled=true;
+  try{
+   await api('save',{date:state.date,item_id:id,value:v===null?'':String(v)});
+   state.records[id]={...state.records[id],actual:v};
+   message('Saved · synced to verifier.');
+   refreshCounterProgress();
+  }catch(err){message('Not saved: '+err.message)}
+  finally{inp.disabled=false}
+ }
+ root.querySelectorAll('[data-id]').forEach(inp=>{
+  inp.addEventListener('input',()=>{
+   clearTimeout(pendingSaves.get(inp));
+   pendingSaves.set(inp,setTimeout(()=>saveCounterInput(inp),500));
+  });
+  inp.addEventListener('change',()=>saveCounterInput(inp));
  });
 }
 async function counter(){try{await load();counterView()}catch(err){message('Unable to load counts: '+err.message)}}
