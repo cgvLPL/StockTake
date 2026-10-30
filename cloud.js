@@ -276,6 +276,17 @@ function setupReportDownloads(){
 
 let verifierSaveTimer=null;
 let verifierSaveQueue=Promise.resolve();
+function setupMobileBento(){
+ const panel=document.querySelector('.frame .panel');
+ const month=document.querySelector('#monthCard');
+ const staff=document.querySelector('#verifierStaffPanel');
+ const catalogue=document.querySelector('#itemCataloguePanel');
+ if(!panel||!month||!staff||!catalogue||document.querySelector('#adminBento'))return;
+ const bento=document.createElement('div');bento.id='adminBento';bento.className='admin-bento';
+ month.parentNode.insertBefore(bento,month);
+ [month,staff,catalogue].forEach(card=>bento.appendChild(card));
+}
+
 async function verifier(){
  try{
   await load();
@@ -286,6 +297,7 @@ async function verifier(){
   root.innerHTML='<span id="roleMessage" class="role-sync-state role-sr-only" role="status" aria-live="polite"></span>';
   if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(catalog());
   if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
+  setupMobileBento();
   mountStaffAccounts();
   if(state.isAdmin)mountAdminCatalog();
   setupReportDownloads();
