@@ -8,17 +8,20 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 let seeded=false;
 async function api(action,params={}){
  const controller=new AbortController();
- const timeout=setTimeout(()=>controller.abort(),12000);
+ let timeoutId;
+ const deadline=new Promise((_,reject)=>{timeoutId=setTimeout(()=>{controller.abort();reject(new Error('Sign-in request timed out. Please retry. If this repeats, the server is not responding.'))},10000)});
  try{
-  const response=await fetch(API_URL,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...params}),signal:controller.signal});
-  let result={};try{result=await response.json()}catch(e){}
-  if(!response.ok)throw Error(result.error||'Backend request failed.');
-  return result;
+  const request=fetch(API_URL,{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({action,...params}),signal:controller.signal}).then(async response=>{
+   let result={};try{result=await response.json()}catch(e){}
+   if(!response.ok)throw Error(result.error||'Backend request failed (HTTP '+response.status+').');
+   return result;
+  });
+  return await Promise.race([request,deadline]);
  }catch(err){
-  if(err.name==='AbortError')throw Error('The server took too long to respond. Please try again.');
+  if(err.name==='AbortError')throw Error('Sign-in request was interrupted. Please try again.');
   if(err instanceof TypeError)throw Error('Unable to reach the sign-in server. Check your connection and try again.');
   throw err;
- }finally{clearTimeout(timeout)}
+ }finally{clearTimeout(timeoutId)}
 }
 const message=(s)=>{const e=root.querySelector('#roleMessage');if(e)e.textContent=s};
 const button=(id,label)=>'<button type="button" id="'+id+'" class="role-button">'+label+'</button>';
