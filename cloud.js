@@ -205,10 +205,38 @@ async function verifier(){
   if(window.stockTakeOpenDate)window.stockTakeOpenDate(state.date);
   mountStaffAccounts();
   setupReportDownloads();
-  /* Verifier loads cloud data automatically; no manual refresh or transition toolbar. */
+  startVerifierLiveSync();
+  /* Counter entries sync from Neon automatically while the verifier tab is open. */
  }catch(err){message('Unable to load verifier: '+err.message)}
 }
+
+
+// Verifier live sync: poll Neon for Counter changes and merge Actual quantities
+// into the visible table. Poll only while the verifier workspace is active.
+let verifierPollTimer=null,verifierPollBusy=false;
+async function syncVerifierActuals(){
+ if(state.role!=='verifier'||document.querySelector('.frame')?.hidden||document.visibilityState==='hidden'||verifierPollBusy)return;
+ const date=document.querySelector('#date')?.value||state.date;
+ if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+ verifierPollBusy=true;
+ try{
+  const result=await api('load',{date});
+  state.date=date;
+  for(const row of result.rows||[])state.records[row.item_id]={...state.records[row.item_id],...row};
+  if(window.stockTakeSyncActuals)window.stockTakeSyncActuals(result.rows||[],date);
+ }catch(err){
+  message('Live sync reconnecting…');
+ }finally{verifierPollBusy=false}
+}
+function startVerifierLiveSync(){
+ if(verifierPollTimer)clearInterval(verifierPollTimer);
+ syncVerifierActuals();
+ verifierPollTimer=setInterval(syncVerifierActuals,2500);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncVerifierActuals()});
+}
+
 function queueVerifierSave(){
+ state.date=document.querySelector('#date')?.value||state.date;
  if(state.role!=='verifier'||!document.querySelector('.frame')||document.querySelector('.frame').hidden)return;
  clearTimeout(verifierSaveTimer);
  message('Saving changes…');
