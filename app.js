@@ -200,3 +200,35 @@ window.stockTakeSetCatalog=items=>{
  window.STOCKTAKE_ITEMS=ITEMS;
  build();show();setFilter(filter);
 };
+
+
+// Merge live Counter entries from Neon into the Verifier table without
+// replacing the verifier's in-progress System/Remarks edits.
+window.stockTakeSyncActuals=(rows,forDate)=>{
+ if(forDate!==date||!Array.isArray(rows))return;
+ let changed=false;
+ rows.forEach(item=>{
+  const id=item.item_id;
+  if(!id)return;
+  const row=document.querySelector('#rows .row[data-i="'+CSS.escape(id)+'"]');
+  const input=row?.querySelector('input[data-k="a"]');
+  if(input&&document.activeElement===input)return;
+  const next=item.actual==null?'':String(item.actual);
+  const record=data[id]||(data[id]={});
+  const current=record.a==null?'':String(record.a);
+  if(current===next)return;
+  if(next==='')delete record.a;else record.a=next;
+  if(!Object.keys(record).length)delete data[id];
+  if(input)input.value=next;
+  if(row)paint(row);
+  changed=true;
+ });
+ if(changed){
+  cache.set(date,data);
+  save(date);
+  stats();
+  month();
+  sortRows();
+  filt(true);
+ }
+};
