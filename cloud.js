@@ -194,7 +194,7 @@ let counterPollTimer=null,counterPollBusy=false;
 async function syncCounterActuals(){
  if(state.role!=='counter'||!root.querySelector('#roleItems')||document.visibilityState==='hidden'||counterPollBusy)return;
  const date=root.querySelector('#roleDate')?.value||state.date;
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
  counterPollBusy=true;
  try{
   const result=await api('load',{date});
