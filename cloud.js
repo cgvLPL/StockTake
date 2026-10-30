@@ -168,7 +168,7 @@ function counterView(){
  async function saveCounterInput(inp){
   clearTimeout(pendingSaves.get(inp));
   const id=inp.dataset.id,raw=inp.value.trim(),v=raw===''?null:Number(raw.replace(',','.'));
-  if(raw!==''&&(!Number.isFinite(v)||v<0||!/^\\d+(?:[.,]\\d{1,4})?$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimals.');return}
+  if(raw!==''&&(!Number.isFinite(v)||v<0||!/^\d+(?:[.,]\d{1,4})?$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimals.');return}
   inp.disabled=true;
   try{
    await api('save',{date:state.date,item_id:id,value:v===null?'':String(v)});
@@ -344,7 +344,7 @@ let verifierPollTimer=null,verifierPollBusy=false;
 async function syncVerifierActuals(){
  if(state.role!=='verifier'||document.querySelector('.frame')?.hidden||document.visibilityState==='hidden'||verifierPollBusy)return;
  const date=document.querySelector('#date')?.value||state.date;
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
  verifierPollBusy=true;
  try{
   const result=await api('load',{date});
