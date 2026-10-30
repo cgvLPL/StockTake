@@ -21,13 +21,33 @@ async function login(){
  try{setup=(await api('status')).needsSetup===true}catch(err){}
  const form=setup
  ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
- : '<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button class="role-button">Sign in</button></form>';
+ : '<form id="roleLogin"><label>Username<input name="username" autocomplete="username" required></label><div class="credential-switch" role="group" aria-label="Sign-in method"><button type="button" class="is-selected" data-method="password">Password</button><button type="button" data-method="pin">PIN</button></div><label id="credentialLabel">Password<input name="credential" type="password" autocomplete="current-password" required></label><input type="hidden" name="method" value="password"><button class="role-button">Sign in</button></form>';
  shell(form);
+ if(!setup){
+  const formEl=root.querySelector('#roleLogin');
+  const switchButtons=formEl.querySelectorAll('[data-method]');
+  const label=formEl.querySelector('#credentialLabel');
+  const credential=formEl.elements.credential;
+  switchButtons.forEach(btn=>btn.onclick=()=>{
+   const pin=btn.dataset.method==='pin';
+   switchButtons.forEach(x=>x.classList.toggle('is-selected',x===btn));
+   formEl.elements.method.value=pin?'pin':'password';
+   label.firstChild.textContent=pin?'PIN':'Password';
+   credential.type=pin?'tel':'password';
+   credential.inputMode=pin?'numeric':'text';
+   credential.autocomplete=pin?'one-time-code':'current-password';
+   credential.pattern=pin?'[0-9]{4,8}':'';
+   credential.minLength=pin?4:0;
+   credential.maxLength=pin?8:256;
+   credential.placeholder=pin?'Enter 4–8 digit PIN':'Enter your password';
+   credential.value='';
+  });
+ }
  root.querySelector('form').onsubmit=async e=>{
-  e.preventDefault();const f=e.target,b=f.querySelector('button');b.disabled=true;b.textContent=setup?'Creating…':'Signing in…';message('Connecting to Neon…');
+  e.preventDefault();const f=e.target,b=f.querySelector('button');b.disabled=true;b.textContent=setup?'Creating…':'Signing in…';message('');
   state.user=f.elements.username.value.trim().toLowerCase();
   try{
-   const result=await api(setup?'setup':'login',{username:state.user,password:f.elements.password.value});
+   const method=f.elements.method?.value||'password';const credential=f.elements.credential?.value||f.elements.password?.value||'';const result=await api(setup?'setup':'login',setup?{username:state.user,password:credential}:{username:state.user,method,[method]:credential});
    state.role=result.user.role;state.isAdmin=!!result.user.is_admin;
    if(state.isAdmin&&!seeded){await api('seedCatalog');seeded=true;}
    welcome();
@@ -48,12 +68,13 @@ function welcome(){
 function mountStaffAccounts(){
   if(!state.isAdmin)return;
   const area=document.createElement('section');area.className='role-admin';
-  area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>New password<input name="password" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
+  area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>Sign-in method<select name="credentialType"><option value="password">Password</option><option value="pin">PIN (4–8 digits)</option></select></label><label id="staffCredentialLabel">New password<input name="credential" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
   document.querySelector('#verifierStaffPanel').appendChild(area);
   area.querySelector('form').onsubmit=async e=>{
    e.preventDefault();const form=e.currentTarget,button=form.querySelector('button'),result=area.querySelector('#staffResult');
    button.disabled=true;result.textContent='Creating account…';
-   try{const response=await api('createUser',{newUsername:form.elements.username.value,newPin:form.elements.password.value,newRole:form.elements.role.value});result.textContent='Created '+response.username+' ('+response.role+').';form.reset()}
+   const updateCredential=()=>{const pin=form.elements.credentialType.value==='pin',input=form.elements.credential,label=form.querySelector('#staffCredentialLabel');label.firstChild.textContent=pin?'New PIN':'New password';input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.value='';};form.elements.credentialType.onchange=updateCredential;updateCredential();
+   try{const response=await api('createUser',{newUsername:form.elements.username.value,credential:form.elements.credential.value,credentialType:form.elements.credentialType.value,newRole:form.elements.role.value});result.textContent='Created '+response.username+' ('+response.role+').';form.reset()}
    catch(err){result.textContent='Account not created: '+err.message}
    finally{button.disabled=false}
   };
