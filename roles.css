@@ -287,3 +287,39 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
 .credential-switch button{appearance:none;border:0;border-radius:9px;padding:10px 12px;background:transparent;color:#59616d;font:inherit;font-weight:650;cursor:pointer}
 .credential-switch button.is-selected{background:#fff;color:#202631;box-shadow:0 1px 4px rgba(0,0,0,.12)}
 #roleLogin #credentialLabel input{box-sizing:border-box;width:100%}
+
+
+/* Credential screen spacing: keep the password/PIN form compact and balanced. */
+#roleLogin[data-step="credential"]{
+  gap:18px;
+}
+#roleLogin[data-step="credential"] .workspace-intro{
+  margin:0;
+}
+#roleLogin[data-step="credential"] .workspace-intro h2{
+  margin:0 0 8px;
+}
+#roleLogin[data-step="credential"] .workspace-intro p{
+  margin:0;
+  line-height:1.5;
+}
+#roleLogin[data-step="credential"] .credential-switch{
+  margin:2px 0 0;
+}
+#roleLogin[data-step="credential"] #credentialLabel{
+  gap:8px;
+  margin:0;
+}
+#roleLogin[data-step="credential"] #credentialLabel input{
+  margin:0;
+}
+#roleLogin[data-step="credential"] > .role-button{
+  margin:0;
+}
+#roleLogin[data-step="credential"] > .role-button + .role-button{
+  margin-top:-6px;
+}
+@media(max-width:480px){
+  #roleLogin[data-step="credential"]{gap:16px}
+  #roleLogin[data-step="credential"] .workspace-intro p{margin:0}
+}
