@@ -102,11 +102,12 @@ function welcome(){
 
  root.querySelector('#roleLogout').onclick=logout;
 }
+function adminPanelContent(id){return document.querySelector('#'+id+' .staff-popup-content')||document.querySelector('#'+id)}
 function mountStaffAccounts(){
   if(!state.isAdmin)return;
   const area=document.createElement('section');area.className='role-admin';
   area.innerHTML='<h3>Staff accounts</h3><p>Create Counter or Verifier access, or add a PIN to an existing account.</p><form id="newStaffForm"><label>New username<input name="username" required minlength="3" maxlength="32" pattern="[a-zA-Z][a-zA-Z0-9_.-]{2,31}" autocomplete="off"></label><label>Sign-in method<select name="credentialType"><option value="password">Password</option><option value="pin">PIN (4–8 digits)</option></select></label><label id="staffCredentialLabel">New password<input name="credential" type="password" required minlength="12" autocomplete="new-password"></label><label>Role<select name="role"><option value="counter">Counter</option><option value="verifier">Verifier</option></select></label><button class="role-button">Create account</button></form><p id="staffResult" role="status"></p>';
-  document.querySelector('#verifierStaffPanel').appendChild(area);
+  adminPanelContent('verifierStaffPanel').appendChild(area);
   const staffForm=area.querySelector('form');
   const updateCredential=()=>{const pin=staffForm.elements.credentialType.value==='pin',input=staffForm.elements.credential,label=staffForm.querySelector('#staffCredentialLabel');label.firstChild.textContent=pin?'New PIN':'New password';input.type=pin?'tel':'password';input.inputMode=pin?'numeric':'text';input.pattern=pin?'[0-9]{4,8}':'';input.minLength=pin?4:12;input.maxLength=pin?8:256;input.placeholder=pin?'4–8 digits':'At least 12 characters';input.autocomplete=pin?'off':'new-password';input.value='';};
   staffForm.elements.credentialType.onchange=updateCredential;
@@ -141,7 +142,7 @@ function parseCSV(text){
 function mountAdminCatalog(){
  const area=document.createElement('section');area.className='role-admin role-catalog-admin';
  area.innerHTML='<h3>Item catalogue</h3><p>Add stock items or import a CSV file. Existing IDs will be updated; archived items can be restored by importing them again.</p><form id="catalogAddForm"><label>Item ID<input name="id" required placeholder="e.g. stock-104"></label><label>Item name<input name="name" required></label><label>UOM<input name="uom" required placeholder="EA, g, ml"></label><button class="role-button">Add item</button></form><hr><label>Import CSV<input id="catalogFile" type="file" accept=".csv,text/csv"></label><div id="catalogPreview" aria-live="polite"></div><button type="button" class="role-button" id="catalogImport" disabled>Import catalogue</button><p id="catalogResult" role="status"></p><div id="catalogItems"></div>';
- document.querySelector('#itemCataloguePanel').appendChild(area);
+ adminPanelContent('itemCataloguePanel').appendChild(area);
  const result=area.querySelector('#catalogResult'),preview=area.querySelector('#catalogPreview'),importButton=area.querySelector('#catalogImport');let pending=[];
  async function refresh(){
   try{const data=await api('catalog');state.catalog=(data.items||[]).map(x=>[x.name,x.uom,x.id]);if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(state.catalog);area.querySelector('#catalogItems').innerHTML='<p><strong>'+state.catalog.length+' active items</strong></p>'+state.catalog.map(x=>'<div class="role-item"><span><b>'+esc(x[0])+'</b><small>'+esc(x[2])+' · '+esc(x[1])+'</small></span></div>').join('');}
