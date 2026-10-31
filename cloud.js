@@ -323,7 +323,7 @@ function setupAdminPopups(){
   if(!summary)return;
   const trigger=document.createElement('button');
   trigger.type='button';trigger.className='staff-panel-trigger';
-  trigger.innerHTML=summary.innerHTML+'<span class="staff-popup-arrow" aria-hidden="true">↗</span>';
+  const title=summary.childNodes[0]?.textContent?.trim()||summary.textContent.trim();const description=summary.querySelector('span')?.textContent?.trim()||'';trigger.innerHTML='<span class="staff-panel-trigger-title">'+esc(title)+'</span><span class="staff-panel-trigger-description">'+esc(description)+'</span><span class="staff-popup-arrow" aria-hidden="true">↗</span>';
   const backdrop=document.createElement('div');
   backdrop.className='staff-popup-backdrop';backdrop.hidden=true;
   backdrop.innerHTML='<section class="staff-popup" role="dialog" aria-modal="true" aria-label="'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'"><div class="staff-popup-heading"><h2>'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'</h2><button type="button" class="staff-popup-close" aria-label="Close">×</button></div><div class="staff-popup-content"></div></section>';
