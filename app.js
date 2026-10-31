@@ -13,7 +13,7 @@ alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v5M12 18h.01"/>',dash:'<circle c
 copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
 trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>'};
 document.querySelectorAll('[data-ic]').forEach(e=>e.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[e.dataset.ic]+'</svg>'));
-let date=iso(new Date()),data={},filter='all',query='';
+let date=iso(new Date()),data={},filter='all',query='',uomFilter='all';
 const cache=new Map(),dirty=new Set(),storageErrors=new Map(),blocked=new Set();
 let armedDate=null,clearTimer;
 
@@ -94,7 +94,7 @@ function stats(){let c=0,m=0,b=0;document.querySelectorAll('#rows .row').forEach
   const progressBar=$('#dashboardProgressFill');if(progressBar)progressBar.setAttribute('style','width:'+verifiedPercent+'%');
   const progressTrack=$('#dashboardProgressTrack');if(progressTrack)progressTrack.setAttribute('aria-valuenow',String(verifiedPercent))}
 function filt(keepEditing=false){let shown=0;document.querySelectorAll('#rows .row').forEach(r=>{const st=r.dataset.st;
-  const ok=(filter==='all'||(filter==='bad'&&st==='DO NOT MATCH')||(filter==='none'&&!st))&&ITEMS.find(it=>it[2]===r.dataset.i)[0].toLowerCase().includes(query);
+  const item=ITEMS.find(it=>it[2]===r.dataset.i);const ok=(filter==='all'||(filter==='bad'&&st==='DO NOT MATCH')||(filter==='none'&&!st))&&(uomFilter==='all'||String(item?.[1]||'').trim().toLowerCase()===uomFilter)&&(item?.[0]||'').toLowerCase().includes(query);
   const visible=ok||(keepEditing&&r.contains(document.activeElement));r.hidden=!visible;if(visible)shown++});$('#empty').hidden=shown>0}
 function month(){const [y,m]=date.split('-').map(Number);const n=new Date(y,m,0).getDate();let full=0,bad=0,h='';
   for(let d=1;d<=n;d++){const k=y+'-'+pad(m)+'-'+pad(d);const rec=read(k);let c=0,b=0;
@@ -144,6 +144,17 @@ document.querySelectorAll('.sort-head').forEach(b=>b.addEventListener('click',()
 $('#itemSort').addEventListener('change',e=>{sortKey=e.target.value;sortDescending=false;sortRows()});
 $('#sortDirection').addEventListener('click',()=>{sortDescending=!sortDescending;sortRows()});
 function setFilter(f){filter=f;document.querySelectorAll('.f').forEach(x=>(x.classList.toggle('on',x.dataset.f===f),x.setAttribute('aria-pressed',String(x.dataset.f===f))));filt()}
+function syncUomFilter(){
+ const select=$('#uomFilter');if(!select)return;
+ const current=uomFilter;
+ const values=[...new Set(ITEMS.map(it=>String(it[1]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}));
+ select.innerHTML='<option value="all">All UOMs</option>'+values.map(v=>'<option value="'+esc(v.toLowerCase())+'">'+esc(v)+'</option>').join('');
+ uomFilter=values.some(v=>v.toLowerCase()===current)?current:'all';
+ select.value=uomFilter;
+}
+$('#uomFilter')?.addEventListener('change',e=>{uomFilter=e.target.value;filt()});
+syncUomFilter();
+
 
 $('#rows').addEventListener('input',e=>{const inp=e.target,r=inp.closest('.row');if(!r)return;
   const i=r.dataset.i;data[i]=data[i]||{};data[i][inp.dataset.k]=inp.value;
@@ -198,7 +209,7 @@ window.stockTakeSetCatalog=items=>{
  if(!Array.isArray(items))return;
  ITEMS=items.filter(x=>Array.isArray(x)&&x.length===3&&/^stock-[0-9]{3,}$/.test(x[2]));
  window.STOCKTAKE_ITEMS=ITEMS;
- build();show();setFilter(filter);
+ syncUomFilter();build();show();setFilter(filter);
 };
 
 
