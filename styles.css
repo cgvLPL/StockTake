@@ -1080,3 +1080,50 @@ body.staff-popup-open{overflow:hidden}
   #adminBento .staff-panel-trigger-title{font-size:17px}
   #adminBento .staff-panel-trigger-description{font-size:13px}
 }
+
+
+/* Unit-of-measure filter remains available on desktop and mobile. */
+.uom-filterbar{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  width:100%;
+  min-width:0;
+  padding:10px 14px;
+  margin:0 0 10px;
+  border:1px solid #e0e3e7;
+  border-radius:14px;
+  background:#f7f8f9;
+}
+.uom-filterbar label{
+  flex:none;
+  color:#727984;
+  font-size:11px;
+  font-weight:750;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.uom-filterbar select{
+  box-sizing:border-box;
+  flex:1 1 180px;
+  min-width:0;
+  max-width:100%;
+  min-height:42px;
+  padding:10px 14px;
+  border:1px solid #d6dbe1;
+  border-radius:11px;
+  background:#fff;
+  color:#1d2229;
+  font:650 14px/1.2 "Instrument Sans",Arial,sans-serif;
+  cursor:pointer;
+}
+.uom-filterbar select:focus-visible{
+  outline:2px solid #ff681f;
+  outline-offset:2px;
+}
+@media(max-width:520px){
+  .uom-filterbar{gap:8px;padding:10px}
+  .uom-filterbar label{width:100%}
+  .uom-filterbar select{flex:1 1 100%;width:100%}
+}
