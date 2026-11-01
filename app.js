@@ -213,6 +213,20 @@ window.stockTakeSetCatalog=items=>{
 };
 
 
+// Keep verifier Actual overrides optimistic until the matching Neon value is observed.
+const pendingActualOverrides=new Map();
+window.stockTakeMarkActualOverride=(id,value)=>{
+ const next=value===''?null:Number(value);
+ pendingActualOverrides.set(id,{value:next,at:Date.now()});
+ const record=data[id]||(data[id]={});
+ if(next==null)delete record.a;else record.a=String(next);
+ if(!Object.keys(record).length)delete data[id];
+ cache.set(date,data);save(date);
+ const row=document.querySelector('#rows .row[data-i="'+CSS.escape(id)+'"]');
+ const input=row?.querySelector('input[data-k="a"]');if(input)input.value=value;
+ if(row)paint(row);stats();month();
+};
+
 // Merge live Counter entries from Neon into the Verifier table without
 // replacing the verifier's in-progress System/Remarks edits.
 window.stockTakeSyncActuals=(rows,forDate)=>{
@@ -225,6 +239,13 @@ window.stockTakeSyncActuals=(rows,forDate)=>{
   const input=row?.querySelector('input[data-k="a"]');
   if(input&&document.activeElement===input)return;
   const next=item.actual==null?'':String(item.actual);
+  const pending=pendingActualOverrides.get(id);
+  if(pending){
+   const expected=pending.value==null?'':String(pending.value);
+   if(next!==expected&&Date.now()-pending.at<15000)return;
+   if(next===expected)pendingActualOverrides.delete(id);
+   else pendingActualOverrides.delete(id);
+  }
   const record=data[id]||(data[id]={});
   const current=record.a==null?'':String(record.a);
   if(current===next)return;
