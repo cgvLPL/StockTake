@@ -1135,3 +1135,103 @@ body.staff-popup-open{overflow:hidden}
 .counter-uom-filter select{flex:1 1 0;width:100%;min-width:0;min-height:42px;padding:9px 12px;border:1px solid #d6dbe1;border-radius:11px;background:#fff;color:#1d2229;font:650 14px/1.2 inherit}
 .counter-uom-filter select:focus-visible{outline:2px solid #ff681f;outline-offset:2px}
 @media(max-width:520px){.counter-uom-filter{align-items:stretch;flex-direction:column;gap:7px}.counter-uom-filter select{flex:none}}
+
+
+/* Stable admin action cards: prevent title/description from being squeezed. */
+#adminBento{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch;
+  gap:14px;
+  width:100%;
+  min-width:0;
+}
+#adminBento>.staff-panel{
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  min-height:118px;
+  padding:0!important;
+  overflow:hidden;
+  border:1px solid #e1e4e8;
+  border-radius:18px;
+  background:#fff;
+}
+#adminBento .staff-panel-trigger{
+  display:flex!important;
+  flex-direction:row;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  width:100%;
+  min-width:0;
+  min-height:118px;
+  height:100%;
+  padding:20px!important;
+  margin:0;
+  border:0;
+  border-radius:inherit;
+  background:#fff;
+  color:#191c20;
+  text-align:left;
+  white-space:normal;
+  overflow:hidden;
+}
+#adminBento .staff-panel-trigger-copy{
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  justify-content:center;
+  gap:7px;
+  width:auto;
+  min-width:0;
+  margin:0;
+}
+#adminBento .staff-panel-trigger-title{
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  color:#191c20;
+  font-size:18px;
+  line-height:1.25;
+  font-weight:750;
+  letter-spacing:-.025em;
+  overflow-wrap:break-word;
+  word-break:normal;
+}
+#adminBento .staff-panel-trigger-description{
+  display:block;
+  width:100%;
+  min-width:0;
+  margin:0;
+  color:#747b83;
+  font-size:13px;
+  line-height:1.45;
+  font-weight:450;
+  overflow-wrap:break-word;
+  word-break:normal;
+}
+#adminBento .staff-popup-arrow{
+  display:grid;
+  flex:0 0 36px;
+  place-items:center;
+  width:36px;
+  height:36px;
+  margin:0;
+  border:1px solid #e3e6e9;
+  border-radius:50%;
+  color:#555d66;
+  font-size:18px;
+  line-height:1;
+}
+#adminBento .staff-panel-trigger:hover{background:#f8f9fa}
+#adminBento .staff-panel-trigger:focus-visible{outline:3px solid rgba(255,104,31,.35);outline-offset:-4px}
+@media(max-width:700px){
+  #adminBento{grid-template-columns:minmax(0,1fr)!important;gap:10px}
+  #adminBento>.staff-panel{min-height:104px}
+  #adminBento .staff-panel-trigger{min-height:104px;padding:17px 18px!important;gap:12px}
+  #adminBento .staff-panel-trigger-title{font-size:17px}
+  #adminBento .staff-panel-trigger-description{font-size:13px}
+}
