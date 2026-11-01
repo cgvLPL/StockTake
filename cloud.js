@@ -415,7 +415,7 @@ function queueVerifierSave(){
   const changes=items.filter(it=>records[it[2]]&&String(records[it[2]].s??'')!==String(state.records[it[2]]?.system??'')||records[it[2]]&&String(records[it[2]].r??'')!==String(state.records[it[2]]?.remarks??''));
   for(const it of changes){
    const r=records[it[2]],raw=String(r.s??'').trim().replace(',','.'),value=raw===''?'':Number(raw);
-   if(raw!==''&&(!Number.isFinite(value)||value<0)){message('Invalid system quantity; not saved to cloud');continue}
+   if(raw!==''&&(!Number.isFinite(value)||value<0||!/^(?:\d+(?:[.,]\d{0,4})?|[.,]\d{1,4})$/.test(raw))){message('Invalid system quantity; use up to 4 decimal places.');continue}
    const remarks=String(r.r||'');
    verifierSaveQueue=verifierSaveQueue.then(()=>api('save',{date,item_id:it[2],value:value===''?'':String(value),remarks}).then(()=>{
     state.records[it[2]]={...state.records[it[2]],system:value===''?null:value,remarks};
