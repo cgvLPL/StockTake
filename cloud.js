@@ -448,6 +448,7 @@ document.querySelector('#rows')?.addEventListener('input',e=>{
    message('Enter a non-negative quantity with up to 4 decimals.');return;
   }
   try{
+   if(window.stockTakeMarkActualOverride)window.stockTakeMarkActualOverride(id,value===''?'':String(value));
    await api('save',{date,item_id:id,value:value===''?'':String(value),field:'actual'});
    state.records[id]={...state.records[id],actual:value===''?null:value};
    message('Actual correction saved · synced to Counter.');
