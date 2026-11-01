@@ -326,7 +326,7 @@ function setupAdminPopups(){
   if(!summary)return;
   const trigger=document.createElement('button');
   trigger.type='button';trigger.className='staff-panel-trigger';
-  const title=summary.childNodes[0]?.textContent?.trim()||summary.textContent.trim();const description=summary.querySelector('span')?.textContent?.trim()||'';trigger.innerHTML='<span class="staff-panel-trigger-title">'+esc(title)+'</span><span class="staff-panel-trigger-description">'+esc(description)+'</span><span class="staff-popup-arrow" aria-hidden="true">↗</span>';
+  const titleNode=[...summary.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim());const title=titleNode?.textContent.trim()||summary.textContent.trim();const description=summary.querySelector('span')?.textContent.trim()||'';trigger.setAttribute('aria-label',title+(description?': '+description:''));trigger.innerHTML='<span class="staff-panel-trigger-copy"><span class="staff-panel-trigger-title">'+esc(title)+'</span><span class="staff-panel-trigger-description">'+esc(description)+'</span></span><span class="staff-popup-arrow" aria-hidden="true">↗</span>';
   const backdrop=document.createElement('div');
   backdrop.className='staff-popup-backdrop';backdrop.hidden=true;
   backdrop.innerHTML='<section class="staff-popup" role="dialog" aria-modal="true" aria-label="'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'"><div class="staff-popup-heading"><h2>'+(id==='verifierStaffPanel'?'Staff management':'Item catalogue')+'</h2><button type="button" class="staff-popup-close" aria-label="Close">×</button></div><div class="staff-popup-content"></div></section>';
