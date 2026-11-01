@@ -238,84 +238,86 @@ function setupReportDownloads(){
  const csvButton=panel.querySelector('#downloadStockReport');
  const pdfButton=panel.querySelector('#downloadExecutivePdf');
  const pdfTools=window.StockTakeExecutivePdf;
- if(!csvButton||!pdfButton||!pdfTools)return;
- const buttons=[csvButton,pdfButton];
- const all=panel.querySelectorAll('[data-report-period]');
+ const options=panel.querySelector('#reportUomOptions');
+ const count=panel.querySelector('#reportUomCount');
+ const selectAll=panel.querySelector('#reportUomAll');
+ const clearAll=panel.querySelector('#reportUomClear');
+ if(!csvButton||!pdfButton||!pdfTools||!options)return;
+ const buttons=[csvButton,pdfButton],all=panel.querySelectorAll('[data-report-period]');
  const selectedDate=document.querySelector('#date')?.value||state.date;
  if(/^\d{4}-\d{2}-\d{2}$/.test(selectedDate))date.value=selectedDate;
  if(panel.dataset.reportReady==='yes')return;
  panel.dataset.reportReady='yes';
- let kind='daily';
+ let kind='daily',uoms=[],selected=new Set(),activeKey='';
+ const keyFor=range=>'stocktake:report-uom:'+range.start+':'+range.end;
+ function currentRange(){return tools.periodRange(kind,date.value)}
+ function persistSelection(){
+  if(!activeKey)return;
+  try{localStorage.setItem(activeKey,JSON.stringify([...selected]));}catch(e){}
+ }
+ function renderUoms(){
+  options.innerHTML=uoms.map(u=>'<label class="report-uom-option"><input type="checkbox" data-report-uom="'+esc(u)+'" '+(selected.has(u)?'checked':'')+'><span>'+esc(u)+'</span></label>').join('');
+  count.textContent=selected.size+' of '+uoms.length+' selected';
+  options.querySelectorAll('input[data-report-uom]').forEach(input=>input.addEventListener('change',()=>{
+   input.checked?selected.add(input.dataset.reportUom):selected.delete(input.dataset.reportUom);
+   persistSelection();count.textContent=selected.size+' of '+uoms.length+' selected';
+  }));
+ }
+ function loadPeriodSelection(){
+  let range;try{range=currentRange()}catch(e){return}
+  activeKey=keyFor(range);
+  let saved=null;try{saved=JSON.parse(localStorage.getItem(activeKey)||'null')}catch(e){}
+  selected=new Set(Array.isArray(saved)?saved.filter(v=>uoms.includes(v)):uoms);
+  renderUoms();
+ }
  function updateHint(){
-  try{
-   const range=tools.periodRange(kind,date.value);
-   hint.textContent=kind==='daily'
-     ?'Daily report · '+range.start
-     :kind==='weekly'
-       ?'Weekly report · '+range.start+' to '+range.end+' (Monday–Sunday)'
-       :'Monthly report · '+range.start+' to '+range.end;
-  }catch(err){hint.textContent='Select a valid date to choose the report period.'}
+  try{const range=currentRange();hint.textContent=kind==='daily'?'Daily report · '+range.start:kind==='weekly'?'Weekly report · '+range.start+' to '+range.end+' (Monday–Sunday)':'Monthly report · '+range.start+' to '+range.end;}
+  catch(err){hint.textContent='Select a valid date to choose the report period.'}
  }
  all.forEach(option=>option.addEventListener('click',()=>{
   kind=option.dataset.reportPeriod;
-  all.forEach(el=>{
-    const active=el===option;
-    el.classList.toggle('is-selected',active);
-    el.setAttribute('aria-pressed',String(active));
-  });
-  status.textContent='';
-  delete status.dataset.error;
-  updateHint();
+  all.forEach(el=>{const active=el===option;el.classList.toggle('is-selected',active);el.setAttribute('aria-pressed',String(active));});
+  status.textContent='';delete status.dataset.error;updateHint();loadPeriodSelection();
  }));
- date.addEventListener('change',()=>{
-  status.textContent='';
-  delete status.dataset.error;
-  updateHint();
- });
-
+ date.addEventListener('change',()=>{status.textContent='';delete status.dataset.error;updateHint();loadPeriodSelection();});
+ selectAll?.addEventListener('click',()=>{selected=new Set(uoms);persistSelection();renderUoms()});
+ clearAll?.addEventListener('click',()=>{selected.clear();persistSelection();renderUoms()});
  async function generateReport(format){
-  let range;
-  try{range=tools.periodRange(kind,date.value)}
-  catch(err){
-   status.dataset.error='true';status.textContent=err.message;date.focus();return;
-  }
+  let range;try{range=currentRange()}catch(err){status.dataset.error='true';status.textContent=err.message;date.focus();return;}
+  if(!selected.size){status.dataset.error='true';status.textContent='Select at least one UOM to include.';return;}
   const isPdf=format==='pdf',button=isPdf?pdfButton:csvButton;
-  buttons.forEach(b=>b.disabled=true);
-  const original=button.innerHTML;
-  button.innerHTML='<span aria-hidden="true">⌛</span> Preparing…';
-  status.textContent='Loading saved stock records from Neon…';
-  delete status.dataset.error;
+  buttons.forEach(b=>b.disabled=true);const original=button.innerHTML;
+  button.innerHTML='<span aria-hidden="true">⌛</span> Preparing…';status.textContent='Loading saved stock records from Neon…';delete status.dataset.error;
   try{
-   // Wait for edits which are still in the verifier's auto-save debounce/queue.
    if(verifierSaveTimer)await new Promise(resolve=>setTimeout(resolve,750));
    await verifierSaveQueue;
    const payload=await api('report',{startDate:range.start,endDate:range.end});
+   const allowed=new Set(selected);
+   const filteredItems=payload.items.filter(item=>allowed.has(String(item.uom||'')));
+   const allowedIds=new Set(filteredItems.map(item=>String(item.id)));
+   const filteredPayload={...payload,items:filteredItems,rows:payload.rows.filter(row=>allowedIds.has(String(row.item_id)))};
    if(isPdf){
-    const report=pdfTools.makeExecutivePdf(payload,kind,date.value);
+    const report=pdfTools.makeExecutivePdf(filteredPayload,kind,date.value);
     pdfTools.downloadExecutivePdf(report);
-    status.textContent='Executive PDF prepared: '+report.filename+
-      ' · '+report.pages+' page(s) · '+report.variances+' variance(s).';
+    status.textContent='Executive PDF prepared: '+report.filename+' · '+report.pages+' page(s) · '+report.variances+' variance(s) · '+filteredItems.length+' items across '+selected.size+' UOM(s).';
    }else{
-    const report=tools.makeReport(payload,kind,date.value);
+    const report=tools.makeReport(filteredPayload,kind,date.value);
     tools.download(report);
-    status.textContent='Detailed CSV prepared: '+report.filename+' · '+report.activeDays+
-      ' day(s) with saved records · '+report.variances+' variance(s).';
+    status.textContent='Detailed CSV prepared: '+report.filename+' · '+report.activeDays+' day(s) with saved records · '+report.variances+' variance(s) · '+filteredItems.length+' items across '+selected.size+' UOM(s).';
    }
   }catch(err){
    status.dataset.error='true';
-   status.textContent=String(err.message||err).includes('Unknown action')
-     ?'The reporting service needs updating.'
-     :'Could not download the '+(isPdf?'PDF':'CSV')+': '+String(err.message||err);
-  }finally{
-   buttons.forEach(b=>b.disabled=false);
-   button.innerHTML=original;
-  }
+   status.textContent=String(err.message||err).includes('Unknown action')?'The reporting service needs updating.':'Could not download the '+(isPdf?'PDF':'CSV')+': '+String(err.message||err);
+  }finally{buttons.forEach(b=>b.disabled=false);button.innerHTML=original;}
  }
  csvButton.addEventListener('click',()=>generateReport('csv'));
  pdfButton.addEventListener('click',()=>generateReport('pdf'));
  updateHint();
+ api('catalog').then(result=>{
+  uoms=[...new Set((result.items||[]).map(item=>String(item.uom||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}));
+  loadPeriodSelection();
+ }).catch(err=>{options.textContent='Could not load UOMs: '+String(err.message||err);count.textContent='Unavailable';});
 }
-
 let verifierSaveTimer=null;
 let verifierSaveQueue=Promise.resolve();
 function setupAdminPopups(){
