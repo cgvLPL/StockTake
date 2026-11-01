@@ -432,12 +432,12 @@ document.querySelector('#rows')?.addEventListener('input',queueVerifierSave);
 document.querySelector('#rows')?.addEventListener('change',queueVerifierSave);
 document.querySelector('#rows')?.addEventListener('focusout',queueVerifierSave);
 
-// Admins may correct Actual values from the Verifier dashboard.
-// The API checks is_admin and only this explicit field can update Actual.
+// Verifiers and admins may override Actual values from the Verifier dashboard.
+// The API authorizes this explicit field; Counter entries continue using the same Actual column.
 const adminActualTimers=new Map();
 document.querySelector('#rows')?.addEventListener('input',e=>{
  const input=e.target;
- if(!state.isAdmin||input.dataset.k!=='a')return;
+ if(state.role!=='verifier'||input.dataset.k!=='a')return;
  const row=input.closest('.row');if(!row)return;
  const id=row.dataset.i,date=document.querySelector('#date')?.value||state.date;
  clearTimeout(adminActualTimers.get(id));
@@ -456,7 +456,7 @@ document.querySelector('#rows')?.addEventListener('input',e=>{
 });
 document.querySelector('#rows')?.addEventListener('change',e=>{
  const input=e.target;
- if(!state.isAdmin||input.dataset.k!=='a')return;
+ if(state.role!=='verifier'||input.dataset.k!=='a')return;
  clearTimeout(adminActualTimers.get(input.closest('.row')?.dataset.i));
  input.dispatchEvent(new Event('input',{bubbles:true}));
 });
