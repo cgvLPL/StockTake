@@ -1296,3 +1296,10 @@ body.staff-popup-open{overflow:hidden}
     width:36px!important;
   }
 }
+
+
+/* Signed variance makes the direction relative to System immediately clear. */
+#rows .df{font-variant-numeric:tabular-nums;font-weight:700}
+#rows .df.diff-positive{color:#16834a}
+#rows .df.diff-negative{color:#d04c42}
+#rows .df.diff-zero{color:inherit}
