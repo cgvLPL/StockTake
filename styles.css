@@ -1235,3 +1235,64 @@ body.staff-popup-open{overflow:hidden}
   #adminBento .staff-panel-trigger-title{font-size:17px}
   #adminBento .staff-panel-trigger-description{font-size:13px}
 }
+
+
+/* Final narrow-screen fix: stack the two admin action cards and give
+   each trigger the full row width so titles can never collapse vertically. */
+@media(max-width:900px){
+  #adminBento{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:12px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  #adminBento>.staff-panel{
+    display:block!important;
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:104px!important;
+    margin:0!important;
+  }
+  #adminBento .staff-panel-trigger{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:104px!important;
+    padding:18px!important;
+    gap:14px!important;
+    white-space:normal!important;
+    text-align:left!important;
+  }
+  #adminBento .staff-panel-trigger-copy{
+    display:flex!important;
+    flex:1 1 0!important;
+    flex-direction:column!important;
+    width:0!important;
+    min-width:0!important;
+    max-width:100%!important;
+  }
+  #adminBento .staff-panel-trigger-title,
+  #adminBento .staff-panel-trigger-description{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:break-word!important;
+  }
+  #adminBento .staff-popup-arrow{
+    flex:0 0 36px!important;
+    width:36px!important;
+  }
+}
