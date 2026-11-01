@@ -64,7 +64,7 @@ function num(v){
 function calc(r){const a=num(r&&r.a),s=num(r&&r.s);if(a===null||s===null)return{diff:null,st:''};const diff=(Math.round(a*1e4)-Math.round(s*1e4))/1e4;return{diff,st:diff===0?'MATCH':'DO NOT MATCH'}}
 function paint(r){const c=calc(data[r.dataset.i]);r.dataset.st=c.st;
   r.querySelectorAll('input.q').forEach(inp=>{const invalid=inp.value.trim()!==''&&num(inp.value)===null;inp.setAttribute('aria-invalid',String(invalid));inp.setCustomValidity(invalid?'Enter a valid number with up to four decimal places.':'')});
-  r.querySelector('.df').textContent=c.diff===null?'':fmt.format(c.diff);
+  const diffCell=r.querySelector('.df');diffCell.textContent=c.diff===null?'':(c.diff>0?'+':'')+fmt.format(c.diff);diffCell.classList.toggle('diff-positive',c.diff>0);diffCell.classList.toggle('diff-negative',c.diff<0);diffCell.classList.toggle('diff-zero',c.diff===0);
   r.querySelector('.st').innerHTML=c.st?'<span class="pill '+(c.st==='MATCH'?'ok':'bad')+'">'+c.st+'</span>':''}
 
 function build(){
