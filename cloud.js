@@ -423,9 +423,12 @@ function queueVerifierSave(){
    })).catch(err=>{message('Cloud save failed: '+err.message)});
   }
   if(!changes.length)message('All changes saved');
- },650);
+ },450);
 }
+// Sync verifier edits while typing, on commit, and when leaving a field.
+document.querySelector('#rows')?.addEventListener('input',queueVerifierSave);
 document.querySelector('#rows')?.addEventListener('change',queueVerifierSave);
+document.querySelector('#rows')?.addEventListener('focusout',queueVerifierSave);
 
 // Admins may correct Actual values from the Verifier dashboard.
 // The API checks is_admin and only this explicit field can update Actual.
