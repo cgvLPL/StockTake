@@ -21,6 +21,7 @@ function f(n){return Number(n).toFixed(2).replace(/\.00$/,'');}
 function color(rgb){return rgb.map(f).join(' ');}
 function quantity(value){if(value===null||value===undefined||value==='')return null;const n=Number(value);return Number.isFinite(n)?n:null;}
 function fmtNum(n){return typeof n==='number'&&Number.isFinite(n)?String(Math.round(n*10000)/10000):'-';}
+function fmtDiff(n){const value=fmtNum(n);return typeof n==='number'&&Number.isFinite(n)&&n>0?'+'+value:value;}
 function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;}
 function dateRange(kind,date){
   if(!validDate(date))throw Error('Choose a valid report date.');
@@ -448,7 +449,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
       pdf.text(ellipsis((e.remarks||'No remark')+(e.uom?'  |  '+e.uom:''),43),M+101,y+20,8,false,C.muted);
       pdf.textRight(fmtNum(e.actual),M+370,y+7,9,false,C.ink);
       pdf.textRight(fmtNum(e.system),M+431,y+7,9,false,C.ink);
-      pdf.textRight(fmtNum(e.diff),RIGHT-9,y+7,9,true,C.red);
+      pdf.textRight(fmtDiff(e.diff),RIGHT-9,y+7,9,true,C.red);
       y+=37;
     });
     if(s.exceptions.length>subset.length){
@@ -525,7 +526,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
         if(offset===0){
           detailCell('no',String(item.number),yTop+7,7.6,false,C.muted);
           const numeric=(key,value,tint=C.ink,bold=false)=>{
-            const displayed=fmtNum(value);
+            const displayed=key==='diff'?fmtDiff(value):fmtNum(value);
             const maxWidth=DETAIL_COLUMNS[key].w-4;
             const scale=helveticaTextWidth(displayed,7.8,bold);
             const size=scale>maxWidth?Math.max(5.5,7.8*maxWidth/scale):7.8;
