@@ -452,9 +452,10 @@ document.querySelector('#rows')?.addEventListener('input',e=>{
    const saved=await api('save',{date,item_id:id,value:value===''?'':String(value),field:'actual'});
    const expected=value===''?null:value;
    if(saved.field!=='actual'||saved.value!==expected)throw Error('The database did not confirm the Actual correction.');
+   if(window.stockTakeConfirmActualOverride)window.stockTakeConfirmActualOverride(id,value===''?'':String(value));
    state.records[id]={...state.records[id],actual:expected};
    message('Actual correction saved · synced to Counter.');
-  }catch(err){message('Actual correction not saved: '+err.message)}
+  }catch(err){if(window.stockTakeRejectActualOverride)window.stockTakeRejectActualOverride(id);message('Actual correction not saved: '+err.message);syncVerifierActuals()}
  },500));
 });
 document.querySelector('#rows')?.addEventListener('change',e=>{
