@@ -475,36 +475,58 @@ document.querySelector('#rows')?.addEventListener('focusout',e=>queueVerifierSav
 // Verifiers and admins may override Actual values from the Verifier dashboard.
 // The API authorizes this explicit field; Counter entries continue using the same Actual column.
 const adminActualTimers=new Map();
-document.querySelector('#rows')?.addEventListener('input',e=>{
- const input=e.target;
- if(state.role!=='verifier'||input.dataset.k!=='a')return;
+const adminActualRevisions=new Map();
+const adminActualQueues=new Map();
+const adminActualScheduled=new Map();
+function parseActualCorrection(raw){
+ const text=String(raw??'').trim();
+ if(text==='')return {valid:true,value:null,display:''};
+ if(!/^(?:\\d+(?:[.,]\\d{0,4})?|[.,]\\d{1,4})$/.test(text))return {valid:false};
+ const value=Number(text.replace(',','.'));
+ return Number.isFinite(value)&&value>=0?{valid:true,value,display:String(value)}:{valid:false};
+}
+function scheduleActualCorrection(input,immediate=false){
+ if(state.role!=='verifier'||input?.dataset?.k!=='a')return;
  const row=input.closest('.row');if(!row)return;
  const id=row.dataset.i,date=document.querySelector('#date')?.value||state.date;
+ const parsed=parseActualCorrection(input.value);
+ const revision=(adminActualRevisions.get(id)||0)+1;
+ adminActualRevisions.set(id,revision);
  clearTimeout(adminActualTimers.get(id));
- message('Saving Actual correction…');
- adminActualTimers.set(id,setTimeout(async()=>{
-  const raw=input.value.trim(),value=raw===''?'':Number(raw.replace(',','.'));
-  if(raw!==''&&(!Number.isFinite(value)||value<0||!/^\\d+(?:[.,]\\d{1,4})?$/.test(raw))){
-   message('Enter a non-negative quantity with up to 4 decimals.');return;
-  }
-  try{
-   if(window.stockTakeMarkActualOverride)window.stockTakeMarkActualOverride(id,value===''?'':String(value));
-   const saved=await api('save',{date,item_id:id,value:value===''?'':String(value),field:'actual'});
-   const expected=value===''?null:value;
+ if(!parsed.valid){message('Enter a non-negative quantity with up to 4 decimals.');return;}
+ // Mark the value as pending immediately, before the next live-sync poll can
+ // replace the editor with an older value from Neon.
+ if(window.stockTakeMarkActualOverride)window.stockTakeMarkActualOverride(id,parsed.value===null?'':String(parsed.value));
+ const save=async()=>{
+  if(adminActualRevisions.get(id)!==revision)return;
+  const previous=adminActualQueues.get(id)||Promise.resolve();
+  const task=previous.catch(()=>{}).then(async()=>{
+   if(adminActualRevisions.get(id)!==revision)return;
+   message('Saving Actual correction…');
+   const saved=await api('save',{date,item_id:id,value:parsed.value===null?'':String(parsed.value),field:'actual'});
+   const expected=parsed.value;
    if(saved.field!=='actual'||saved.value!==expected)throw Error('The database did not confirm the Actual correction.');
-   if(window.stockTakeConfirmActualOverride)window.stockTakeConfirmActualOverride(id,value===''?'':String(value));
+   if(adminActualRevisions.get(id)!==revision)return;
+   if(window.stockTakeConfirmActualOverride)window.stockTakeConfirmActualOverride(id,parsed.value===null?'':String(parsed.value));
    state.records[id]={...state.records[id],actual:expected};
    message('Actual correction saved · synced to Counter.');
-  }catch(err){if(window.stockTakeRejectActualOverride)window.stockTakeRejectActualOverride(id);message('Actual correction not saved: '+err.message);syncVerifierActuals()}
- },500));
+  }).catch(err=>{
+   if(adminActualRevisions.get(id)!==revision)return;
+   if(window.stockTakeRejectActualOverride)window.stockTakeRejectActualOverride(id);
+   message('Actual correction not saved: '+err.message);
+   syncVerifierActuals();
+  });
+  adminActualQueues.set(id,task);
+  await task;
+ };
+ if(immediate)save();
+ else adminActualTimers.set(id,setTimeout(save,450));
+}
+document.querySelector('#rows')?.addEventListener('input',e=>scheduleActualCorrection(e.target,false));
+document.querySelector('#rows')?.addEventListener('change',e=>scheduleActualCorrection(e.target,true));
+document.querySelector('#rows')?.addEventListener('focusout',e=>{
+ if(e.target?.dataset?.k==='a')scheduleActualCorrection(e.target,true);
 });
-document.querySelector('#rows')?.addEventListener('change',e=>{
- const input=e.target;
- if(state.role!=='verifier'||input.dataset.k!=='a')return;
- clearTimeout(adminActualTimers.get(input.closest('.row')?.dataset.i));
- input.dispatchEvent(new Event('input',{bubbles:true}));
-});
-
 window.STOCKTAKE_CLOUD_ACTIVE=true;
 login();
 })();
