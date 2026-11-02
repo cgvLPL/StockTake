@@ -481,7 +481,7 @@ const adminActualScheduled=new Map();
 function parseActualCorrection(raw){
  const text=String(raw??'').trim();
  if(text==='')return {valid:true,value:null,display:''};
- if(!/^(?:\\d+(?:[.,]\\d{0,4})?|[.,]\\d{1,4})$/.test(text))return {valid:false};
+ if(!/^(?:\d+(?:[.,]\d{0,4})?|[.,]\d{1,4})$/.test(text))return {valid:false};
  const value=Number(text.replace(',','.'));
  return Number.isFinite(value)&&value>=0?{valid:true,value,display:String(value)}:{valid:false};
 }
