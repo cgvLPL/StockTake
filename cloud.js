@@ -294,7 +294,7 @@ function setupReportDownloads(){
    const allowedIds=new Set(filteredItems.map(item=>String(item.id)));
    const filteredPayload={...payload,items:filteredItems,rows:payload.rows.filter(row=>allowedIds.has(String(row.item_id)))};
    if(isPdf){
-    const report=pdfTools.makeExecutivePdf(filteredPayload,kind,date.value);
+    const report=await pdfTools.makeExecutivePdf(filteredPayload,kind,date.value);
     pdfTools.downloadExecutivePdf(report);
     status.textContent='Executive PDF prepared: '+report.filename+' · '+report.pages+' page(s) · '+report.variances+' variance(s) · '+filteredItems.length+' items across '+selected.size+' UOM(s).';
    }else{
