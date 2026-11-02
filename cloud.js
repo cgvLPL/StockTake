@@ -384,6 +384,21 @@ async function verifier(){
 // Verifier live sync: poll Neon for Counter changes and merge Actual quantities
 // into the visible table. Poll only while the verifier workspace is active.
 let verifierPollTimer=null,verifierPollBusy=false;
+// Immediately hydrate a selected historical date from Neon before the verifier edits it.
+window.stockTakeLoadDate=async function(forDate){
+ if(state.role!=='verifier'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(forDate||'')))return;
+ try{
+  const result=await api('load',{date:forDate});
+  if(document.querySelector('#date')?.value!==forDate)return;
+  state.date=forDate;
+  state.records=Object.fromEntries((result.rows||[]).map(row=>[row.item_id,row]));
+  if(window.stockTakeSyncActuals)window.stockTakeSyncActuals(result.rows||[],forDate);
+  if(window.stockTakeSyncSystem)window.stockTakeSyncSystem(result.rows||[],forDate);
+  const local={version:2,records:{}};
+  for(const [id,row] of Object.entries(state.records))local.records[id]={a:row.actual==null?'':String(row.actual),s:row.system==null?'':String(row.system),r:row.remarks||''};
+  try{localStorage.setItem('stocktake:'+forDate,JSON.stringify(local));}catch(_){}
+ }catch(err){message('Unable to load selected stocktake date: '+err.message);}
+};
 async function syncVerifierActuals(){
  if(state.role!=='verifier'||document.querySelector('.frame')?.hidden||document.visibilityState==='hidden'||verifierPollBusy)return;
  const date=document.querySelector('#date')?.value||state.date;
