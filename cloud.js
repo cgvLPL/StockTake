@@ -411,9 +411,9 @@ function startVerifierLiveSync(){
 }
 
 const verifierPendingSystem=new Map();
-function queueVerifierSave(){
+function queueVerifierSave(e){
  state.date=document.querySelector('#date')?.value||state.date;
- const target=event?.target;
+ const target=e?.target;
  if(target?.dataset?.k==='s'||target?.dataset?.k==='r'){
   const id=target.closest('.row')?.dataset.i;
   if(id){const previous=verifierPendingSystem.get(id)||{};verifierPendingSystem.set(id,{value:target.closest('.row').querySelector('input[data-k="s"]')?.value??previous.value??'',remarks:target.closest('.row').querySelector('input[data-k="r"]')?.value??previous.remarks??''});}
@@ -441,9 +441,9 @@ function queueVerifierSave(){
  },450);
 }
 // Sync verifier edits while typing, on commit, and when leaving a field.
-document.querySelector('#rows')?.addEventListener('input',queueVerifierSave);
-document.querySelector('#rows')?.addEventListener('change',queueVerifierSave);
-document.querySelector('#rows')?.addEventListener('focusout',queueVerifierSave);
+document.querySelector('#rows')?.addEventListener('input',e=>queueVerifierSave(e));
+document.querySelector('#rows')?.addEventListener('change',e=>queueVerifierSave(e));
+document.querySelector('#rows')?.addEventListener('focusout',e=>queueVerifierSave(e));
 
 // Verifiers and admins may override Actual values from the Verifier dashboard.
 // The API authorizes this explicit field; Counter entries continue using the same Actual column.
