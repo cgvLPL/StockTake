@@ -270,3 +270,30 @@ window.stockTakeSyncActuals=(rows,forDate)=>{
   filt(true);
  }
 };
+
+
+// Merge System quantities and remarks from Neon across verifier devices.
+window.stockTakeSyncSystem=(rows,forDate)=>{
+ if(forDate!==date||!Array.isArray(rows))return;
+ let changed=false;
+ rows.forEach(item=>{
+  const id=item.item_id;if(!id)return;
+  const row=document.querySelector('#rows .row[data-i="'+CSS.escape(id)+'"]');
+  const systemInput=row?.querySelector('input[data-k="s"]');
+  const remarksInput=row?.querySelector('input[data-k="r"]');
+  if((systemInput&&document.activeElement===systemInput)||(remarksInput&&document.activeElement===remarksInput))return;
+  const record=data[id]||(data[id]={});
+  const system=item.system==null?'':String(item.system);
+  const remarks=String(item.remarks||'');
+  const currentSystem=record.s==null?'':String(record.s),currentRemarks=String(record.r||'');
+  if(currentSystem===system&&currentRemarks===remarks)return;
+  if(system==='')delete record.s;else record.s=system;
+  if(remarks==='')delete record.r;else record.r=remarks;
+  if(!Object.keys(record).length)delete data[id];
+  if(systemInput)systemInput.value=system;
+  if(remarksInput)remarksInput.value=remarks;
+  if(row)paint(row);
+  changed=true;
+ });
+ if(changed){cache.set(date,data);save(date);stats();month();sortRows();filt(true);}
+};
