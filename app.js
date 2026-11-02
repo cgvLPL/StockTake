@@ -105,7 +105,7 @@ function month(){const [y,m]=date.split('-').map(Number);const n=new Date(y,m,0)
   $('#days').innerHTML=h;
   $('#mn').textContent=new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'})+': '+full+' days fully matched, '+bad+' with a variance. Dashed days are partly counted.'}
 function disarm(){armedDate=null;clearTimeout(clearTimer);$('#clear').classList.remove('arm')}
-function go(k){disarm();date=k;show();if(window.stockTakeLoadDate)window.stockTakeLoadDate(k)}
+function go(k){if(k===date)return;disarm();date=k;show();if(window.stockTakeLoadDate)window.stockTakeLoadDate(k)}
 function shift(n){const d=new Date(date+'T00:00:00');d.setDate(d.getDate()+n);go(iso(d))}
 let sortKey='no',sortDescending=false;
 function sortValue(row,key){
