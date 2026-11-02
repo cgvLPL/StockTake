@@ -196,7 +196,38 @@ function imageJpegHex(jpegBase64){
   for(let i=0;i<raw.length;i++)hex.push(raw.charCodeAt(i).toString(16).padStart(2,'0'));
   return hex.join('').toUpperCase();
 }
-function reportLogo(){
+async function reportLogo(){
+  // Render the source SVG at 2x its native dimensions for crisp print output.
+  if(root&&typeof root.fetch==='function'&&typeof root.Image==='function'&&root.document){
+    try{
+      const response=await root.fetch('./brand/cgv-stocktake.svg',{cache:'force-cache'});
+      if(!response.ok)throw Error('Could not load vector report logo.');
+      const svg=await response.text();
+      const blob=new Blob([svg],{type:'image/svg+xml'});
+      const url=URL.createObjectURL(blob);
+      try{
+        const imageElement=new root.Image();
+        await new Promise((resolve,reject)=>{
+          imageElement.onload=resolve;
+          imageElement.onerror=()=>reject(Error('Could not render vector report logo.'));
+          imageElement.src=url;
+        });
+        const scale=2,canvas=root.document.createElement('canvas');
+        canvas.width=imageElement.naturalWidth*scale;
+        canvas.height=imageElement.naturalHeight*scale;
+        const context=canvas.getContext('2d');
+        if(!context)throw Error('High-resolution logo rendering is unavailable.');
+        context.fillStyle='#FFFFFF';
+        context.fillRect(0,0,canvas.width,canvas.height);
+        context.drawImage(imageElement,0,0,canvas.width,canvas.height);
+        const jpegBase64=canvas.toDataURL('image/jpeg',0.98).split(',')[1];
+        return {width:canvas.width,height:canvas.height,jpegBase64};
+      }finally{URL.revokeObjectURL(url);}
+    }catch(error){
+      if(root.StockTakeReportLogo)return root.StockTakeReportLogo;
+      throw error;
+    }
+  }
   if(root&&root.StockTakeReportLogo)return root.StockTakeReportLogo;
   if(typeof module!=='undefined'&&module.exports&&typeof require==='function')
     return require('./brand/cgv-stocktake-report-logo.js');
@@ -269,7 +300,7 @@ function writer(logo){
     body+='trailer\n<< /Size '+objs.length+' /Root '+catalog+' 0 R >>\nstartxref\n'+start+'\n%%EOF\n';
     return {bytes:encoder.encode(body),pages:pages.length};
   }
-  return {newPage,rect,line,text,textRight,boxText,image,finish,hasLogo:!!logo,get pages(){return pages;}};
+  return {newPage,rect,line,text,textRight,boxText,image,finish,hasLogo:!!logo,logoAspect:logo?Number(logo.width)/Number(logo.height):520/106,get pages(){return pages;}};
 }
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function formatCoverDate(value){
@@ -283,17 +314,17 @@ function coverPeriodLabel(kind,start,end){
   if(sy===ey&&sm===em)return Number(start.slice(8))+' - '+formatCoverDate(end);
   return formatCoverDate(start)+' - '+formatCoverDate(end);
 }
-function makeExecutivePdf(payload,kind,anchor,generatedAt){
+async function makeExecutivePdf(payload,kind,anchor,generatedAt){
   const s=summarize(payload,kind,anchor),time=generatedAt||new Date();
   if(!(time instanceof Date)||!Number.isFinite(time.valueOf()))throw Error('Invalid report generation timestamp.');
-  const pdf=writer(reportLogo()), period=kind.toUpperCase(),range=s.range.start===s.range.end?
+  const pdf=writer(await reportLogo()), period=kind.toUpperCase(),range=s.range.start===s.range.end?
     s.range.start:s.range.start+'  -  '+s.range.end;
   const percent=n=>Math.round(n*100)+'%';
   const coverType=kind.charAt(0).toUpperCase()+kind.slice(1);
   const coverDate=coverPeriodLabel(kind,s.range.start,s.range.end);
   const generated=time.toISOString().slice(0,16).replace('T',' ')+' UTC';
   function logoAt(x,y,w){
-    if(pdf.hasLogo)pdf.image(x,y,w,w*106/520);
+    if(pdf.hasLogo)pdf.image(x,y,w,w/pdf.logoAspect);
     else{
       pdf.text('CGV',x,y+8,25,true,C.orange);
       pdf.text('StockTake',x+65,y+8,24,true,C.ink);
@@ -302,7 +333,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
   function subPage(title,desc){
     pdf.newPage();
     // All content stays within the printable A4 margins.
-    logoAt(M,14,207);
+    logoAt(M,14,185);
     pdf.line(M,66,RIGHT,66,C.line,.8);
     pdf.text(title,M,80,18,true,C.ink);
     pdf.textRight(desc,RIGHT,87,9,false,C.muted);
@@ -310,7 +341,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
 
   // A4 portrait cover: white paper, embedded logo, explicit report type and dates.
   pdf.newPage();
-  logoAt(M,78,410);
+  logoAt(M,78,350);
   pdf.line(M,187,RIGHT,187,C.line,1);
   pdf.text('OPERATIONS  /  STOCKTAKE',M,212,10,true,C.muted);
   pdf.text(coverType+' Stocktake',M,271,41,true,C.ink);
@@ -328,7 +359,7 @@ function makeExecutivePdf(payload,kind,anchor,generatedAt){
 
   // Page two begins the executive summary. No black header or footer bars.
   pdf.newPage();
-  logoAt(M,15,302);
+  logoAt(M,15,250);
   pdf.textRight('EXECUTIVE  /  '+period,RIGHT,29,9,true,C.muted);
   pdf.line(M,83,RIGHT,83,C.line,1);
   pdf.text('Stocktake executive summary',M,97,22,true,C.ink);
