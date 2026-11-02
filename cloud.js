@@ -449,8 +449,10 @@ document.querySelector('#rows')?.addEventListener('input',e=>{
   }
   try{
    if(window.stockTakeMarkActualOverride)window.stockTakeMarkActualOverride(id,value===''?'':String(value));
-   await api('save',{date,item_id:id,value:value===''?'':String(value),field:'actual'});
-   state.records[id]={...state.records[id],actual:value===''?null:value};
+   const saved=await api('save',{date,item_id:id,value:value===''?'':String(value),field:'actual'});
+   const expected=value===''?null:value;
+   if(saved.field!=='actual'||saved.value!==expected)throw Error('The database did not confirm the Actual correction.');
+   state.records[id]={...state.records[id],actual:expected};
    message('Actual correction saved · synced to Counter.');
   }catch(err){message('Actual correction not saved: '+err.message)}
  },500));
