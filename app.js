@@ -213,8 +213,15 @@ window.stockTakeSetCatalog=items=>{
 };
 
 
-// Keep verifier Actual overrides optimistic until the matching Neon value is observed.
+// Keep verifier Actual overrides optimistic until Neon confirms the write.
 const pendingActualOverrides=new Map();
+window.stockTakeConfirmActualOverride=(id,value)=>{
+ const pending=pendingActualOverrides.get(id);
+ if(!pending)return;
+ const expected=value===''?null:Number(value);
+ if(pending.value===expected)pendingActualOverrides.delete(id);
+};
+window.stockTakeRejectActualOverride=(id)=>{pendingActualOverrides.delete(id);};
 window.stockTakeMarkActualOverride=(id,value)=>{
  const next=value===''?null:Number(value);
  pendingActualOverrides.set(id,{value:next,at:Date.now()});
@@ -242,9 +249,8 @@ window.stockTakeSyncActuals=(rows,forDate)=>{
   const pending=pendingActualOverrides.get(id);
   if(pending){
    const expected=pending.value==null?'':String(pending.value);
-   if(next!==expected&&Date.now()-pending.at<15000)return;
-   if(next===expected)pendingActualOverrides.delete(id);
-   else pendingActualOverrides.delete(id);
+   if(next!==expected)return;
+   pendingActualOverrides.delete(id);
   }
   const record=data[id]||(data[id]={});
   const current=record.a==null?'':String(record.a);
