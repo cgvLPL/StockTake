@@ -396,7 +396,7 @@ window.stockTakeLoadDate=async function(forDate){
   state.date=forDate;
   state.records=Object.fromEntries((result.rows||[]).map(row=>[row.item_id,row]));
   if(window.stockTakeSyncActuals)window.stockTakeSyncActuals(result.rows||[],forDate);
-  if(window.stockTakeSyncSystem)window.stockTakeSyncSystem(result.rows||[],forDate);
+  if(window.stockTakeSyncSystem)window.stockTakeSyncSystem((result.rows||[]).filter(row=>!verifierPendingSystem.has(row.item_id)),forDate);
   const local={version:2,records:{}};
   for(const [id,row] of Object.entries(state.records))local.records[id]={a:row.actual==null?'':String(row.actual),s:row.system==null?'':String(row.system),r:row.remarks||''};
   try{localStorage.setItem('stocktake:'+forDate,JSON.stringify(local));}catch(_){}
@@ -425,7 +425,7 @@ async function syncVerifierActuals(){
    if(pending){state.records[row.item_id].system=pending.value;state.records[row.item_id].remarks=pending.remarks;}
   }
   if(window.stockTakeSyncActuals)window.stockTakeSyncActuals(result.rows||[],date);
-  if(window.stockTakeSyncSystem)window.stockTakeSyncSystem(result.rows||[],date);
+  if(window.stockTakeSyncSystem)window.stockTakeSyncSystem((result.rows||[]).filter(row=>!verifierPendingSystem.has(row.item_id)),date);
  }catch(err){
   message('Live sync reconnecting…');
  }finally{verifierPollBusy=false}
