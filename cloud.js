@@ -392,8 +392,13 @@ async function syncVerifierActuals(){
  try{
   const result=await api('load',{date});
   state.date=date;
-  for(const row of result.rows||[])state.records[row.item_id]={...state.records[row.item_id],...row};
+  for(const row of result.rows||[]){
+   const pending=verifierPendingSystem.get(row.item_id);
+   state.records[row.item_id]={...state.records[row.item_id],...row};
+   if(pending){state.records[row.item_id].system=pending.value;state.records[row.item_id].remarks=pending.remarks;}
+  }
   if(window.stockTakeSyncActuals)window.stockTakeSyncActuals(result.rows||[],date);
+  if(window.stockTakeSyncSystem)window.stockTakeSyncSystem(result.rows||[],date);
  }catch(err){
   message('Live sync reconnecting…');
  }finally{verifierPollBusy=false}
@@ -405,8 +410,14 @@ function startVerifierLiveSync(){
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')syncVerifierActuals()});
 }
 
+const verifierPendingSystem=new Map();
 function queueVerifierSave(){
  state.date=document.querySelector('#date')?.value||state.date;
+ const target=event?.target;
+ if(target?.dataset?.k==='s'||target?.dataset?.k==='r'){
+  const id=target.closest('.row')?.dataset.i;
+  if(id){const previous=verifierPendingSystem.get(id)||{};verifierPendingSystem.set(id,{value:target.closest('.row').querySelector('input[data-k="s"]')?.value??previous.value??'',remarks:target.closest('.row').querySelector('input[data-k="r"]')?.value??previous.remarks??''});}
+ }
  if(state.role!=='verifier'||!document.querySelector('.frame')||document.querySelector('.frame').hidden)return;
  clearTimeout(verifierSaveTimer);
  message('Saving changes…');
@@ -419,9 +430,11 @@ function queueVerifierSave(){
    const r=records[it[2]],raw=String(r.s??'').trim().replace(',','.'),value=raw===''?'':Number(raw);
    if(raw!==''&&(!Number.isFinite(value)||value<0||!/^(?:\d+(?:[.,]\d{0,4})?|[.,]\d{1,4})$/.test(raw))){message('Invalid system quantity; use up to 4 decimal places.');continue}
    const remarks=String(r.r||'');
-   verifierSaveQueue=verifierSaveQueue.then(()=>api('save',{date,item_id:it[2],value:value===''?'':String(value),remarks}).then(()=>{
+   verifierSaveQueue=verifierSaveQueue.then(()=>api('save',{date,item_id:it[2],value:value===''?'':String(value),remarks}).then(saved=>{if(saved.field!=='system'||saved.value!==(value===''?null:value))throw Error('System amount was not confirmed by Neon.');
     state.records[it[2]]={...state.records[it[2]],system:value===''?null:value,remarks};
-    message('All changes saved to cloud');
+    const pending=verifierPendingSystem.get(it[2]);
+    if(pending&&String(pending.value??'')===String(r.s??'')&&String(pending.remarks??'')===remarks)verifierPendingSystem.delete(it[2]);
+    message('System amounts synced to cloud');
    })).catch(err=>{message('Cloud save failed: '+err.message)});
   }
   if(!changes.length)message('All changes saved');
