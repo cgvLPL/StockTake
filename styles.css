@@ -1303,3 +1303,7 @@ body.staff-popup-open{overflow:hidden}
 #rows .df.diff-positive{color:#16834a}
 #rows .df.diff-negative{color:#d04c42}
 #rows .df.diff-zero{color:inherit}
+
+/* Keep date changes visually steady while the selected day's saved values hydrate. */
+#rows.date-loading{opacity:.58;pointer-events:none;transition:opacity .12s ease}
+@media(prefers-reduced-motion:reduce){#rows.date-loading{transition:none}}
