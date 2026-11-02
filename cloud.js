@@ -178,24 +178,21 @@ function counterView(){
  startCounterLiveSync();
  const pendingSaves=new WeakMap();
  async function saveCounterInput(inp){
-  clearTimeout(pendingSaves.get(inp));
+  clearTimeout(pendingSaves.get(inp));pendingSaves.delete(inp);
   const id=inp.dataset.id,raw=inp.value.trim(),v=raw===''?null:Number(raw.replace(',','.'));
-  if(raw!==''&&(!Number.isFinite(v)||v<0||!/^(?:\d+(?:[.,]\d{0,4})?|[.,]\d{1,4})$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimals.');return}
-  inp.disabled=true;
+  if(raw!==''&&(!Number.isFinite(v)||v<0||!/^(?:\d+(?:[.,]\d{0,4})?|[.,]\d{1,4})$/.test(raw))){message('Enter a non-negative quantity with up to 4 decimal places.');return}
   try{
    await api('save',{date:state.date,item_id:id,value:v===null?'':String(v)});
    state.records[id]={...state.records[id],actual:v};
-   message('Saved · synced to verifier.');
-   refreshCounterProgress();
+   message('Saved · synced to verifier.');refreshCounterProgress();
   }catch(err){message('Not saved: '+err.message)}
-  finally{inp.disabled=false}
  }
  root.querySelectorAll('[data-id]').forEach(inp=>{
   inp.addEventListener('input',()=>{
    clearTimeout(pendingSaves.get(inp));
    pendingSaves.set(inp,setTimeout(()=>saveCounterInput(inp),500));
   });
-  inp.addEventListener('change',()=>saveCounterInput(inp));
+  inp.addEventListener('change',()=>{clearTimeout(pendingSaves.get(inp));saveCounterInput(inp)});
  });
 }
 async function counter(){try{await load();counterView()}catch(err){message('Unable to load counts: '+err.message)}}
