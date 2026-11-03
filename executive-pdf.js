@@ -185,7 +185,7 @@ function wrapPdfCell(value,maxWidth,fontSize=7.8,bold=false){
 }
 
 function imageJpegHex(jpegBase64){
-  if(typeof jpegBase64!=='string'||jpegBase64.length<128||jpegBase64.length>250000)
+  if(typeof jpegBase64!=='string'||jpegBase64.length<128||jpegBase64.length>2000000)
     throw Error('Invalid embedded report logo.');
   const raw=typeof atob==='function'?atob(jpegBase64):
     (typeof Buffer!=='undefined'?Buffer.from(jpegBase64,'base64').toString('binary'):null);
