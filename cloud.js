@@ -153,7 +153,14 @@ function mountAdminCatalog(){
  adminPanelContent('itemCataloguePanel').appendChild(area);
  const result=area.querySelector('#catalogResult'),preview=area.querySelector('#catalogPreview'),importButton=area.querySelector('#catalogImport');let pending=[];
  async function refresh(){
-  try{const data=await api('catalog');state.catalog=(data.items||[]).map(x=>[x.name,x.uom,x.id]);if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(state.catalog);area.querySelector('#catalogItems').innerHTML='<p><strong>'+state.catalog.length+' active items</strong></p>'+state.catalog.map(x=>'<div class="role-item"><span><b>'+esc(x[0])+'</b><small>'+esc(x[2])+' · '+esc(x[1])+'</small></span></div>').join('');}
+  try{const data=await api('catalog');state.catalog=(data.items||[]).map(x=>[x.name,x.uom,x.id]);if(window.stockTakeSetCatalog)window.stockTakeSetCatalog(state.catalog);area.querySelector('#catalogItems').innerHTML='<p><strong>'+state.catalog.length+' active items</strong></p>'+state.catalog.map(x=>'<div class="role-item"><span><b>'+esc(x[0])+'</b><small>'+esc(x[2])+' · '+esc(x[1])+'</small></span><button type="button" class="role-button role-item-delete" data-delete-item="'+esc(x[2])+'" aria-label="Delete '+esc(x[0])+'">Delete</button></div>').join('');
+  area.querySelectorAll('[data-delete-item]').forEach(button=>button.addEventListener('click',async()=>{
+   const id=button.dataset.deleteItem,item=state.catalog.find(x=>x[2]===id);
+   if(!item||!confirm('Delete "'+item[0]+'" ('+id+') from the active item catalogue? Existing stocktake history will be retained.'))return;
+   button.disabled=true;button.textContent='Deleting…';result.textContent='Removing item…';
+   try{await api('archiveItem',{id});result.textContent='Deleted '+item[0]+'. Historical stocktake records are retained.';await refresh();}
+   catch(err){result.textContent='Could not delete item: '+err.message;button.disabled=false;button.textContent='Delete';}
+  }));}
   catch(err){result.textContent='Could not load catalogue: '+err.message}
  }
  area.querySelector('#catalogAddForm').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('button');b.disabled=true;try{await api('upsertItem',{item:{id:f.elements.id.value,name:f.elements.name.value,uom:f.elements.uom.value}});result.textContent='Item saved.';f.reset();await refresh()}catch(err){result.textContent=err.message}finally{b.disabled=false}};
