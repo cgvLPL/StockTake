@@ -207,7 +207,7 @@ window.stockTakeOpenDate=go;
 
 window.stockTakeSetCatalog=items=>{
  if(!Array.isArray(items))return;
- ITEMS=items.filter(x=>Array.isArray(x)&&x.length===3&&/^stock-[0-9]{3,}$/.test(x[2]));
+ ITEMS=items.filter(x=>Array.isArray(x)&&x.length===3&&/^[A-Za-z0-9][A-Za-z0-9._-]{1,63}$/.test(String(x[2]??'')));
  window.STOCKTAKE_ITEMS=ITEMS;
  syncUomFilter();build();show();setFilter(filter);
 };
