@@ -323,3 +323,7 @@ body:has(#enterVerifier) .role-card,body:has(#enterCounter) .role-card{box-sizin
   #roleLogin[data-step="credential"]{gap:16px}
   #roleLogin[data-step="credential"] .workspace-intro p{margin:0}
 }
+
+.role-catalog-admin .role-item-delete{background:#fff0f0;color:#a32626;border:1px solid #f0caca;padding:8px 12px;font-size:12px;white-space:nowrap}
+.role-catalog-admin .role-item-delete:disabled{opacity:.55}
+@media(max-width:560px){.role-catalog-admin #catalogItems .role-item{grid-template-columns:minmax(0,1fr) auto}.role-catalog-admin .role-item-delete{min-width:68px;padding:8px 10px}}
