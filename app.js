@@ -4,7 +4,7 @@ const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const fmt=new Intl.NumberFormat('id-ID',{minimumFractionDigits:2,maximumFractionDigits:4});
-function displayQty(value,uom){const n=num(value);if(String(uom||'').trim().toLowerCase()==='g'&&n!==null&&Number.isInteger(n))return String(n);return value==null?'':String(value)}
+function displayQty(value,uom){const n=num(value);if(String(uom||'').trim().toLowerCase()==='g'&&n!==null){if(Number.isInteger(n))return String(n);return typeof value==='number'?String(value).replace('.',','):String(value)}return value==null?'':String(value)}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const KEY=d=>'stocktake:'+d;
 const P={grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
