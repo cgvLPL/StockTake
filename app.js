@@ -4,6 +4,7 @@ const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const fmt=new Intl.NumberFormat('id-ID',{minimumFractionDigits:2,maximumFractionDigits:4});
+function displayQty(value,uom){const n=num(value);if(String(uom||'').trim().toLowerCase()==='g'&&n!==null&&Number.isInteger(n))return String(n);return value==null?'':String(value)}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const KEY=d=>'stocktake:'+d;
 const P={grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -64,7 +65,7 @@ function num(v){
 function calc(r){const a=num(r&&r.a),s=num(r&&r.s);if(a===null||s===null)return{diff:null,st:''};const diff=(Math.round(a*1e4)-Math.round(s*1e4))/1e4;return{diff,st:diff===0?'MATCH':'DO NOT MATCH'}}
 function paint(r){const c=calc(data[r.dataset.i]);r.dataset.st=c.st;
   r.querySelectorAll('input.q').forEach(inp=>{const invalid=inp.value.trim()!==''&&num(inp.value)===null;inp.setAttribute('aria-invalid',String(invalid));inp.setCustomValidity(invalid?'Enter a valid number with up to four decimal places.':'')});
-  const diffCell=r.querySelector('.df');diffCell.textContent=c.diff===null?'':(c.diff>0?'+':'')+fmt.format(c.diff);diffCell.classList.toggle('diff-positive',c.diff>0);diffCell.classList.toggle('diff-negative',c.diff<0);diffCell.classList.toggle('diff-zero',c.diff===0);
+  const diffCell=r.querySelector('.df'),item=ITEMS.find(it=>it[2]===r.dataset.i);diffCell.textContent=c.diff===null?'':(c.diff>0?'+':'')+(String(item?.[1]||'').trim().toLowerCase()==='g'?displayQty(c.diff,'g'):fmt.format(c.diff));diffCell.classList.toggle('diff-positive',c.diff>0);diffCell.classList.toggle('diff-negative',c.diff<0);diffCell.classList.toggle('diff-zero',c.diff===0);
   r.querySelector('.st').innerHTML=c.st?'<span class="pill '+(c.st==='MATCH'?'ok':'bad')+'">'+c.st+'</span>':''}
 
 function build(){
@@ -80,7 +81,7 @@ function show(){
   $('#mon').textContent=d.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
   $('#dnum').textContent=pad(d.getDate());
   document.querySelectorAll('#rows .row').forEach(r=>{const v=data[r.dataset.i]||{};
-    r.querySelectorAll('input').forEach(inp=>inp.value=v[inp.dataset.k]||'');paint(r)});
+    r.querySelectorAll('input').forEach(inp=>inp.value=inp.dataset.k==='a'||inp.dataset.k==='s'?displayQty(v[inp.dataset.k],ITEMS.find(it=>it[2]===r.dataset.i)?.[1]):v[inp.dataset.k]||'');paint(r)});
   stats();sortRows();filt();month();storageStatus();
 }
 function stats(){let c=0,m=0,b=0;document.querySelectorAll('#rows .row').forEach(r=>{const s=r.dataset.st;if(s){c++;s==='MATCH'?m++:b++}});
@@ -160,7 +161,7 @@ $('#rows').addEventListener('input',e=>{const inp=e.target,r=inp.closest('.row')
   const i=r.dataset.i;data[i]=data[i]||{};data[i][inp.dataset.k]=inp.value;
   if(!data[i].a&&!data[i].s&&!data[i].r)delete data[i];
   save();paint(r);stats();month();filt(true)});
-$('#rows').addEventListener('focusout',()=>setTimeout(()=>{sortRows();filt()},0));
+$('#rows').addEventListener('focusout',e=>{const inp=e.target;if(inp.matches('input.q[data-k="a"],input.q[data-k="s"]')){const row=inp.closest('.row'),item=ITEMS.find(it=>it[2]===row?.dataset.i);if(String(item?.[1]||'').trim().toLowerCase()==='g'){const value=num(inp.value);if(value!==null&&Number.isInteger(value)){inp.value=String(value);if(data[row.dataset.i]){data[row.dataset.i][inp.dataset.k]=inp.value;save();}}}}setTimeout(()=>{sortRows();filt()},0)});
 $('#rows').addEventListener('keydown',e=>{const t=e.target;if(e.key!=='Enter'||t.tagName!=='INPUT')return;e.preventDefault();
   let nx;
   if(t.dataset.k==='a')nx=t.closest('.row').querySelector('input[data-k="s"]');
@@ -230,7 +231,7 @@ window.stockTakeMarkActualOverride=(id,value)=>{
  if(!Object.keys(record).length)delete data[id];
  cache.set(date,data);save(date);
  const row=document.querySelector('#rows .row[data-i="'+CSS.escape(id)+'"]');
- const input=row?.querySelector('input[data-k="a"]');if(input)input.value=value;
+ const input=row?.querySelector('input[data-k="a"]');if(input)input.value=displayQty(value,ITEMS.find(it=>it[2]===id)?.[1]);
  if(row)paint(row);stats();month();
 };
 
@@ -257,7 +258,7 @@ window.stockTakeSyncActuals=(rows,forDate)=>{
   if(current===next)return;
   if(next==='')delete record.a;else record.a=next;
   if(!Object.keys(record).length)delete data[id];
-  if(input)input.value=next;
+  if(input)input.value=displayQty(next,ITEMS.find(it=>it[2]===id)?.[1]);
   if(row)paint(row);
   changed=true;
  });
@@ -290,7 +291,7 @@ window.stockTakeSyncSystem=(rows,forDate)=>{
   if(system==='')delete record.s;else record.s=system;
   if(remarks==='')delete record.r;else record.r=remarks;
   if(!Object.keys(record).length)delete data[id];
-  if(systemInput)systemInput.value=system;
+  if(systemInput)systemInput.value=displayQty(system,ITEMS.find(it=>it[2]===id)?.[1]);
   if(remarksInput)remarksInput.value=remarks;
   if(row)paint(row);
   changed=true;
