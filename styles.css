@@ -372,9 +372,9 @@ input:focus-visible,button:focus-visible{outline:2px solid #ff681f;outline-offse
   box-sizing:border-box;min-width:0;width:100%;max-width:100%;height:46px;
   border:1px solid #44464a;border-radius:12px;
   background:#26282b;color:#fff;
-  padding:9px 12px;font-size:15px;color-scheme:dark;line-height:24px;
+  padding:9px 12px;font-size:15px;color-scheme:dark;line-height:24px;text-align:center;
 }
-.report-date-field input::-webkit-date-and-time-value{min-height:24px;text-align:left}
+.report-date-field input::-webkit-date-and-time-value{min-height:24px;text-align:center}
 .report-download{
   min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:10px;
   white-space:nowrap;padding:12px 21px;border:0;border-radius:12px;
