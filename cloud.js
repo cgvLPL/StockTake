@@ -29,13 +29,9 @@ function shell(inner){root.innerHTML='<div class="role-shell"><div class="role-c
 async function login(){
  document.querySelector('.frame').hidden=true;
  let setup=false;
- try{const status=await api('status');setup=!!status.needsSetup;}catch(err){shell('<div class="workspace-intro"><h2>Unable to connect</h2><p>'+esc(err.message)+'</p></div><button type="button" class="role-button" onclick="location.reload()">Try again</button>');return;}
- const form=setup
- ? '<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>'
- : '<div class="workspace-intro"><span class="workspace-eyebrow">WELCOME BACK</span><h2>Sign in</h2><p>Enter your username to continue.</p></div><form id="roleLogin" data-step="username"><label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><button type="submit" class="role-button">Continue</button></form>';
- shell(form);
- const formEl=root.querySelector('#roleLogin');
- formEl.onsubmit=async e=>{
+ const setupForm='<div class="workspace-intro"><span class="workspace-eyebrow">FIRST-TIME SETUP</span><h2>Create administrator</h2><p>Set up the first StockTake administrator. Use a unique password of at least 12 characters.</p></div><form id="roleLogin"><label>Admin username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><label>Password<input name="password" type="password" autocomplete="new-password" required minlength="12"></label><button class="role-button">Create administrator</button></form>';
+ const signinForm='<div class="workspace-intro"><span class="workspace-eyebrow">WELCOME BACK</span><h2>Sign in</h2><p>Enter your username to continue.</p></div><form id="roleLogin" data-step="username"><label>Username<input name="username" autocomplete="username" required minlength="3" maxlength="32"></label><button type="submit" class="role-button">Continue</button></form>';
+ const wireLoginForm=()=>{const formEl=root.querySelector('#roleLogin');formEl.onsubmit=async e=>{
   e.preventDefault();const f=e.currentTarget,b=f.querySelector('button[type="submit"]')||f.querySelector('button');b.disabled=true;message('');
   if(setup){
    b.textContent='Creating…';
@@ -91,6 +87,23 @@ async function login(){
    if(!recovered&&submitButton.isConnected){submitButton.disabled=false;submitButton.textContent='Sign in';delete submitButton.dataset.submitting;}
   }
  };
+ };
+ shell(signinForm);
+ wireLoginForm();
+ /* Status check runs in the background, so the sign-in form is on screen
+    immediately even when the database is cold. Only swap to first-time
+    setup (or to the Unable to connect screen) while the form is still
+    untouched at the username step. */
+ api('status').then(status=>{
+  if(!status.needsSetup)return;
+  const current=root.querySelector('#roleLogin');
+  if(!current||current.dataset.step!=='username')return;
+  setup=true;shell(setupForm);wireLoginForm();
+ }).catch(err=>{
+  const current=root.querySelector('#roleLogin');
+  if(!current||current.dataset.step!=='username')return;
+  shell('<div class="workspace-intro"><h2>Unable to connect</h2><p>'+esc(err.message)+'</p></div><button type="button" class="role-button" onclick="location.reload()">Try again</button>');
+ });
 }
 function welcome(){
  document.querySelector('.frame').hidden=true;
